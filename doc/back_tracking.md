@@ -294,3 +294,37 @@ class Solution:
             backtrack(s_r, s_c, non_obstacles)
             return ans
 ```
+
+### [491. Increasing Subsequences](https://leetcode.com/problems/increasing-subsequences/)
+
+```python
+class Solution:
+    def findSubsequences(self, nums: List[int]) -> List[List[int]]:
+        # Wrong
+        N = len(nums)
+        dp = [0] * N
+        dp[0] = 0
+        for i in range(1, N):
+            for j in range(i):
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[i], 2 * dp[j] + 1)
+        return dp[-1]
+    
+    def findSubsequences(self, nums):
+        # Time Complexity: O(n ^ 2)
+        N, ans = len(nums), set()
+        def backtrack(start, seq):
+            if len(seq) > 1:
+                ans.add(tuple(seq))
+            if start == N:
+                return
+            for i in range(start, N):
+                if not seq or seq[-1] <= nums[i]:
+                    seq.append(nums[i])
+                    backtrack(i + 1, seq)
+                    seq.pop()
+        backtrack(0, [])
+        return ans
+            
+        
+```

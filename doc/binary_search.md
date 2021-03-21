@@ -64,3 +64,74 @@ class Solution:
                 right = pivot
         return nums[right]
 ```
+
+
+### [1095. Find in Mountain Array](https://leetcode.com/problems/find-in-mountain-array/)
+
+```python
+# """
+# This is MountainArray's API interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class MountainArray:
+#    def get(self, index: int) -> int:
+#    def length(self) -> int:
+
+class Solution:
+    def findInMountainArray(self, target: int, mountain_arr: 'MountainArray') -> int:
+        N = mountain_arr.length()
+        left, right = 0, N - 1
+        while left < right:
+            # Pattern: Binary Search
+            #   To search a specific value, can use left <= right, but
+            #   when the value is not known, use left < right; then mid +/- 1
+            #   will change accordingly.
+            mid = (left + right) // 2
+            # Trick: Check two adjecent item to determin peak
+            if mountain_arr.get(mid) < mountain_arr.get(mid + 1):
+                left = mid + 1
+            else:
+                right = mid
+        peak = left
+        
+        left, right = 0, peak
+        while left <= right:
+            mid = (left + right) // 2
+            if mountain_arr.get(mid) == target:
+                return mid
+            elif mountain_arr.get(mid) > target:
+                right = mid - 1
+            else:
+                left = mid + 1
+                
+        left, right = peak, N - 1
+        while left <= right:
+            mid = (left + right) // 2
+            if mountain_arr.get(mid) == target:
+                return mid
+            elif mountain_arr.get(mid) < target:
+                right = mid - 1
+            else:
+                left = mid + 1
+                
+        return -1
+```
+
+### [852. Peak Index in a Mountain Array](https://leetcode.com/problems/peak-index-in-a-mountain-array/)
+
+```python
+class Solution:
+    def peakIndexInMountainArray(self, arr: List[int]) -> int:
+        N = len(arr)
+        left, right = 0, N - 1
+        while left < right:
+            mid = (left + right) // 2
+            # Cannot use arr[mid - 1] < arr[mid], cuz it cannot
+            # prov target is at right of mid, it could be mid;
+            # left has to be mid + 1, otherwise dead loop
+            if arr[mid] < arr[mid + 1]:
+                left = mid + 1
+            else:
+                right = mid
+        return left
+```

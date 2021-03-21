@@ -259,3 +259,23 @@ class Solution:
             mp[key] += 1
         return ans
 ```
+
+### [845. Longest Mountain in Array](https://leetcode.com/problems/longest-mountain-in-array/)
+### [941. Valid Mountain Array](https://leetcode.com/problems/valid-mountain-array/)
+
+```python
+class Solution:
+    def validMountainArray(self, arr: List[int]) -> bool:
+        N, i = len(arr), 0
+        
+        while i < N - 1 and arr[i] < arr[i + 1]:
+            i += 1
+        
+        if i == 0 or i == N - 1:
+            return False
+        
+        while i < N - 1 and arr[i] > arr[i + 1]:
+            i += 1
+            
+        return i == N - 1
+```

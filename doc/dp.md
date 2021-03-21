@@ -3,6 +3,8 @@ https://leetcode.com/discuss/general-discussion/458695/dynamic-programming-patte
 https://leetcode.com/problems/paint-house/solution/
 Questions to print all ways cannot resolved using DP
 
+Take unknown as known
+
 pattern: 576, 1269
 
 ## Problems
@@ -2076,5 +2078,566 @@ class Solution:
                 dp0, dp1 = dp1, max(dp1, dp0 + h)
             return dp1
         return max(max_value(nums[:-1]), max_value(nums[1:]))
+```
+
+
+## Number of Subsequences
+
+### [300. Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
+
+```python
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        # dp is the LIS for array with len i, which must includes i
+        dp = [1] * len(nums)
+        
+        for i in range(1, len(nums)):
+            maxval = 0
+            for j in range(0, i):
+                if nums[i] > nums[j]:
+                    maxval = max(maxval, dp[j])
+            dp[i] = maxval + 1
+            
+        maxval = 1
+        for i in range(0, len(nums)):
+            maxval = max(maxval, dp[i])
+            
+        return maxval
+```
+
+### [403. Frog Jump](https://leetcode.com/problems/frog-jump/)
+
+```python
+class Solution:
+    def canCross(self, stones: List[int]) -> bool:
+        if stones[1] != 1: return False
+        N = len(stones)
+        dp = {x: set() for x in stones}
+        dp[1].add(1)
+        
+        for x in stones[1:-1]:
+            for j in dp[x]:
+                for k in range(j - 1, j + 2):
+                    if k > 0 and x + k in dp:
+                        dp[x + k].add(k)
+        
+        return bool(dp[stones[-1]])
+        
+    def canCross(self, stones: List[int]) -> bool:
+        N = len(stones)
+        if N == 0 or N > 1 and stones[1] != 1:
+            return False
+        
+        dp = [False] * N
+        dp[0] = dp[1] = True
+        jump_steps = defaultdict(list)
+        jump_steps[1] = [1, 2]
+        
+        for i in range(2, N):
+            for j in range(1, i):
+                k = stones[i] - stones[j]
+                # This make the time complexity O(N^3)
+                if k in jump_steps[j]:
+                    dp[i] = True
+                    jump_steps[i].extend([k - 1, k, k + 1])
+        
+        return dp[-1]
+```
+
+## Longest Increasing Subsequence
+
+### [300. Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
+
+```python
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        # Pattern: LIS - DP
+        # dp is the LIS for array with len i, which must includes i
+        N = len(nums)
+        dp = [1] * N
+        for i in range(1, N):
+            for j in range(i):
+                if nums[j] < nums[i]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        
+        return max(dp)
+    
+    def lengthOfLIS(self, nums):
+        # Pattern: LIS - Greedy
+        # Intuition: Maintain a monotonous increasing array.
+        #   Get x from nums one by one, and add x into dp,
+        #   if x is the biggest of dp, append it to end;
+        #   if x is not the biggest, replace the FIRST num
+        #   in dp that >= x with x; in this way, we are continously
+        #   building an mono increasing array with smaller numbers. 
+        #   If the new mono array is not as long as cur one, just
+        #   replace first no-smaller num, when the numer is enough
+        #   it will replace the last largest number and even increase
+        #   the complete array. The final array is not a valid mono
+        #   array, because some order might not correct, but the length
+        #   is the answer.
+        dp = []
+        for x in nums:
+            pos, dp_len = 0, len(dp)
+            while pos <= dp_len:
+                if pos == dp_len:
+                    dp.append(x)
+                    break
+                elif dp[pos] >= x:
+                    dp[pos] = x
+                    break
+                pos += 1
+        return len(dp)
+    
+    def lengthOfLIS(self, nums):
+        dp = []
+        def binary_search(x):
+            # Trick: hi is len(dp) not len(dp) - 1
+            lo, hi = 0, len(dp)
+            while lo < hi:
+                mid = (hi + lo) // 2
+                if dp[mid] < x:
+                    lo = mid + 1
+                elif dp[mid] >= x:
+                    hi = mid
+            return lo
+        for x in nums:
+            i = binary_search(x)
+            if i == len(dp):
+                dp.append(x)
+            else:
+                dp[i] = x
+        return len(dp)
+    
+    def lengthOfLIS(self, nums):
+        dp = []
+        for x in nums:
+            i = bisect.bisect_left(dp, x)
+            if i == len(dp):
+                dp.append(x)
+            else:
+                dp[i] = x
+        return len(dp)
+    
+    def lengthOfLIS(self, nums):
+        # Pattern: LIS Monotonous Array
+        #   Use bitsect to mantain a monotonic increasing array
+        #   for the cur num, each cur num will replace the smallest
+        #   number non-smaller than it self, and it will also keep
+        #   record of the max mono array before cur if cur is not
+        #   the max.
+        dp = [math.inf] * (len(nums) + 1)
+        for x in nums:
+            dp[bisect.bisect_left(dp, x)] = x
+        return dp.index(math.inf)
+```
+
+
+### [354. Russian Doll Envelopes](https://leetcode.com/problems/russian-doll-envelopes/)
+
+```python
+class Solution:
+    def maxEnvelopes(self, envelopes: List[List[int]]) -> int:
+        N = len(envelopes)
+        dp = [1] * N
+        envelopes.sort()
+        for i in range(1, N):
+            for j in range(i):
+                if envelopes[j][0] < envelopes[i][0] and envelopes[j][1] < envelopes[i][1]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        
+        return max(dp)
+    
+    def maxEnvelopes(self, envelopes: List[List[int]]) -> int:
+        # Pattern: LIS
+        # Trick: Sort by first asc, second desc, so same length env has decending
+        #   width so cannot be collected in one LIS, any LIS has ascending width 
+        #   and length
+        envelopes.sort(key=lambda x: (x[0], -x[1]))
+        def lis(nums):
+            dp = []
+            for x in nums:
+                i = bisect.bisect_left(dp, x)
+                if i == len(dp):
+                    dp.append(x)
+                else:
+                    dp[i] = x
+            return len(dp)
+        return lis([x[1] for x in envelopes])
+```
+
+### [1671. Minimum Number of Removals to Make Mountain Array](https://leetcode.com/problems/minimum-number-of-removals-to-make-mountain-array/)
+
+```python
+class Solution:
+    def minimumMountainRemovals(self, nums: List[int]) -> int:
+        N = len(nums)
+        dp, dp2 = [1] * N, [1] * N
+        for i in range(1, N):
+            for j in range(i):
+                if nums[i] > nums[j]:
+                    # If num i > num j, update the LIS length, no impact on
+                    # mountain length
+                    dp[i] = max(dp[i], dp[j] + 1)
+                elif nums[i] < nums[j]:
+                    if dp[j] > 1:
+                        # First check the case of LIS till j, if there is LIS 
+                        # (dp1[j] > 1) till j, i becomes the first descending 
+                        # number.
+                        dp2[i] = max(dp2[i], dp[j] + 1)
+                    if dp2[j] > 1:
+                        # Second check the case of LDS till j, if there is LDS
+                        # (dp2[j] > 1) till j, i will be adding to the descending
+                        # sequence.
+                        dp2[i] = max(dp2[i], dp2[j] + 1)
+        
+        return N - max(dp2)
+    
+    def minimumMountainRemovals(self, nums: List[int]) -> int:
+        def lis(arr):
+            dp = [math.inf] * (len(arr) + 1)
+            for x in arr:
+                dp[bisect.bisect_left(dp, x)] = x
+            return dp.index(math.inf)
+        
+        N, ans = len(nums), 0
+        # Make sure i is the biggeist number in both left and right subarray
+        # this will make sure the max LIS includes i; reverse right array and
+        # get max LIS for both left and right and reverse right result;
+        # we can make sure i is included in both and we just have to compare
+        # each i with length a + b -1 (removing duplicate i)
+        for i in range(1, N - 1):
+            left  = [n for n in nums[:i] if n < nums[i]] + [nums[i]]
+            right = [nums[i]] + [n for n in nums[i + 1:] if n < nums[i]]
+            right = right[::-1]
+            a, b = lis(left), lis(right)
+            if a > 1 and b > 1:
+                ans = max(ans, a + b - 1)
+        
+        return N - ans
+    
+    def minimumMountainRemovals(self, nums: List[int]) -> int:
+        def lis(arr):
+            # Instead of return the max len, lens[i] is the max len of
+            # LIS end with i AND include i.
+            N = len(arr)
+            dp = [math.inf] * (N + 1)
+            lens = [1] * N
+            for i, x in enumerate(arr):
+                pos = bisect.bisect_left(dp, x)
+                lens[i] = pos + 1
+                dp[pos] = x
+            return lens
+        lis_a, lis_b = lis(nums), lis(nums[::-1])[::-1]
+        ans, N = 0, len(nums)
+        for i in range(N):
+            if lis_a[i] > 1 and lis_b[i] > 1:
+                ans = max(ans, lis_a[i] + lis_b[i] - 1)
+        
+        return N - ans
+```
+
+### [403. Frog Jump](https://leetcode.com/problems/frog-jump/)
+
+```python
+class Solution:
+    def canCross(self, stones: List[int]) -> bool:
+        if stones[1] != 1: return False
+        N = len(stones)
+        dp = {x: set() for x in stones}
+        dp[1].add(1)
+        
+        for x in stones[1:-1]:
+            for j in dp[x]:
+                for k in range(j - 1, j + 2):
+                    if k > 0 and x + k in dp:
+                        dp[x + k].add(k)
+        
+        return bool(dp[stones[-1]])
+        
+    def canCross(self, stones: List[int]) -> bool:
+        N = len(stones)
+        if N == 0 or N > 1 and stones[1] != 1:
+            return False
+        
+        dp = [False] * N
+        dp[0] = dp[1] = True
+        jump_steps = defaultdict(list)
+        jump_steps[1] = [1, 2]
+        
+        for i in range(2, N):
+            for j in range(1, i):
+                k = stones[i] - stones[j]
+                # This make the time complexity O(N^3)
+                if k in jump_steps[j]:
+                    dp[i] = True
+                    jump_steps[i].extend([k - 1, k, k + 1])
+        
+        return dp[-1]
+```
+
+
+### [646. Maximum Length of Pair Chain](https://leetcode.com/problems/maximum-length-of-pair-chain/submissions/)
+```python
+class Solution:
+    def findLongestChain(self, pairs: List[List[int]]) -> int:
+        N = len(pairs)
+        dp = [1] * N
+        pairs.sort()
+        for i in range(1, N):
+            for j in range(i):
+                if pairs[j][1] < pairs[i][0]:
+                    dp[i] = max(dp[i], dp[j] + 1)
+        return dp[-1]
+    
+    def findLongestChain(self, pairs):
+        cur, ans = float('-inf'), 0
+        # Trick: operator.itemgetter(1)
+        for x, y in sorted(pairs, key = operator.itemgetter(1)):
+            if cur < x:
+                cur = y
+                ans += 1
+        return ans
+```
+
+### [673. Number of Longest Increasing Subsequence](https://leetcode.com/problems/number-of-longest-increasing-subsequence/)
+```python
+class Solution:                   
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        N = len(nums)
+        if N <= 1: return N
+        # Intuition: 
+        #   lengths[i] -  the max len of LIS ending with i
+        #   counts[i]  -  the count of LIS ending with i with the max len
+        #   Starting from 1 to N - 1, for each i, iterate j in [0, i - 1] looking
+        #   for nums[i] > nums[j]. For any matching j, we can build lengths[i] and 
+        #   counts[i].
+        #   For one j, if lengths[j] >= lengths[i], this means previous values for
+        #   lengths[i] and counts[i] is not useful, we found completely different
+        #   set of LIS which are longer, so we just replace lengths[i] and counts[i];
+        #   if lengths[j] + 1 = lengths[i], means we find more LIS for i with same
+        #   len as lengths[i], so just add to current counts[i], but lengths[i] remain
+        #   unchanged. We are iterate [0, i - 1], so no worry on duplicates.
+        lengths, counts = [1] * N, [1] * N
+        for i in range(1, N):
+            for j in range(i):
+                if nums[i] > nums[j]:
+                    if lengths[j] >= lengths[i]:
+                        lengths[i] = lengths[j] + 1
+                        counts[i] = counts[j]
+                    elif lengths[j] + 1 == lengths[i]:
+                        counts[i] += counts[j]
+        longest = max(lengths)
+        return sum(c for i, c in enumerate(counts) if lengths[i] == longest)
+```
+### [845. Longest Mountain in Array](https://leetcode.com/problems/longest-mountain-in-array/)
+
+```python
+class Solution:
+    # 53 Maximum Subarray
+    # 121 Best Time to Buy and Sell Stock
+    # 152 Maximum Product Subarray
+    # 238 Product of Array Except Self
+    # 739 Daily Temperatures
+    # 769 Max Chunks to Make Sorted
+    # 770 Max Chunks to Make Sorted II
+    # 821 Shortest Distance to a Character
+    # 845 Longest Mountain in Array
+    def longestMountain(self, arr: List[int]) -> int:
+        N = len(arr)
+        up, down = [0] * N, [0] * N
+        for i in range(1, N):
+            if arr[i - 1] < arr[i]:
+                up[i] = up[i - 1] + 1
+        for i in range(N - 2, -1, -1):
+            if arr[i + 1] < arr[i]:
+                down[i] = down[i + 1] + 1
+        return max([u + d + 1 for u, d in zip(up, down) if u and d] or [0])
+    
+    def longestMountain1(self, arr: List[int]) -> int:
+        # One pass
+        pos, N, ans = 1, len(arr), 0
+        while pos < N:
+            while pos < N and arr[pos] == arr[pos - 1]:
+                pos += 1
+            
+            up = 0
+            while pos < N and arr[pos] > arr[pos - 1]:
+                up += 1
+                pos += 1
+            
+            down = 0
+            while pos < N and arr[pos] < arr[pos - 1]:
+                down += 1
+                pos += 1
+                
+            if up and down:
+                ans = max(ans, up + down + 1)
+        return ans
+```
+
+
+## Jump Game
+
+### [55. Jump Game](https://leetcode.com/problems/jump-game/)
+
+```python
+class Solution:
+    
+    def canJump(self, nums: List[int]) -> bool:
+        N = len(nums)
+        dp = [True] + [False] * (N - 1)
+        for i, x in enumerate(nums):
+            for j in range(min(N - 1, i + 1), min(N - 1, i + x) + 1):
+                dp[j] = dp[i]
+        return dp[-1]
+    
+    def canJump(self, nums: List[int]) -> bool:
+        N = len(nums)
+        dp = [True] + [False] * (N - 1)
+        good_pos = 0
+        for i, x in enumerate(nums):
+            if dp[i]:
+                for j in range(good_pos, min(N - 1, i + x) + 1):
+                    dp[j] = True
+                good_pos = min(N - 1, i + x)
+        return dp[-1]
+    
+    def canJump(self, nums: List[int]) -> bool:
+        # Alg: Greedy
+        # Tuition: The final target is last index, if a pos can go
+        #   to target, the pos is good. If a pos can reach to a good
+        #   pos, it is good too; if a pos can reach to target and 
+        #   it is on left of another pos, it can reach that pos too;
+        #   if a pos can reach to a good pos, it can reach another
+        #   good pos in middle. If a pos cannot reach it's leftmost (nearest)
+        #   good pos, it cannot reach to other good pos and target neither.
+        #   So starting from right most index, we find the leftmost good pos,
+        #   then iteratively find next good pos which can reach to cur good pos.
+        #   the last good pos should be 0.
+        
+        N = len(nums)
+        good_pos = N - 1
+        for i in range(N - 2, -1, -1):
+            if nums[i] >= good_pos - i:
+                good_pos = i
+        return good_pos == 0
+```
+
+### [1326. Minimum Number of Taps to Open to Water a Garden](https://leetcode.com/problems/minimum-number-of-taps-to-open-to-water-a-garden/)
+
+```python
+class Solution:
+    def minTaps(self, n: int, ranges: List[int]) -> int:
+        # Intuition: dp[i] is min tap required to water [1, i] gardon.
+        #   total garden is [1, n], total tap is [0, n], there are n
+        #   gardens and n + 1 taps.
+        #   Go through each tap[i]'s scope, for every dp[j] in scope, 
+        #   the ans is dp[k] + 1 where k is last garden out of left
+        #   border of scope. For each i, updating min of dp[j], you find
+        #   the final min for dp[j].
+        # Pattern: DP - A lot of cases iterate items as support point
+        dp = [0] + [n + 2] * n
+        for i, x in enumerate(ranges):
+            for j in range(max(0, i - x + 1), min(n, i + x) + 1):
+                dp[j] = min(dp[j], dp[max(0, i - x)] + 1)
+        
+        return dp[-1] if dp[-1] < n + 2 else -1
+```
+
+### [1340. Jump Game V](https://leetcode.com/problems/jump-game-v/)
+
+```python
+class Solution:
+    def maxJumps(self, arr: List[int], d: int) -> int:
+        # DP - Bottom Up O(nLogn)
+        N = len(arr)
+        # dp[i] is the max num of indices start from i
+        dp = [1] * N
+        # Trick: Sort by height, lowest has ans as 1. Use height
+        # as supporting point
+        sorted_arr = sorted([(x, i) for i, x in enumerate(arr)])
+        for x, i in sorted_arr[1:]:
+            for j in range(min(N -1, i + 1), min(N - 1, i + d) + 1):
+                if arr[j] >= x:
+                    break
+                dp[i] = max(dp[i], dp[j] + 1)
+
+            for j in range(max(0, i - 1), max(0, i - d) - 1, -1):
+                if arr[j] >= x:
+                    break
+                dp[i] = max(dp[i], dp[j] + 1)
+        
+        return max(dp)
+    
+    def maxJumps(self, arr: List[int], d: int) -> int:
+        # DP - Top Down O(n)
+        N = len(arr)
+        @functools.lru_cache(None)
+        def dp(i):
+            ans = 1
+            for j in range(min(N -1, i + 1), min(N - 1, i + d) + 1):
+                if arr[j] >= arr[i]:
+                    break
+                ans = max(ans, dp(j) + 1)
+            for j in range(max(0, i - 1), max(0, i - d) - 1, -1):
+                if arr[j] >= arr[i]:
+                    break
+                ans = max(ans, dp(j) + 1)
+            return ans
+        return max(map(dp, range(N)))
+```
+
+### [45. Jump Game II](https://leetcode.com/problems/jump-game-ii/)
+
+```python
+class Solution:
+    def jump(self, nums: List[int]) -> int:
+        N = len(nums)
+        dp = [0] + [N] * (N - 1)
+        for i, x in enumerate(nums):
+            for j in range(min(N - 1, i + 1), min(N - 1, i + x) + 1):
+                dp[j] = min(dp[j], dp[i] + 1)
+        return dp[-1]
+    
+    def jump(self, nums: List[int]) -> int:
+        if len(nums) == 1: return 0
+        left, right, steps = 1, nums[0], 1
+        while right < len(nums) - 1:
+            steps += 1
+            left, right = right + 1, max([i + nums[i] for i in range(left,right + 1)])
+        return steps
+```
+
+### [1696. Jump Game VI](https://leetcode.com/problems/jump-game-vi/)
+
+```python
+class Solution:
+    def maxResult(self, nums: List[int], k: int) -> int:
+        # dp is the max score can achieve at step i
+        N = len(nums)
+        dp = [0] * N
+        dp[0] = nums[0]
+        
+        # q is monotonicc decreasing queue for prev best scores for step
+        # [i - k, i - 1]
+        q = deque([0])
+        for i in range(1, N):
+            # For each step, get rid of pre step cannot be reached back
+            if q[0] < i - k:
+                q.popleft()
+            
+            # The head of monotonic decreasing stack/queue is max score
+            # dp[i] = max(dp[i - k],...,dp[i - 1]) + nums[i]
+            # max is q[0]
+            dp[i] = dp[q[0]] + nums[i]
+            
+            # Update the mono queue using current dp[i]
+            # > and >= both work
+            while q and dp[i] > dp[q[-1]]:
+                q.pop()
+            q.append(i)
+        
+        return dp[-1]
 ```
 
