@@ -1,5 +1,13 @@
 #
 
+378. Kth Smallest Element in a Sorted Matrix
+410. Split Array Largest Sum
+1011. Capacity To Ship Packages Within D Days
+1231. Divide Chocolate
+875. Koko Eating Bananas
+774. Minimize Max Distance to Gas Station
+1201. Ugly Number III
+
 ### [1060. Missing Element in Sorted Array](https://leetcode.com/problems/missing-element-in-sorted-array/)
 
 ```python
