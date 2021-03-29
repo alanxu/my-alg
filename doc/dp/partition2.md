@@ -313,7 +313,7 @@ class Solution:
         
         return dp[0][-1]
     
-    def mergeStones1(self, stones: List[int], K: int) -> int:
+    def mergeStones(self, stones: List[int], K: int) -> int:
         N = len(stones)
         if (N - 1) % (K - 1): return -1
         prefix = [0] * (N+1)
@@ -323,6 +323,32 @@ class Solution:
             for i in range(N-m+1):
                 dp[i][i+m-1] = min(dp[i][k] + dp[k+1][i+m-1] for k in range(i, i+m-1, K-1)) + (prefix[i+m] - prefix[i] if (m-1)%(K-1) == 0 else 0)
         return dp[0][N-1]
+    
+    def mergeStones(self, stones: List[int], K: int) -> int:
+        N = len(stones)
+        # Inuition: dp[i][j][k] denotes min cost to partition [i,j] into k
+        # groups where only merge of 1 or K piles are allowed
+        dp = [[[math.inf] * (K + 1) for _ in range(N)] for _ in range(N)]
+        
+        # DP partition 2 - iterate from small segments to bigger ones
+        for l in range(1, N + 1):
+            for i in range(N - l + 1):
+                j = i + l - 1
+                # For each [i, j], calculate min cost for [1. K] partitions,
+                # when l == 1, dp[1] = 0
+                # when k == 1, dp[k] = dp[K] + sum[i:j+1];
+                # when k >= 2, dp[k] = ...
+                # For each [i, j] followig the merge rule, it is possible for [1, k] to
+                # gave valid cost, but not always depends on nums
+                if l == 1:
+                    dp[i][j][1] = 0
+                else:
+                    for k in range(2, min(K, l) + 1):
+                        for m in range(i + k - 1, j + 1):
+                            dp[i][j][k] = min(dp[i][j][k], dp[i][m - 1][k - 1] + dp[m][j][1])
+                    dp[i][j][1] = dp[i][j][K] + sum(stones[i:j + 1])
+
+        return dp[0][N - 1][1] if dp[0][N - 1][1] < math.inf else -1
 ```
 
 ### [375. Guess Number Higher or Lower II](https://leetcode.com/problems/guess-number-higher-or-lower-ii/)

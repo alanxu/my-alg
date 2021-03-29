@@ -739,3 +739,46 @@ class Solution:
                     
         return dp[-1]
 ```
+
+### [132. Palindrome Partitioning II](https://leetcode.com/problems/palindrome-partitioning-ii/)
+
+```python
+class Solution:
+    def minCut(self, s: str) -> int:
+        # Pattern: DP Partition 1 - TLE
+        N = len(s)
+        dp = [[False] * (N + 1) for _ in range(N)]
+        
+        def is_valid(s):
+            return s == s[::-1]
+        
+        for i in range(N):
+            for k in range(1, min(i + 1, N) + 1):
+                if k == 1:
+                    dp[i][1] = is_valid(s[:i + 1])
+                else:
+                    for j in range(k - 1, N):
+                        dp[i][k] = dp[i][k] or dp[j - 1][k - 1] and is_valid(s[j:i + 1])
+        # print(dp)
+        return min(i for i, x in enumerate(dp[-1]) if x) - 1
+                        
+    def minCut(self, s: str) -> int:
+        # Pattern: DP Type 2
+        # Intuition: dp[i] is min cut for [0, i] to make palindrome partitions.
+        # create a dp with size n + 1, first -1 is for dp[j - 1] when j is first
+        # in s.
+        N = len(s)
+        dp = [-1] + [math.inf] * N
+        dp[1] = 0
+        
+        def is_valid(s):
+            return s == s[::-1]
+        
+        for i in range(1, N + 1):
+            for j in range(1, i + 1):
+                if s[j - 1] == s[i - 1] and is_valid(s[j - 1: i]):
+                    dp[i] = min(dp[i], dp[j - 1] + 1)
+
+        return dp[-1]
+```
+

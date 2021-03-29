@@ -211,3 +211,32 @@ class Solution:
         
         return dfs(0, D)
 ```
+
+### [1478. Allocate Mailboxes](https://leetcode.com/problems/allocate-mailboxes/)
+
+```python
+class Solution:
+    def minDistance(self, houses: List[int], K: int) -> int:
+        N = len(houses)
+        dp = [[math.inf] * (K + 1) for _ in range(N)]
+        houses.sort()
+        
+        costs = [[0] * N for _ in range(N)]
+        
+        # Trick: Manhaton Distance - Put it in median item
+        for i, j in product(range(N), range(N)):
+            median = houses[(i + j) // 2]
+            for t in range(i, j + 1):
+                costs[i][j] += abs(median - houses[t])
+        
+        for i in range(N):
+            # Trick: Avoid using if k == 1
+            dp[i][1] = costs[0][i]
+            for k in range(2, K + 1):
+                # Iterate on j can make sure find optimal division for the new
+                # mailbox
+                for j in range(1, i + 1):
+                    dp[i][k] = min(dp[i][k], dp[j - 1][k - 1] + costs[j][i])
+        
+        return dp[-1][-1]
+```
