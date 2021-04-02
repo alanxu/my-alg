@@ -291,6 +291,63 @@ class Solution:
         return max(dp)
 ```
 
+
+### [446. Arithmetic Slices II - Subsequence](https://leetcode.com/problems/arithmetic-slices-ii-subsequence/)
+
+```python
+class Solution:
+    def numberOfArithmeticSlices(self, A: List[int]) -> int:
+        N = len(A)
+        # dp[i] is a map for A[i], key is d, value is num of
+        # arithmetic subseq ending with i with difference d, regardless
+        # if length
+        dp = [defaultdict(int) for _ in range(N)]
+        
+        ans = 0
+        for i in range(1, N):
+            for j in range(i):
+                diff = A[i] - A[j]
+                local_counts = dp[j][diff]
+                # Accumulate accounts of arithmetic subseqs ending with
+                # i: increased by local_counts means all counts for i plus
+                # i forms same num of seqs for i, then (j, i) is other 1
+                dp[i][diff] += local_counts + 1
+                # We count local_counts as the new increased valid number,
+                # because the extra 1 is length of 2. The seq for i might
+                # be just 2 items, add i forms 3 items, so just simply add
+                # local_counts. If i has no seq ending with j, local_accounts
+                # == 0, so just smply add it.
+                ans += local_counts
+        return ans
+```
+
+### [1027. Longest Arithmetic Subsequence](https://leetcode.com/problems/longest-arithmetic-subsequence/)
+
+```python
+class Solution:
+    def longestArithSeqLength(self, A: List[int]) -> int:
+        N = len(A)
+        dp = [defaultdict(int) for _ in range(N)]
+        ans = 0
+        for i in range(1, N):
+            for j in range(i):
+                diff = A[i] - A[j]
+                dp[i][diff] = dp[j][diff] + 1
+                ans = max(ans, dp[i][diff] + 1)
+        return ans
+    
+    def longestArithSeqLength(self, A: List[int]) -> int:
+        N = len(A)
+        dp = {}
+        for i in range(1, N):
+            for j in range(i):
+                diff = A[i] - A[j]
+                dp[(diff, i)] = dp.get((diff, j), 1) + 1
+        
+        return max(dp.values())
+```
+
+
 ## Others
 
 ### [300. Longest Increasing Subsequence](https://leetcode.com/problems/longest-increasing-subsequence/)
@@ -781,4 +838,52 @@ class Solution:
 
         return dp[-1]
 ```
+
+### [940. Distinct Subsequences II](https://leetcode.com/problems/distinct-subsequences-ii/)
+
+```python
+class Solution:
+    def distinctSubseqII(self, S: str) -> int:
+        # Pattern - DP Type 2
+        # Pattern - How many ways
+        # - Select and No Select
+        # - Consier first or last
+        # - Handle duplications
+        # Pattern: See 10^9 + 7 know it is DP
+        # Trick: You must consier empty. If not, dp[0] = 1 for 'a', for j in [1..n], 
+        # you always consider add or not add S[j] based on 'a', which is wrong.
+        # You have to have dp[0] = 1 for '', then dp[1] = 2 for 'a', then dp[2] can
+        # be just 'b' not always start from 'a'. BUT you need to -1 at the end to 
+        # remove the case that all chars are not selected.
+        S= ' ' + S
+        N = len(S)
+        dp = [0] * (N)
+        dp[0] = 1
+        
+        last_idx = {}
+        for i in range(1, N):
+            # Select S[i] and not select S[i]
+            dp[i] = dp[i - 1] + dp[i - 1]
+            
+            # There will be duplicate seq if S[i] == S[j],
+            # Then dp[i - 1] * 1(S[i]) and dp[i - 1] * 1(S[i]).
+            # The duplication only happen for j where j is last
+            # same value as i.
+            # Why last not ealier?
+            # X X X a X X a X X
+            # X X X   X X a X X a
+            # Not same
+            # X X X a     a
+            # X X X       a     a
+            # Same, but this is is counted in last a case??
+            j = last_idx.get(S[i])
+            if j:
+                dp[i] -= dp[j - 1]
+            dp[i] %= 10 ** 9 + 7
+            
+            last_idx[S[i]] = i
+                
+        return dp[-1] - 1
+```
+
 

@@ -90,6 +90,29 @@ class Solution:
         return max(accumulate(nums, initial=0)) - min(accumulate(nums, initial=0))
 ```
 
+### [152. Maximum Product Subarray](https://leetcode.com/problems/maximum-product-subarray/)
+
+```python
+class Solution(object):
+    def maxProduct(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: int
+        """
+        max_v, min_v, res = nums[0], nums[0], nums[0]
+        
+        for i in range(1, len(nums)):
+            num = nums[i]
+            max_v_cur = max_v * num
+            min_v_cur = min_v * num
+            max_v = max(max_v_cur, min_v_cur, num)
+            min_v = min(max_v_cur, min_v_cur, num)
+            
+            res = max(res, max_v)
+        
+        return res
+```
+
 ## Stairs
 
 ### [70. Climbing Stairs](https://leetcode.com/problems/climbing-stairs/)
@@ -652,5 +675,280 @@ class Solution:
         return ans
 ```
 
+### [639. Decode Ways II](https://leetcode.com/problems/decode-ways-ii/)
 
+```python
+class Solution:
+    def numDecodings(self, s: str) -> int:
+        if s == '0': return 0
+        s = '00' + s
+        N, MOD = len(s), 10 ** 9 + 7
+        dp = [1] * N
+        for i in range(2, N):
+            if s[i] == '0':
+                if s[i - 1] == '*':
+                    dp[i] = dp[i - 2] * 2
+                elif s[i - 1] in ('1', '2'):
+                    dp[i] = dp[i - 2]
+                else:
+                    return 0
+            elif s[i] == '*':
+                dp[i] = dp[i - 1] * 9
+                if s[i - 1] == '1':
+                    dp[i] += dp[i - 2] * 9
+                elif s[i - 1] == '2':
+                    dp[i] += dp[i - 2] * 6
+                elif s[i - 1] == '*':
+                    dp[i] += dp[i - 2] * 15
+            else:
+                dp[i] = dp[i - 1]
+                    
+                if s[i - 1] == '1':
+                    dp[i] += dp[i - 2]
+                elif s[i - 1] == '2' and s[i] <= '6':
+                    dp[i] += dp[i - 2]
+                elif s[i - 1] == '*':
+                    if '1' <= s[i] <= '6':
+                        dp[i] += dp[i - 2] * 2
+                    else:
+                        dp[i] += dp[i - 2]
+                
+            dp[i] %= MOD
+
+        return dp[-1]
+```
+
+### [600. Non-negative Integers without Consecutive Ones](https://leetcode.com/problems/non-negative-integers-without-consecutive-ones/)
+
+```python
+class Solution:
+    def findIntegers(self, num: int) -> int:
+        # Build reference data
+        # dp[i] denotes num of cases for a i-digits binary without adjacent 1's
+        # Use 33 to make it 1-indexed.
+        dp = [0] * 33
+        dp[0], dp[1] = 1, 2
+        for i in range(2, 33):
+            dp[i] = dp[i - 1] + dp[i - 2]
+        
+        # Build the threshold number into binary array,
+        # the array is in reversed order
+        # Trick: Convert a int into binary
+        digits = [0] * 33
+        for i in range(1, 33):
+            digits[i] = num % 2
+            num = num // 2
+        
+        # Iterate threshod binary from higher digit, based
+        # on location of 1's, we calc cases
+        i, ans = 32, 0
+        while(i >= 1):
+            
+            if digits[i] == 0:
+                # If the benchmark digits is 0 at i, our ans has to be 0 at i too
+                # so continue search for 1 in benchmark so we can calc cases
+                i -= 1
+            else:
+                # If the benchmark digits is 1 at i, there are two type in our ans
+                # 1. 0 at i, all digits after that is free, so totacl case of this
+                # type is dp[i - 1];
+                # 2. 1 at i, same as benchmark, so we have to continue searching next
+                # 1 in benchmark... 
+                ans += dp[i - 1]
+                
+                if i >= 2 and digits[i - 1] == 1:
+                    ans += dp[i - 2]
+                    return ans
+                else:
+                    i -= 2
+        
+        # +1 is for the case that equals to the benchmark
+        return ans + 1
+```
+
+### [656. Coin Path](https://leetcode.com/problems/coin-path/)
+```python
+class Solution:
+    def cheapestJump(self, A: List[int], B: int) -> List[int]:
+        # Pattern: Partition 2
+        # Intution: First glance this is Partition 2 not sure why. Then
+        # when look at the formular, it only require first part to be subproblem,
+        # so Partition 2 is not good, cuz it is O(bn^2)
+        # TLE
+        A = [-1] + A
+        N = len(A)
+        dp = [[math.inf] * N for _ in range(N)]
+        for i in range(1, N):
+            if A[i] != -1:
+                dp[i][i] = A[i]
+        
+        ans = [[math.inf]] * N
+        ans[1] = [1]
+        
+        for l in range(2, N):
+            for i in range(1, N - l + 1):
+                j = i + l - 1
+                if A[i] != -1 and A[j] != -1:
+                    k_cache = {}
+                    for k in range(max(i, j - B), j):
+                        # dp[i][j] = min(dp[i][j], dp[i][k] + A[j])
+                        # if dp[i][j] == dp[i][k] + A[j] and dp[i][j] != math.inf and i == 1:
+                        #     path = ans[k] + [j]
+                        #     if path < ans[j]:
+                        #         ans[j] = path
+                                
+                        if dp[i][k] + A[j] < dp[i][j]:
+                            dp[i][j] = dp[i][k] + A[j]
+                            if i == 1:
+                                ans[j] = ans[k] + [j]
+                        elif dp[i][k] + A[j] == dp[i][j] and i == 1:
+                            path = ans[k] + [j]
+                            # print(path)
+                            if path < ans[j]:
+                                ans[j] = path
+
+        return ans[-1] if ans[-1] < [math.inf] else []
+
+    def cheapestJump(self, A: List[int], B: int) -> List[int]:
+        A = [-1] + A
+        N = len(A)
+        # Pattern: DP - Type 2
+        # Because only first part of formula is subproblem, so not partition 2.
+        # Intuition: dp[i] is min cost jump from 1 to i
+        dp = [math.inf] * N
+        dp[1] = A[1]
+        # No need to give default value [math.inf], cus the flow is
+        # controled by dp, paths will be updated when it should be;
+        # For A[i] == inf, dp[i] == dp[j] + A[j] will match, but
+        # paths[i] will not changed, cuz it is already smallest
+        paths = [[]] * N
+        paths[1] = [1]
+        
+        for i in range(2, N):
+            # Only need to check i not j, cuz
+            # j was i before
+            if A[i] == -1:
+                continue
+            for j in range(max(1, i - B), i):
+                # Trick: inf == inf + 1 -> true
+                if dp[i] > dp[j] + A[j]:
+                    # If find a optimal j before i, update dp and paths
+                    # this is the first value for the new optimal ans
+                    dp[i] = dp[j] + A[j]
+                    paths[i] = paths[j] + [i]
+                elif dp[i] == dp[j] + A[j]:
+                    # If another j has same optimal value, compare the path.
+                    # There is another possibility for dp[j] == inf, the code
+                    # will be executed, paths will not be updated
+                    path = paths[j] + [i]
+                    if path < paths[i]:
+                        paths[i] = path
+        
+        return paths[-1]
+```
+
+### [920. Number of Music Playlists](https://leetcode.com/problems/number-of-music-playlists/)
+
+```python
+class Solution:
+    def numMusicPlaylists(self, N: int, L: int, K: int) -> int:
+        
+        @functools.lru_cache(None)
+        def dp(n, l):
+            # Parttern: DP - Recursion + Memo - How many ways
+            # This is usually type 1 DP
+            # Think about two types: Rob/NoRob, Select/NoSelect, Used/NoUsed
+            # Think about order of shuaiguo: first + dp(), or dp() + last
+            # Anwser is sum of all types
+            
+            # Intuition: Consider current recursion is after a bunch of previous
+            # Two types: 
+            # - First time use a song
+            # - The song is used before
+            # The two type are exclusive so should be added to make an answer
+            
+            # There are n song, cannot use n song to make a empty list
+            if l == 0 and n  > 0: return 0
+            # There are empty song, cannot use empty song to make a list of l > 0
+            if l  > 0 and n == 0: return 0
+            # There are empty song and empty list, perfect 1 match
+            if l == 0 and n == 0: return 1
+            
+            # For the current resursion, shuaiguo prevous selection to dp(), and just
+            # select the last song, select a song not used before
+            ans = dp(n - 1, l - 1) * (N - (n - 1))
+            
+            # There is other possiblilities if choose a used song. In this case,
+            # we look for dp(n, l - 1), all n song is used before. And the selection
+            # of last song cannot be recent k, if there is less than k books in the 
+            # current recursion, this case is not valid
+            ans += dp(n, l - 1) * max(n - K, 0)
+            
+            return ans % (10 ** 9 + 7)
+        
+        return dp(N, L)
+```
+
+### [1639. Number of Ways to Form a Target String Given a Dictionary](https://leetcode.com/problems/number-of-ways-to-form-a-target-string-given-a-dictionary/)
+
+```python
+class Solution:
+    def numWays(self, words: List[str], target: str) -> int:
+        MOD = 10 ** 9 + 7
+        N, K = len(target), len(words[0])
+        
+        # Flaten words to 1D array with counts and 1-indexed
+        counts = [Counter() for _ in range(K + 1)] 
+        for c in range(K):
+            for r in range(len(words)):
+                counts[c + 1][words[r][c]] += 1
+
+        # Trick: Make target 1-indexed
+        target = '?' + target
+        
+        # dp[i][k] denotes the ways to form target[1,i] using flaten words[1, k]
+        dp = [[0] * (K + 1) for _ in range(N + 1)]
+        # Determine initial value later
+        for k in range(K + 1):
+            dp[0][k] = 1
+        
+        for i in range(1, N + 1):
+            for k in range(1, K + 1):
+                # If dont use kth in words
+                dp[i][k] = dp[i][k - 1]
+                
+                # If use kth in words and it can form target[i]
+                if target[i] in counts[k]:
+                    count = counts[k][target[i]]
+                    dp[i][k] += dp[i - 1][k - 1] * count
+                dp[i][k] %= MOD
+        
+        return dp[-1][-1] % MOD
+```
+
+### [1692. Count Ways to Distribute Candies](https://leetcode.com/problems/count-ways-to-distribute-candies/)
+
+```python
+class Solution:
+    def waysToDistribute(self, n: int, k: int) -> int:
+        MOD = 10 ** 9 + 7
+        
+        # dp[i][j] denotes ways to put candiies[1, i] in j bags
+        # bags has no difference
+        dp = [[0] * (k + 1) for _ in range(n + 1)]
+        
+        # How to determin the initial value? Draw dp table?
+        for i in range(1, n + 1):
+            dp[i][1] = 1
+        
+        for i in range(1, n + 1):
+            for j in range(2, k + 1):
+                # If put ith candy in a new bag, it is dp[i - 1][j - 1];
+                # If put ith candy in existing bag, j bags alredy used,
+                # there are j ways to put ith candy, j * dp[i - 1][j]
+                dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j] * j
+                dp[i][j] %= MOD
+        
+        return dp[-1][-1] % MOD
+```
 

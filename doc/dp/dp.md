@@ -333,4 +333,163 @@ class Solution:
         return dp(N, N)
 ```
 
+### [818. Race Car](https://leetcode.com/problems/race-car/)
 
+```python
+class Solution:
+    # https://youtu.be/HzlEkUt2TYs
+    dp = {0: 0}
+    def racecar(self, t):
+        if t in self.dp:
+            return self.dp[t]
+        n = t.bit_length()
+        if 2**n - 1 == t:
+            self.dp[t] = n
+        else:
+            self.dp[t] = self.racecar(2**n - 1 - t) + n + 1
+            for m in range(n - 1):
+                self.dp[t] = min(self.dp[t], self.racecar(t - 2**(n - 1) + 2**m) + n + m + 1)
+        return self.dp[t]
+```
+
+### [837. New 21 Game](https://leetcode.com/problems/new-21-game/)
+
+```python
+'''
+X, X, X, X, [i-w, i-w-1, ..., i-2, i-1], i
+'''
+class Solution:
+    def new21Game(self, N: int, K: int, W: int) -> float:
+        # Intuition: dp[i] is the possibility of getting i
+        # points by keep drawing cards until getting >= K points.
+        # For each point target dp[i], it can be obtained by
+        # drawing 1 card after getting points [i -1, i - 2, ..., 
+        # i - W], we know the probability of all those previous
+        # situations, then it is 1.0/W probability to draw the card
+        # required to make points i after all W previous cases.
+        # So dp[i] = 1.0/W*dp[i - 1] + 1.0/W*dp[i - 2] + ... +
+        # 1.0/W*dp[i - W].
+        # Note that the previous cases are valid only if the points
+        # < k, because if it is >=k, card drawing is stopped, there is 0 
+        # probability to get to points i. So the base points taken in to
+        # account to calc dp[i] should < k and maximun W points.
+        dp = [0] * (N + 1)
+        dp[0] = 1
+        # Trick: Use sum to keep subarray sum
+        sum_ = 0
+        for i in range(1, N + 1):
+            # Only invude prev points < K
+            if i - 1 < K:
+                sum_ += dp[i - 1]
+            # If W + 1 points exists, remove it
+            if i - W - 1 >= 0:
+                sum_ -= dp[i - W - 1]
+            dp[i] = 1.0 / W * sum_
+            
+        return sum(dp[K: N + 1])             
+```
+
+### [887. Super Egg Drop](https://leetcode.com/problems/super-egg-drop/)
+
+```python
+class Solution:
+    def superEggDrop(self, k: int, n: int) -> int:
+        @functools.lru_cache(None)
+        def test(k, n):
+            # Intuition: 
+            # If k == 1, you can only
+            # start from F1, when floor i break, you know the
+            # answer is i - 1, so max move is n (worst case all
+            # floors cannot break). So there is no case we cannot
+            # get a number given k >= 1. 
+            # If k > 1, the approach is, for given k and n, we choose a floor
+            # i to start with, you first try 1 egg on F[i], if
+            # break you need to test [1, i - 1] floors with k - 1
+            # eggs, and if it doesn't break, you need to test
+            # [i + 1, n] floors with k egg.
+            # The tricky part is you don't know if it break or not,
+            # you are just looking for worst case.
+            
+            # Why 0? The function always has a answer if k >= 1,
+            # if k == 0  and n > 1, it means in upper recursion,
+            # you have only 1 egg and you are trying it from bottom
+            # of floor and at floor of upper recursion you assum
+            # the only egg break, and the last egg is break, you know
+            # the max moves (floor) for that case; so at cur resursion 
+            # you get 0 egg you just return 0 so the upper recursion can
+            # finish.
+            if k == 0: return 0
+            if k == 1: return n
+            if n <= 1: return n
+            
+            ans = math.inf
+            for i in range(1, n + 1):
+                ans = min(ans, 1 + max(test(k, n - i), test(k - 1, i - 1)))
+            
+            return ans
+        return test(k, n)
+    
+    def test(k, n):
+        # Trick: Iterate for i in n get TLE, use binary search to find i.
+        # The 2 funcs are monotone increasing and decreasing, so their
+        # minmax is the point they meet... when test(k, n - i) == test(k - 1, i - 1)
+        @functools.lru_cache(None)
+        def test(k, n):
+            if k == 0: return 0
+            if k == 1: return n
+            if n <= 1: return n
+            
+            l, r = 1, n
+            while l < r:
+                m = (l + r) // 2
+                # When first try F[1], if break when got answer with 1 move,
+                # and we need more move if it is not break. So when no_break > break
+                # it means m needs to be increased by moving l
+                if test(k, n - m) >= test(k - 1, m - 1):
+                    l = m
+                else:
+                    r = m - 1
+            
+            return test(k, n - l)
+        return test(k, n)
+    
+    def superEggDrop(self, K, N):
+        # https://leetcode.com/problems/super-egg-drop/discuss/158974/C%2B%2BJavaPython-2D-and-1D-DP-O(KlogN)
+        dp = [[0] * (K + 1) for i in range(N + 1)]
+        for m in range(1, N + 1):
+            for k in range(1, K + 1):
+                dp[m][k] = dp[m - 1][k - 1] + dp[m - 1][k] + 1
+            if dp[m][K] >= N: return m
+```
+
+
+### [1316. Distinct Echo Substrings](https://leetcode.com/problems/distinct-echo-substrings/)
+
+```python
+class Solution:
+    def distinctEchoSubstrings(self, text: str) -> int:
+        text = '?' + text
+        N = len(text)
+        
+        # dp[i][j] denotes the length of same substring ending with i and j, j is after i
+        dp = [[0] * N for _ in range(N)]
+        words = set()
+        ans = 0
+        
+        for i in range(1, N):
+            for j in range(i + 1, N):
+                # It is ok use N for upper border for both i and j
+                # loop of j wont run when i == N - 1
+                if text[i] == text[j]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                
+                # Why >= not ==? Cuz the substr ending with j can be longer than
+                # j - i
+                if dp[i][j] >= j - i:
+                    substr = text[i + 1:j + 1]
+                    if substr not in words:
+                        ans += 1
+                        words.add(substr)
+        
+        return ans
+```

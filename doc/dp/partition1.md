@@ -232,11 +232,74 @@ class Solution:
         for i in range(N):
             # Trick: Avoid using if k == 1
             dp[i][1] = costs[0][i]
+            # What if k is more than i? Just interrate it.
+            # When i == 1, for loop of j will not run, so
+            # dp[1][2...] all inf, which actually should be 0 but
+            # doesn't matter.
+            # For k more than i, dp[i][k] == 0
             for k in range(2, K + 1):
                 # Iterate on j can make sure find optimal division for the new
                 # mailbox
                 for j in range(1, i + 1):
                     dp[i][k] = min(dp[i][k], dp[j - 1][k - 1] + costs[j][i])
+        print(dp)
+        return dp[-1][-1]
+```
+
+### [629. K Inverse Pairs Array](https://leetcode.com/problems/k-inverse-pairs-array/)
+
+```python
+class Solution:
+    def kInversePairs(self, N: int, K: int) -> int:
+        # Pattern: DP - Patition 1
+        # Given a sequence (i) and a independent constraints (k), partition, mailbox
+        # num of inversed seq etc. Ask for a optimal answer.
+        # Usually iterate for i and k, for dp[i][k], iterate all cases specific for
+        # A[i] and aggregate it for dp[i][k]
+        
+        # Intuition: dp[i][k] is to add A[i] into [0, i - 1] which has dp[i-1][...],
+        # There are i + 1 ways to put A[i], when put A[i] at i, it will not create
+        # extra inversed seq; when put A[i] at 0, it create extra i - 1 inversed seq,
+        # bcuz A[i] is max value in [0, i]. 
+        # Putting A[i] in [0, i - 1] will only adds to the results but not changing
+        # exsting value for [0, i - 1]. So when A[i] generate m cases, [0, i - 1] needs
+        # to generate k - m cases. dp[i][k] is the sum of the two parts.
+        # The cases putting A[i] can generate is bounded by i and k, choose the min.
+        
+        # This alg will TLE, needs to use fomular for 3rd loop.
+        dp = [[0] * (K + 1) for _ in range(N + 1)]
+        
+        for i in range(N + 1):
+            dp[i][0] = 1
+        
+        for i in range(1, N + 1):
+            for k in range(1, K + 1):
+                if k == 0:
+                    dp[i][k] = 1
+                else:
+                    for m in range(min(k, i - 1) + 1):
+                        dp[i][k] = (dp[i][k] + dp[i - 1][k - m]) % 1000000007
+        return dp[-1][-1]
+
+    def kInversePairs(self, N: int, K: int) -> int:
+        dp = [[0] * (K + 1) for _ in range(N + 1)]
+        
+        for i in range(N + 1):
+            dp[i][0] = 1
+        
+        for i in range(1, N + 1):
+            for k in range(1, K + 1):
+                if k >= i:
+                    dp[i][k] = dp[i][k - 1] + dp[i - 1][k] - dp[i - 1][k - i]
+                else:
+                    dp[i][k] = dp[i][k - 1] + dp[i - 1][k]
+                dp[i][k] %= 10 ** 9 + 7
         
         return dp[-1][-1]
+```
+
+### [1621. Number of Sets of K Non-Overlapping Line Segments](https://leetcode.com/problems/number-of-sets-of-k-non-overlapping-line-segments/)
+
+```python
+
 ```

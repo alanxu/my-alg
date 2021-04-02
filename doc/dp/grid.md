@@ -4,6 +4,54 @@ All 2D DP are actually grid problem. E.g. 1289. Minimum Falling Path Sum II vs. 
 
 
 
+## Square on Grid
+
+### [221. Maximal Square](https://leetcode.com/problems/maximal-square/)
+```python
+class Solution:
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        dp = [[0] * len(matrix[0]) for _ in range(len(matrix))]
+        dp[0][0] = 1 if matrix[0][0] == 1 else 0
+        
+        ans = 0
+        
+        for i in range(len(dp)):
+            for j in range(len(dp[0])):
+                if i == 0 or j == 0:
+                    print(matrix[i][j])
+                    dp[i][j] = 1 if matrix[i][j] == '1' else 0
+                else:
+                    dp[i][j] = min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1]) + 1 if matrix[i][j] == '1' else 0
+                ans = max(ans, dp[i][j])
+            
+        return ans * ans
+```
+### [1277. Count Square Submatrices with All Ones](https://leetcode.com/problems/count-square-submatrices-with-all-ones/)
+
+```python
+class Solution:
+    def countSquares(self, M: List[List[int]]) -> int:
+        R, C = len(M), len(M[0])
+        
+        # Intuition: Travese grid, update cell with the len of side of the squre
+        # with the current cell as the bottom-right corner, the num is also the
+        # num of squre with the cell as bottom-right corner.
+        # 
+        # See https://leetcode.com/problems/maximal-square/ to understand below
+        # formula
+        # M[r][c] = min(M[r - 1][c], M[r][c - 1], M[r - 1][c - 1]) + 1
+        ans = 0
+        for r in range(0, R):
+            for c in range(0, C):
+                if r > 0 and c > 0 and M[r][c]:
+                    M[r][c] = min(M[r - 1][c], M[r][c - 1], M[r - 1][c - 1]) + 1
+                ans += M[r][c]
+        return ans
+```
+
+## Others
+
+
 ### [62. Unique Paths](https://leetcode.com/problems/unique-paths/)
 
 ```python

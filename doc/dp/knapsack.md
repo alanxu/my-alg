@@ -128,27 +128,6 @@ class Solution:
         return dp[-1][-1][-1]
 ```
 
-### [221. Maximal Square](https://leetcode.com/problems/maximal-square/)
-```python
-class Solution:
-    def maximalSquare(self, matrix: List[List[str]]) -> int:
-        dp = [[0] * len(matrix[0]) for _ in range(len(matrix))]
-        dp[0][0] = 1 if matrix[0][0] == 1 else 0
-        
-        ans = 0
-        
-        for i in range(len(dp)):
-            for j in range(len(dp[0])):
-                if i == 0 or j == 0:
-                    print(matrix[i][j])
-                    dp[i][j] = 1 if matrix[i][j] == '1' else 0
-                else:
-                    dp[i][j] = min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j - 1]) + 1 if matrix[i][j] == '1' else 0
-                ans = max(ans, dp[i][j])
-            
-        return ans * ans
-```
-
 ### [322. Coin Change](https://leetcode.com/problems/coin-change/)
 ```python
 class Solution:
@@ -359,4 +338,101 @@ class Solution(object):
                 dp[i] = min(dp[i], dp[i-square] + 1)
         
         return dp[-1]
+```
+
+### [805. Split Array With Same Average](https://leetcode.com/problems/split-array-with-same-average/)
+
+```python
+class Solution:
+    def splitArraySameAverage(self, nums: List[int]) -> bool:
+        # TLE
+        # https://youtu.be/tMaWUhj5YaU
+        N, total = len(nums), sum(nums)
+        
+        # Intuition: dp[sum][num] is whether we can find a subset of num items
+        # in nums that sums to sum.
+        # For each num calc the whole table for that num agaist all nums. Why it
+        # works? Becuz we just need true or false, say (a, c, e)(b, d, f), we know
+        # (a, c, e) can make it, if we run a and c cannot get the result, but e
+        # can, if we run a and e first then c can. So the last one of the subset
+        # will lead to a True if matches.
+        
+        # If average(A) = average(B), average(A) = average(B) = average(All)
+        # total / N = sum / num
+        dp = [[False] * (N + 1) for _ in range(total + 1)]
+        dp[0][0] = True
+        
+        for x in nums:
+            # If we run a loop outside of the dp loop, there is a typical situation
+            # that the dp needs to referecing to the previous state that already
+            # changed by current round. 2 solutions:
+            # - use 2 dp and copy it
+            # - iterate dp reversed order (next solution)
+            dp2 = copy.deepcopy(dp)
+            for ssum in range(x, total + 1):
+                for num in range(1, N):
+                    # If Use current x can find a sum and num subset,
+                    # check if this sum and num can be the equal average
+                    if dp2[ssum - x][num - 1]:
+                        dp[ssum][num] = True
+                        if ssum * N == total * num:
+                            return True
+        return False
+    
+    def splitArraySameAverage(self, nums: List[int]) -> bool:
+        # TLE
+        N, total = len(nums), sum(nums)
+        nums.sort()
+        dp = [[False] * (N + 1) for _ in range(total + 1)]
+        dp[0][0] = True
+        
+        cur_sum = 0
+        for x in nums:
+            cur_sum += x
+            # For cur x, the upper capacity is the running sum so far,
+            # more than that should not be considered.
+            # For num, limit it to N//2 + 1, + 1 to be safe, cuz we
+            # just want to find the smaller half.
+            # Trick: Use reversed order to get ride of 2 dp table
+            for ssum in range(cur_sum, x - 1, -1):
+                for num in range(N//2 + 1, 0, -1):
+                    if dp[ssum - x][num - 1]:
+                        dp[ssum][num] = True
+                        if num != N and ssum * N == total * num:
+                            return True
+        return False
+
+    def splitArraySameAverage(self, A: List[int]) -> bool:
+        # Dont understand
+        # A subfunction that see if total k elements sums to target
+        # target is the goal, k is the number of elements in set B, i is the index we 
+        # have traversed through so far
+        mem = {}
+
+        def find(target, k, i):
+            # if we are down searching for k elements in the array, 
+            # see if the target is 0 or not. This is a basecase
+            if k == 0: return target == 0
+
+            # if the to-be selected elements in B (k) + elements we have traversed so 
+            # far is larger than total length of A
+            # even if we choose all elements, we don't have enough elements left, 
+            # there should be no valid answer.
+            if k + i > len(A): return False
+
+            if (target, k, i) in mem: return mem[(target, k, i)]
+
+            # if we choose the ith element, the target becomes target - A[i] for total sum
+            # if we don't choose the ith element, the target doesn't change
+            mem[(target - A[i], k - 1, i + 1)] = find(target - A[i], k - 1, i + 1) or find(target, k, i + 1)
+
+            return mem[(target - A[i], k - 1, i + 1)]
+
+        n, s = len(A), sum(A)
+        # Note that the smaller set has length j ranging from 1 to n//2+1
+        # we iterate for each possible length j of array B from length 1 to length n//2+1
+        # if s*j%n, which is the sum of the subset, it should be an integer, so we only 
+        # proceed to check if s * j % n == 0
+        # we check if we can find target sum s*j//n (total sum of j elements that sums to s*j//n)
+        return any(find(s * j // n, j, 0) for j in range(1, n // 2 + 1) if s * j % n == 0)
 ```
