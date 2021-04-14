@@ -1,4 +1,73 @@
+## MinMax
 
+### [1563. Stone Game V](https://leetcode.com/problems/stone-game-v/)
+https://youtu.be/2_JkASlmxTA
+```python
+class Solution:
+    def stoneGameV(self, stoneValue: List[int]) -> int:
+        N = len(stoneValue)
+        dp = [[0] * N for _ in range(N)]
+        
+        for i in range(N - 1):
+            dp[i][i + 1] = max(stoneValue[i], stoneValue[i + 1])
+        
+        for l in range(3, N):
+            for i in range(0, N - l + 1):
+                print(i)
+                j = i + l - 1
+                for k in range(i, j):
+                    left_sum, right_sum = sum(stoneValue[i:k + 1]), sum(stoneValue[k + 1:j + 1])
+                    if left_sum > right_sum:
+                        dp[i][j] = max(dp[i][j], right_sum + dp[k + 1][j])
+                    elif left_sum < right_sum:
+                        dp[i][j] = max(dp[i][j], left_sum + dp[i][k])
+                    else:
+                        dp[i][j] = max(dp[i][j], left_sum + max(dp[k + 1][j], dp[i][k]))
+        print(dp)
+        return dp[0][-1]
+    
+    def stoneGameV(self, stoneValue: List[int]) -> int:
+        n = len(stoneValue)
+        acc = [0] + list(itertools.accumulate(stoneValue))
+
+        @functools.lru_cache(None)
+        def dfs(i, j):
+            if j == i:
+                return 0
+            ans = 0
+            for k in range(i, j):
+                s1, s2 = acc[k + 1] - acc[i], acc[j + 1] - acc[k + 1]
+                if s1 <= s2:
+                    ans = max(ans, dfs(i, k) + s1)
+                if s1 >= s2:
+                    ans = max(ans, dfs(k + 1, j) + s2)
+            return ans
+
+        return dfs(0, n - 1)
+    
+
+        def stoneGameV(self, stoneValue: List[int]) -> int:
+            n = len(stoneValue)
+            acc = [0] + list(itertools.accumulate(stoneValue))
+
+            @functools.lru_cache(None)
+            def dfs(i, j):
+                if j - i == 1:
+                    return 0
+                ans = 0
+                for k in range(i + 1, j):
+                    s1, s2 = acc[k] - acc[i], acc[j] - acc[k]
+                    if s1 <= s2:
+                        ans = max(ans, dfs(i, k) + s1)
+                    if s1 >= s2:
+                        ans = max(ans, dfs(k, j) + s2)
+                return ans
+
+            return dfs(0, n)
+```
+
+
+## Others
 
 ### [130. Surrounded Regions](https://leetcode.com/problems/surrounded-regions/)
 
@@ -546,4 +615,48 @@ class Solution:
             return False
                     
         return dfs(start)
+```
+
+### [464. Can I Win](https://leetcode.com/problems/can-i-win/)
+
+```python
+def canIWin(self, maxChoosableInteger: int, desiredTotal: int) -> bool:
+        # Intuition:
+        # What does 'force a win' mean? It means for player 1, starting from 
+        # first round, when he pick a number, there is no way for player 2 to win,
+        # no matter what player 2 choose afterword, unless player 1 gives up by
+        # choosing a wrong number.
+        # Tree is the permutation of selected numbers sum to Total. We can prune it
+        # by the remaining numbers are same for different permutation of selected
+        # numbers. The anwser is actually if there is a node at node (height == 1),
+        # where all it's leaf nodes fail on player1's round (height is odd). But
+        # we are not using this to resolve the problem...
+        
+        # Alg: DFS is to form a tree with permutations of numbers, prune can be used
+        # to make it a combination. While build the tree, it also perform specific 
+        # logic based on question.
+        
+        # Intuition: dfs() build/traverse the tree, and return if there is a child node
+        # for give node/state, so the cur step can control its win be selecting it.
+        @lru_cache(None)
+        def dfs(choices, remainder):
+            
+            if choices[-1] >= remainder:
+                return True
+            
+            for i in range(len(choices)):
+                if not dfs(tuple(choices[:i] + choices[i + 1:]), remainder - choices[i]):
+                    return True
+            
+        summed_choices = (maxChoosableInteger + 1) * maxChoosableInteger / 2
+
+        # If all the choices added up are less than the total, no-one can win
+        if summed_choices < desiredTotal:
+            return False
+
+        # If the sum matches desiredTotal exactly then you win if there's an odd number of turns
+        if summed_choices == desiredTotal:
+            return maxChoosableInteger % 2
+        
+        return dfs(tuple(range(1, maxChoosableInteger + 1)), desiredTotal)
 ```

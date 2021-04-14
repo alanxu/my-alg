@@ -113,6 +113,9 @@ class Solution(object):
         return res
 ```
 
+### [1191. K-Concatenation Maximum Sum](https://leetcode.com/problems/k-concatenation-maximum-sum/)
+
+
 ## Stairs
 
 ### [70. Climbing Stairs](https://leetcode.com/problems/climbing-stairs/)
@@ -952,3 +955,138 @@ class Solution:
         return dp[-1][-1] % MOD
 ```
 
+### [1406. Stone Game III](https://leetcode.com/problems/stone-game-iii/)
+
+```python
+class Solution:
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        dp = [-math.inf] * N + [0]
+        dp[N - 1] = A[-1]
+        
+        for i in range(N - 2, -1, -1):
+            dp[i] = max(dp[i], sum(A[i: i + 1]) + sum(A[i + 1:]) - dp[i + 1])
+            if i <= N - 2:
+                dp[i] = max(dp[i], sum(A[i:i + 2]) + sum(A[i + 2:]) - dp[i + 2])
+            if i <= N - 3:
+                dp[i] = max(dp[i], sum(A[i:i + 3]) + sum(A[i + 3:]) - dp[i + 3])
+        
+        if 2 * dp[0] > total: return 'Alice'
+        if 2 * dp[0] < total: return 'Bob'
+        
+        return 'Tie'
+    
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        dp = [-math.inf] * N + [0]
+        dp[N - 1] = A[-1]
+        
+        for i in range(N - 2, -1, -1):
+            dp[i] = max(dp[i], sum(A[i:]) - dp[i + 1])
+            if i <= N - 2:
+                dp[i] = max(dp[i], sum(A[i:]) - dp[i + 2])
+            if i <= N - 3:
+                dp[i] = max(dp[i], sum(A[i:]) - dp[i + 3])
+        
+        if 2 * dp[0] > total: return 'Alice'
+        if 2 * dp[0] < total: return 'Bob'
+        
+        return 'Tie'
+    
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        dp = [-math.inf] * N + [0]
+        dp[N - 1] = A[-1]
+        
+        prefix_sum = A[-1]
+        for i in range(N - 2, -1, -1):
+            prefix_sum += A[i]
+            dp[i] = max(dp[i], prefix_sum - dp[i + 1])
+            if i <= N - 2:
+                dp[i] = max(dp[i], prefix_sum - dp[i + 2])
+            if i <= N - 3:
+                dp[i] = max(dp[i], prefix_sum - dp[i + 3])
+        
+        if 2 * dp[0] > total: return 'Alice'
+        if 2 * dp[0] < total: return 'Bob'
+        
+        return 'Tie'
+    
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        dp = [-math.inf] * N + [0]
+        dp[N - 1] = A[-1]
+        
+        prefix_sum = A[-1]
+        for i in range(N - 2, -1, -1):
+            prefix_sum += A[i]
+            for k in range(1, min(3, N - i) + 1):
+                dp[i] = max(dp[i], prefix_sum - dp[i + k])
+        
+        print(dp)
+        
+        if 2 * dp[0] > total: return 'Alice'
+        if 2 * dp[0] < total: return 'Bob'
+        
+        return 'Tie'
+    
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        dp = [-math.inf] * N + [0]
+        
+        prefix_sum = 0
+        # We found N - 1 can be added to the loop, it can give
+        # some benefits for further improvement, as all steps
+        # are handled in same way
+        for i in range(N - 1, -1, -1):
+            prefix_sum += A[i]
+            for k in range(1, min(3, N - i) + 1):
+                dp[i] = max(dp[i], prefix_sum - dp[i + k])
+        
+        if 2 * dp[0] > total: return 'Alice'
+        if 2 * dp[0] < total: return 'Bob'
+        
+        return 'Tie'
+    
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        # Add 3 dummy states
+        dp = [-math.inf] * N + [0] * 3
+        
+        prefix_sum = 0
+
+        for i in range(N - 1, -1, -1):
+            prefix_sum += A[i]
+            # We can remove the  min(3, N - i) by adding 3 dummy states
+            for k in range(1, 3 + 1):
+                dp[i] = max(dp[i], prefix_sum - dp[i + k])
+        
+        if 2 * dp[0] > total: return 'Alice'
+        if 2 * dp[0] < total: return 'Bob'
+        
+        return 'Tie'
+    
+    def stoneGameIII(self, stoneValue: List[int]) -> str:
+        A = stoneValue
+        N, total = len(A), sum(A)
+        # Becuz only 3 states are used, we can use O(1) space
+        # New dp[i] will update dp[i % 3] and use old dp[i + 1]
+        # and dp[i + 1 % 3], dp[i + 2 / 3]
+        dp = [0] * 3
+        
+        prefix_sum = 0
+        for i in range(N - 1, -1, -1):
+            prefix_sum += A[i]
+            
+            # Cannot use dp[i] = max(dp[i], ...), cuz dp[i] now is value of prev
+            # rather the default value for i
+            dp[i % 3] = max([prefix_sum - dp[(i + k) % 3] for k in (1, 2, 3)])
+        
+        return 'Alice' if 2 * dp[0] > total else 'Bob' if 2 * dp[0] < total else 'Tie'
+```

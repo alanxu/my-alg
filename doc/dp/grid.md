@@ -49,6 +49,42 @@ class Solution:
         return ans
 ```
 
+### [304. Range Sum Query 2D - Immutable](https://leetcode.com/problems/range-sum-query-2d-immutable/)
+
+```python
+class NumMatrix:
+
+    def __init__(self, matrix: List[List[int]]):
+        R, C = len(matrix), len(matrix[0])
+        dp = [[0] * C for _ in range(R)]
+        dp[0][0] = matrix[0][0]
+        
+        for r in range(1, R):
+            dp[r][0] = dp[r - 1][0] + matrix[r][0]
+        
+        for c in range(1, C):
+            dp[0][c] = dp[0][c - 1] + matrix[0][c]
+        
+        for r in range(1, R):
+            for c in range(1, C):
+                dp[r][c] = dp[r][c - 1] + dp[r - 1][c] - dp[r - 1][c - 1] + matrix[r][c]
+        
+        self.dp = dp
+
+    def sumRegion(self, row1: int, col1: int, row2: int, col2: int) -> int:
+        # ans = self.dp[row2][col2] - self.dp[row1 - 1][col2] - 
+        #       self.dp[row2][col1 - 1] + self.dp[row1 - 1][col1 - 1]
+        ans = self.dp[row2][col2]
+        if row1 > 0:
+            ans -= self.dp[row1 - 1][col2]
+        if col1 > 0:
+            ans -= self.dp[row2][col1 - 1]
+        if row1 > 0 and col1 > 0:
+            ans += self.dp[row1 - 1][col1 - 1]
+        
+        return ans
+```
+
 ## Others
 
 

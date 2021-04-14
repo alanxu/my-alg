@@ -857,3 +857,21 @@ class Solution:
 ```
 
 
+### [270. Closest Binary Search Tree Value](https://leetcode.com/problems/closest-binary-search-tree-value/)
+
+```python
+class Solution:
+    def closestValue(self, root: TreeNode, target: float) -> int:
+        # Intuition: If target < root.val, it is btw min(root.left) and root.val, it must
+        # not close to any(root.right), vice versa
+        
+        def dfs(node):
+            if node.val < target and node.right:
+                return min(node.val, dfs(node.right), key=lambda x: abs(target - x))
+            elif node.val > target and node.left:
+                return min(node.val, dfs(node.left), key=lambda x: abs(target - x))
+            else:
+                return node.val
+            
+        return dfs(root)
+```

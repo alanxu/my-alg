@@ -340,3 +340,39 @@ class Solution:
         bfs()
         return self.ans
 ```
+
+### [1654. Minimum Jumps to Reach Home](https://leetcode.com/problems/minimum-jumps-to-reach-home/)
+
+```python
+class Solution:
+    def minimumJumps(self, forbidden: List[int], a: int, b: int, x: int) -> int:
+        q, seen = deque([(0, True)]), {(0, True)}
+        # The key is to know what is the limit of forward,
+        # limit is a experimental value...
+        steps, limit = 0, 5997
+        
+        for pos in forbidden:
+            seen.add((pos, True)) 
+            seen.add((pos, False))
+        
+        while q:
+            for _ in range(len(q)):
+                pos, dirt = q.pop()
+                
+                if pos == x:
+                    return steps
+                
+                forward, backward = (pos + a, True), (pos - b, False)
+                
+                if forward[0] <= limit and forward not in seen:
+                    seen.add(forward)
+                    q.appendleft(forward)
+                
+                if dirt and backward[0] > 0 and backward not in seen:
+                    seen.add(backward)
+                    q.appendleft(backward)
+                    
+            steps += 1
+        
+        return -1
+```

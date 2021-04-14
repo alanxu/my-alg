@@ -412,3 +412,45 @@ class Solution:
         
         return dp[0][N - 1]
 ```
+
+### [1770. Maximum Score from Performing Multiplication Operations](https://leetcode.com/problems/maximum-score-from-performing-multiplication-operations/)
+
+```python
+class Solution:
+    def maximumScore(self, nums: List[int], multipliers: List[int]) -> int:
+        m, n = len(multipliers), len(nums)
+        dp = [[-math.inf] * (m + 1) for _ in range(m + 1)]
+        dp[0][0] = 0
+        
+        ans = -math.inf
+        for l in range(1, m + 1):
+            for i in range(0, m + 1):
+                j = l - i
+                if i >= 1:
+                    dp[i][j] = max(dp[i][j], dp[i - 1][j] + nums[i - 1] * multipliers[i + j - 1])
+                if j >= 1:
+                    dp[i][j] = max(dp[i][j], dp[i][j - 1] + nums[n - j] * multipliers[i + j - 1])
+        
+                if l == m:
+                    ans = max(ans, dp[i][j])
+                    
+        return ans
+    
+    def maximumScore(self, nums, muls):
+        # let dp[i][j] represents pick i elements from left and pick j from right from nums
+        # dp[i][j] = Max(dp[i-1][j] + muls[i+j-1] * nums[i-1], dp[i][j-1] + muls[i+j-1] * nums[n-j])
+        n, m = len(nums), len(muls)
+        dp = [[0] * (m+1) for _ in range(m+1)]
+        res = float("-inf")
+        for i in range(0, m+1):
+            for j in range(0, m-i+1):
+                if i == 0 and j == 0: 
+                    continue
+                l, r = float("-inf"), float("-inf")
+                if i > 0: l = dp[i-1][j] + muls[i+j-1] * nums[i-1] # pick left
+                if j > 0: r = dp[i][j-1] + muls[i+j-1] * nums[n-j] # pick right
+                dp[i][j] = max(l, r)
+                if i + j == m:
+                    res = max(res, dp[i][j])
+        return res
+```

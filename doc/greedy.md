@@ -453,3 +453,33 @@ class Solution:
                     del counts[nxt]
         return True
 ```
+
+
+### [1191. K-Concatenation Maximum Sum](https://leetcode.com/problems/k-concatenation-maximum-sum/)
+
+```python
+class Solution:
+    def kConcatenationMaxSum(self, arr: List[int], k: int) -> int:
+        # https://youtu.be/-T19A8DvD6U
+        # When sum > 0, even if maxsum in in middle of arr, maxsum_2
+        # will be acrose 2 arr...
+        def kadane(arr, k):
+            arr = arr * k
+            global_sum = local_sum = 0
+            for x in arr:
+                local_sum = max(local_sum + x, x)
+                global_sum = max(global_sum, local_sum)
+                
+            return global_sum
+        
+        MOD = 10 ** 9 + 7
+        
+        if k < 3:
+            return kadane(arr, k) % MOD
+        
+        sum_ = sum(arr)
+        ans1 = kadane(arr, 1)
+        ans2 = kadane(arr, 2)
+        
+        return max(ans1, ans2, ans2 + sum_ * (k - 2)) % MOD
+```

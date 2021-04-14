@@ -1,4 +1,52 @@
+## Max Size Subarray Sum Equals K
 
+### [325. Maximum Size Subarray Sum Equals k](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/)
+
+```
+class Solution:
+    def maxSubArrayLen(self, nums: List[int], k: int) -> int:
+        # Pattern: Subarray sum of K
+        # In this case the answer is able max length, the presence
+        # of the sum key matters, so unlike the max nums we just need 
+        # to count the num where 0 is ok
+        cur_sum, ans = 0, 0
+        # Required for [0,i] sums to k, -1 is to offset the 0 index, cuz o is
+        # before index 0, so it is -1
+        mp = {0: -1}
+        for i, x in enumerate(nums):
+            cur_sum += x
+            
+            if cur_sum - k in mp:
+                ans = max(ans, i - mp[cur_sum - k])
+            
+            mp[cur_sum] = mp.get(cur_sum, i)
+        
+        return ans
+```
+
+### [1658. Minimum Operations to Reduce X to Zero](https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero/)
+
+```python
+class Solution:
+    def minOperations(self, nums: List[int], x: int) -> int:
+        # DP is O(xN^2), not optimal
+        # Intuition: Equals to problem - find max len subarray in nums
+        # with sum to sum(nums) - x
+        
+        sum_, N = sum(nums), len(nums)
+        if sum_ == x:
+            return N
+        k = sum_ - x
+        cur_sum, ans = 0, 0
+        mp = {0: -1}
+        for i, v in enumerate(nums):
+            cur_sum += v
+            if cur_sum - k in mp:
+                ans = max(ans, i - mp[cur_sum - k])
+            mp[cur_sum] = mp.get(cur_sum, i)
+        
+        return (N - ans) if ans else -1
+```
 
 ### [454. 4Sum II](https://leetcode.com/problems/4sum-ii/)
 ```python
