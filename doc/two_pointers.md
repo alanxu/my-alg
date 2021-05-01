@@ -70,3 +70,86 @@ class Solution:
 ```
 
 ### [1658. Minimum Operations to Reduce X to Zero](https://leetcode.com/problems/minimum-operations-to-reduce-x-to-zero/)
+
+### [11. Container With Most Water](https://leetcode.com/problems/container-with-most-water/)
+
+```python
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        l, r = 0, len(height) - 1
+        
+        ans = 0
+        while l < r:
+            ans = max(ans, min(height[l], height[r]) * (r - l))
+            if height[l] < height[r]:
+                l += 1
+            else:
+                r -= 1
+                
+        return ans
+```
+
+## K Sums
+
+### [18. 4Sum](https://leetcode.com/problems/4sum/)
+
+```python
+class Solution:
+    def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+        def k_sum(nums: List[int], target: int, k: int):   
+            if not nums or nums[0] * k > target or nums[-1] * k < target:
+                return []
+            
+            if k == 2:
+                return two_sum(nums, target)
+            
+            l = len(nums)
+            ret = []
+            for i in range(l):
+                if i == 0 or nums[i - 1] != nums[i]:
+                    for r in k_sum(nums[i + 1:], target - nums[i], k - 1):
+                        ret.append(r + [nums[i]])
+                        
+            return ret
+            
+        def two_sum(nums, target):
+            lo, hi = 0, len(nums) - 1
+            ret = []
+            while lo < hi:
+                s = nums[lo] + nums[hi]
+                if s > target or (hi < len(nums) - 1 and nums[hi] == nums[hi + 1]):
+                    hi -= 1
+                elif s < target or (lo >= 0 and nums[lo] == [lo - 1]):
+                    lo += 1
+                else:
+                    ret.append([nums[lo], nums[hi]])
+                    lo += 1
+                    hi -= 1
+            return ret
+        
+        nums.sort()
+        return k_sum(nums, target, 4)
+```
+
+### [3Sum Closest](https://leetcode.com/problems/3sum-closest/)
+```python
+class Solution:
+    def threeSumClosest(self, nums: List[int], target: int) -> int:
+        
+        diff = float('inf')
+        nums.sort()
+        for i in range(len(nums)):
+            lo, hi = i + 1, len(nums) - 1
+            while lo < hi:
+                sum = nums[i] + nums[lo] + nums[hi]
+                if abs(target - sum) < abs(diff):
+                    diff = target - sum
+                if diff == 0:
+                    break
+                if sum < target:
+                    lo += 1
+                else:
+                    hi -= 1
+            
+        return target - diff
+```

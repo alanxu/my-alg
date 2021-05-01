@@ -4,8 +4,30 @@ Right always moving forward, left is moved once the limit exceeds.
 
 The optimal point is how left can efficiently move
 
+Sliding window algorithms can be implemented with a single pointer and a variable for window size. Typically we use all of the elements within the window for the problem (for eg - sum of all elements in the window).
+
+Two pointer technique is quite similar but we usually compare the value at the two pointers instead of all the elements between the pointers.
+
+Two pointers can also have variations like fast-slow pointer.
 
 ## Problems
+
+### [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)
+
+```python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        mp = {}
+        
+        i, ans = 0, 0
+        for j in range(len(s)):
+            if s[j] in mp:
+                # Use max to make sure previous duplication is ignored.
+                i = max(mp.get(s[j], 0), i)
+            ans = max(ans, j - i + 1)
+            mp[s[j]] = j + 1
+        return ans
+```
 
 ### [340. Longest Substring with At Most K Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/)
 ```python

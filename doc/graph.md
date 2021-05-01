@@ -2,7 +2,179 @@
 
 SP (Shortest Path) problems https://leetcode.com/problems/find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance/
 
+## Eulerian Path
 
+### [332. Reconstruct Itinerary](https://leetcode.com/problems/reconstruct-itinerary/)
+
+```python
+class Solution:
+    def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+        # Intuition: Eulerian path. The path can be get by doing
+        # a post-order traverse and remove the traversed path after
+        # used. Why it works? If a node is a start and end of a cycle,
+        # it is also the start of non-cycle to end E. By post-order
+        # traverse, if the cycle is traverssed first it goes back to
+        # start and continue to going to E, E is first (last in final result)
+        # of the traverse path, if the cycle first traverse the non-cycle
+        # path, E also is the first.
+        graph = defaultdict(list)
+        for u, v in sorted(tickets, reverse=True):
+            graph[u].append(v)
+        
+        path = []
+        def dfs(node):
+            while graph[node]:
+                dfs(graph[node].pop())
+            path.append(node)
+            
+        dfs('JFK')
+        return path[::-1]
+```
+## Floyd's Tortoise and Hare
+
+### [287. Find the Duplicate Number](https://leetcode.com/problems/find-the-duplicate-number/)
+
+```python
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        # Alg: Floyd's Tortoise and Hare 
+        # Limitation: if in format of array, nums in array must in range [1:n]
+        # and array length is n + 1
+        
+        # We know that 0 is starting point, cuz all values
+        # in nums > 0, meaning no pos pointing to location 0
+        tortoise = hare = nums[0]
+        
+        # Find inersection point, hare will start from there,
+        # note hare runs at nums[nums[hare]]
+        # Cannot use while tortoise != hare, cuz it doesn't mean
+        # t and h are at same location, it is possible t and h
+        # are at diff point that pointing to same point (inside
+        # and outside of the 'entrence' point). t and h are at
+        # 'intersection' point only if t == h and nums[t] == nums[h]
+        while True:
+            tortoise, hare = nums[tortoise], nums[nums[hare]]
+            if tortoise == hare:
+                break
+        
+        # Tortoise start from begining
+        # Run until meet in same speed
+        tortoise = nums[0]
+        while tortoise != hare:
+            tortoise, hare = nums[tortoise], nums[hare]
+        
+        return hare
+```
+
+## Cycle Detection
+
+### [1059. All Paths from Source Lead to Destination](https://leetcode.com/problems/all-paths-from-source-lead-to-destination/)
+
+```python
+class Solution:
+    def leadsToDestination(self, n: int, edges: List[List[int]], source: int, destination: int) -> bool:
+        # Alg: DFS variant - Coloring
+        def dfs(node):
+            # If the node has color meaning it is
+            # either checked (and valid) or in progress.
+            # If it already checked, then it has to be
+            # valid otherwise the program has returned;
+            # If it is in progress, a loop detected, so
+            # return False.
+            if states[node]:
+                return states[node] == BLACK
+            # If node is a leaf, it has to be dest, otherwise
+            # return False
+            if not graph[node]:
+                return node == destination
+            # Now node is not leaf neither visited before,
+            # traverse all nxt nodes see if valid, if any
+            # nxt is not valid, the cur node is not valid.
+            states[node] = GRAY
+            for nxt in graph[node]:
+                if not dfs(nxt):
+                    return False
+            states[node] = BLACK
+            return True
+        
+        graph, states = defaultdict(list), [None] * n
+        GRAY, BLACK = 1, 2
+        for s, t in edges:
+            graph[s].append(t)
+        return dfs(source)
+```
+
+### [1192. Critical Connections in a Network](https://leetcode.com/problems/critical-connections-in-a-network/)
+
+```python
+class Solution:
+    
+    rank = {}
+    graph = defaultdict(list)
+    conn_dict = {}
+    
+    def criticalConnections(self, n: int, connections: List[List[int]]) -> List[List[int]]:
+
+        self.formGraph(n, connections)
+        self.dfs(0, 0)
+        
+        result = []
+        for u, v in self.conn_dict:
+            result.append([u, v])
+        
+        return result
+            
+    def dfs(self, node: int, discovery_rank: int) -> int:
+        
+        # That means this node is already visited. We simply return the rank.
+        if self.rank[node]:
+            return self.rank[node]
+        
+        # Update the rank of this node.
+        self.rank[node] = discovery_rank
+        
+        # This is the max we have seen till now. So we start with this instead of INT_MAX or something.
+        min_rank = discovery_rank
+        for neighbor in self.graph[node]:
+            
+            # Skip the parent.
+            if self.rank[neighbor] and self.rank[neighbor] == discovery_rank - 1:
+                continue
+                
+            # Recurse on the neighbor.    
+            recursive_rank = self.dfs(neighbor, discovery_rank + 1)
+            
+            # Step 1, check if this edge needs to be discarded.
+            if recursive_rank <= discovery_rank:
+                del self.conn_dict[(min(node, neighbor), max(node, neighbor))]
+            
+            # Step 2, update the minRank if needed.
+            min_rank = min(min_rank, recursive_rank)
+        
+        return min_rank
+    
+    def formGraph(self, n: int, connections: List[List[int]]):
+        
+        # Reinitialize for each test case
+        self.rank = {}
+        self.graph = defaultdict(list)
+        self.conn_dict = {}
+        
+        # Default rank for unvisited nodes is "null"
+        for i in range(n):
+            self.rank[i] = None
+        
+        for edge in connections:
+            
+            # Bidirectional edges.
+            u, v = edge[0], edge[1]
+            self.graph[u].append(v)
+            self.graph[v].append(u)
+            
+            self.conn_dict[(min(u, v), max(u, v))] = 1
+```
+
+## Others
 ### [743. Network Delay Time](https://leetcode.com/problems/network-delay-time/)
 
 ```python

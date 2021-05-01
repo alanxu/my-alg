@@ -381,5 +381,29 @@ class Solution:
         return dp[0][N - 1]
 ```
 
+### [10. Regular Expression Matching](https://leetcode.com/problems/regular-expression-matching/)
 
+```python
+class Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+        s_l, p_l = len(s), len(p)
+        dp = [[False] * (p_l+1) for _ in range(s_l+1)]
+        dp[0][0] = True
+        
+        for i in range(2, p_l+1):
+            dp[0][i] = dp[0][i-2] and p[i-1] == '*'
+            
+        for i in range(1, s_l+1):
+            for j in range(1, p_l+1):
+                if p[j-1] == '*':
+                    dp[i][j] = dp[i][j-2] | dp[i][j-1]
+                    
+                    if p[j-2] == s[i-1] or p[j-2] == '.':
+                        dp[i][j] |= dp[i-1][j]
+                        
+                else:
+                    dp[i][j] = (p[j-1] == s[i-1] or p[j-1] == '.') and dp[i-1][j-1]
+                    
+        return dp[-1][-1]
+```
 

@@ -1,4 +1,29 @@
 
+### [50. Pow(x, n)](https://leetcode.com/problems/powx-n/)
+
+```python
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        def my_pow(x, n):
+            if n == 0:
+                return 1.0
+            
+            half = my_pow(x, n//2)
+            
+            ans = half * half
+            
+            if n%2 == 1:
+                ans = ans * x
+                
+            return ans
+        
+        if n < 0:
+            n = -n
+            x = 1/x
+            
+        return my_pow(x, n)
+```
+
 ### [241. Different Ways to Add Parentheses](https://leetcode.com/problems/different-ways-to-add-parentheses/)
 
 ```python

@@ -9,6 +9,29 @@ https://torstencurdt.com/tech/posts/modulo-of-negative-numbers/
 
 ## Problems
 
+## Number Conversion
+
+### [12. Integer to Roman](https://leetcode.com/problems/integer-to-roman/)
+```python
+class Solution:
+    
+
+    def intToRoman(self, num: int) -> str:
+        digits = [(1000, "M"), (900, "CM"), (500, "D"), (400, "CD"), (100, "C"), (90, "XC"), 
+          (50, "L"), (40, "XL"), (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")]
+        
+        roman_digits = []
+        # Loop through each symbol.
+        for value, symbol in digits:
+            # We don't want to continue looping if we're done.
+            if num == 0: break
+            count, num = divmod(num, value)
+            # Append "count" copies of "symbol" to roman_digits.
+            roman_digits.append(symbol * count)
+        return "".join(roman_digits)
+```
+
+## Others
 ### [592. Fraction Addition and Subtraction](https://leetcode.com/problems/group-shifted-strings/)
 
 ```python
@@ -175,3 +198,56 @@ class Solution:
                 count += 1
         return count
 ```
+
+### [2. Add Two Numbers](https://leetcode.com/problems/add-two-numbers/)
+
+```python
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+
+        c1, c2 = l1, l2
+        carry = 0
+        r, rc = None, None
+        while True:
+            if not c1 and not c2 and not carry:
+                break
+            v1, v2 = c1.val if c1 else 0, c2.val if c2 else 0
+
+            s = v1 + v2 + carry
+            v = s % 10
+            carry = s //10
+            
+            if not r:
+                r = rc = ListNode(v, None)
+            else:
+                rc.next = ListNode(v, None)
+                rc = rc.next
+                
+            c1 = c1.next if c1 else None
+            c2 = c2.next if c2 else None
+
+        return r
+```
+
+### [8. String to Integer (atoi)](https://leetcode.com/problems/string-to-integer-atoi/)
+
+```python
+class Solution:
+    def myAtoi(self, str: str) -> int:
+        str = str.strip()
+        str = re.findall('(^[\+\-0]*\d+)\D*', str)
+
+        try:
+            result = int(str[0])
+            MAX_INT = 2147483647
+            MIN_INT = -2147483648
+            if result > MAX_INT > 0:
+                return MAX_INT
+            elif result < MIN_INT < 0:
+                return MIN_INT
+            else:
+                return result
+        except:
+            return 0
+```
+

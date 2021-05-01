@@ -328,3 +328,52 @@ class Solution:
             
         
 ```
+
+### [17. Letter Combinations of a Phone Number](https://leetcode.com/problems/letter-combinations-of-a-phone-number/)
+
+```python
+class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+        phone = {'2': ['a', 'b', 'c'],
+                 '3': ['d', 'e', 'f'],
+                 '4': ['g', 'h', 'i'],
+                 '5': ['j', 'k', 'l'],
+                 '6': ['m', 'n', 'o'],
+                 '7': ['p', 'q', 'r', 's'],
+                 '8': ['t', 'u', 'v'],
+                 '9': ['w', 'x', 'y', 'z']}
+        
+        ans = []
+        
+        def backtrack(combination, idx):
+            if idx >= len(digits):
+                ans.append(combination) 
+            else:
+                for c in phone[digits[idx]]:
+                    backtrack(combination + c, idx + 1)
+                    
+        if digits:
+            backtrack('', 0)
+        return ans
+```
+
+### [22. Generate Parentheses](https://leetcode.com/problems/generate-parentheses/)
+
+```python
+class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        ans = []
+        def gen(s, count_l, count_r):
+            if count_l == n and count_r == n:
+                ans.append(s)
+                return
+            if count_l > count_r:
+                if count_l < n:
+                    gen(s + '(', count_l + 1, count_r)
+                gen(s + ')', count_l, count_r + 1)
+            elif count_l == count_r:
+                gen(s + '(', count_l + 1, count_r)
+                
+        gen('', 0, 0)
+        return ans
+```

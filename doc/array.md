@@ -279,3 +279,29 @@ class Solution:
             
         return i == N - 1
 ```
+
+### [6. ZigZag Conversion](https://leetcode.com/problems/zigzag-conversion/)
+
+```python
+class Solution:
+    def convert(self, s: str, numRows: int) -> str:
+        
+        if numRows == 1:
+            return s
+        
+        rows = [''] * numRows
+        
+        cur_row, next_step = 0, 1
+        
+        for c in s:
+            rows[cur_row] += c
+            
+            if (cur_row == 0 and next_step == -1) or (cur_row == numRows - 1 and next_step == 1):
+                next_step = -next_step
+            
+            cur_row += next_step
+            
+        return ''.join(rows)
+```
+
+

@@ -660,3 +660,128 @@ def canIWin(self, maxChoosableInteger: int, desiredTotal: int) -> bool:
         
         return dfs(tuple(range(1, maxChoosableInteger + 1)), desiredTotal)
 ```
+
+### [200. Number of Islands](https://leetcode.com/problems/number-of-islands/)
+
+### [785. Is Graph Bipartite?](https://leetcode.com/problems/is-graph-bipartite/)
+
+```python
+# Fav
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        color = {}
+        def dfs(node):
+            if node not in color:
+                color[node] = 0
+            for nei in graph[node]:
+                if nei in color and color[nei] == color[node]:
+                    return False
+                if nei not in color:
+                    color[nei] = color[node] ^ 1
+                    if not dfs(nei):
+                        return False
+            return True
+        
+        for i in range(len(graph)):
+            # Why this dfs is slower than the other dfs?
+            # It does a lot of duplicated check on nodes
+            # already checked in prevous run.
+            if not dfs(i):
+                return False
+        return True
+
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        N = len(graph)
+        parent, rank = [i for i in range(N)], [1] * N
+        def find(i):
+            if parent[i] != i:
+                parent[i] = find(parent[i])
+            return parent[i]
+        def union(i, j):
+            rooti, rootj = find(i), find(j)
+            if rooti == rootj:
+                return
+            if rooti < rootj:
+                rooti, rootj = rootj, rooti
+            parent[rootj] = rooti
+            rank[rooti] += rank[rootj]
+        
+        for u in range(N):
+            for v in graph[u][1:]:
+                union(graph[u][0], v)
+        
+        for u in range(N):
+            for v in graph[u]:
+                if find(u) == find(v):
+                    return False
+        return True
+    
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        N = len(graph)
+        parent, rank = [i for i in range(N)], [1] * N
+        def find(i):
+            if parent[i] != i:
+                parent[i] = find(parent[i])
+            return parent[i]
+        def union(i, j):
+            rooti, rootj = find(i), find(j)
+            if rooti == rootj:
+                return
+            if rooti < rootj:
+                rooti, rootj = rootj, rooti
+            parent[rootj] = rooti
+            rank[rooti] += rank[rootj]
+        
+        for u in range(N):
+            for v in graph[u]:
+                if find(u) == find(v):
+                    return False
+                union(graph[u][0], v)
+
+        return True
+    
+    def isBipartite(self, graph):
+        color = {}
+        def dfs(pos):
+            for i in graph[pos]:
+                if i in color:
+                    if color[i] == color[pos]:
+                        return False
+                else:
+                    color[i] = 1 - color[pos]
+                    if not dfs(i):
+                        return False
+            return True
+        for i in range(len(graph)):
+            if i not in color:
+                color[i] = 0
+                if not dfs(i):
+                    return False
+        return True
+    
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        # Trick: Coloring. Used when you need to divid nodes into groups
+        colors = {}
+        
+        def bfs(root=0):
+            q = deque([root])
+            while q:
+                node = q.pop()
+                for nei in graph[node]:
+                    if nei in colors and colors[nei] == colors[node]:
+                        return False
+                    if nei not in colors:
+                        q.appendleft(nei)
+                        colors[nei] = colors[node] ^ 1
+            return True
+        
+        # Because there could be disconnected graphs, so we have to traverse all
+        # nodes, and use memory.
+        for node in range(len(graph)):
+            if node not in colors:
+                colors[node] = 0
+                if not bfs(node):
+                    return False
+
+        return True
+```

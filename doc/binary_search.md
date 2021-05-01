@@ -89,6 +89,69 @@ class Solution:
                 right = mid - 1
         return -1
 ```
+### [702. Search in a Sorted Array of Unknown Size](https://leetcode.com/problems/search-in-a-sorted-array-of-unknown-size/)
+
+```python
+class Solution:
+    def search(self, reader, target):
+        left, right = 0, 2147483647
+        
+        while left <= right:
+            mid = left + (right - left) // 2
+            x = reader.get(mid)
+            if x == target:
+                return mid
+            elif x < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        
+        return left if reader.get(left) == target else -1
+        
+    def search(self, reader, target):
+        if reader.get(0) == target:
+            return 0
+        
+        # Trick: Search boundary for target
+        left, right = 0, 1
+        while reader.get(right) < target:
+            left = right
+            right <<= 1
+        
+        while left <= right:
+            mid = left + (right - left) // 2
+            x = reader.get(mid)
+            if x == target:
+                return mid
+            elif x < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        
+        return -1
+```
+
+### [367. Valid Perfect Square](https://leetcode.com/problems/valid-perfect-square/)
+
+```python
+class Solution:
+    def isPerfectSquare(self, num: int) -> bool:
+        if num < 2:
+            return True
+        
+        left, right = 2, num // 2
+        while left <= right:
+            x = left + (right - left) // 2
+            sqr = x * x
+            if sqr == num:
+                return True
+            elif sqr < num:
+                left = x + 1
+            else:
+                right = x - 1
+        
+        return False
+```
 
 ## Template 2
 
@@ -130,17 +193,58 @@ public class Solution {
 ### [153. Find Minimum in Rotated Sorted Array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/)
 
 ```python
+# Fav
 class Solution:
     def findMin(self, nums: List[int]) -> int:
+        # Binary Search template 2
+        # The key of binary search is to find two opposite conditions
+        # that we can move left and right, and the target is at the
+        # the border of the two conditions
         left, right = 0, len(nums) - 1
         while left < right:
             mid = left + (right - left) // 2
+            # When the target condition match, set right at mid, otherwise
+            # move left to skip mid
             if nums[mid] < nums[right]:
                 right = mid
             else:
                 left = mid + 1
         return nums[left]
 ```
+
+### [154. Find Minimum in Rotated Sorted Array II](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array-ii/)
+
+```python
+# Fav
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        left, right = 0, len(nums) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            # if nums[mid] == nums[right], there are 2 possibilities
+            # - if nums[left] == nums[right], we don't know where is 
+            #   the mid, consider cases [3, 3, 1, 3] and [3, 1, 3, 3],
+            #   in this case, we move both left, right by 1, for edge case
+            #   left and right are adjecent, left/right will swap and 
+            #   loop will terminate, it doesn't impact the result cuz
+            #   nums[left] == nums[right]
+            # - if nums[left] > nums[right], right needs to move, bcuz
+            #   if mid is on left side nums[mid] >= nums[left] > nums[right] 
+            #   which conflicts with the initial condition of 
+            # - it is impossible nums[left] < nums[right], cuz pointers will
+            #   meet at the point of border
+            if nums[left] == nums[mid] == nums[right]:
+                left += 1
+                right -= 1
+            # if mid failed at right side
+            elif nums[mid] <= nums[right]:
+                right = mid
+            # otherwise mid must on left side
+            else:
+                left = mid + 1
+        return nums[left]
+```
+
 
 ### [34. Find First and Last Position of Element in Sorted Array](https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
 
@@ -205,6 +309,266 @@ class Solution:
         return sorted(arr[:k])
 ```
 
+### [744. Find Smallest Letter Greater Than Target](https://leetcode.com/problems/find-smallest-letter-greater-than-target/)
+
+```python
+class Solution:
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        # Alg: Binary Search template 2
+        left, right = 0, len(letters) - 1
+        while left < right:
+            mid = left + (right - left) // 2
+            if letters[mid] > target:
+                right = mid
+            else:
+                left = mid + 1
+        return letters[left] if letters[left] > target else letters[0]
+    
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        pos = bisect.bisect_right(letters, target)
+        return letters[pos % len(letters)]
+    
+    def nextGreatestLetter(self, letters: List[str], target: str) -> str:
+        # Alg: Binary Search template 1
+        left, right = 0, len(letters) - 1
+        while left <= right:
+            mid = left + (right - left) // 2
+            if letters[mid] > target:
+                right = mid - 1
+            else:
+                left = mid + 1
+
+        pos = left if left < len(letters) else right
+        return letters[pos] if letters[pos] > target else letters[0]
+```
+
+### [167. Two Sum II - Input array is sorted](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/)
+
+```python
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # Pattern: Binary Search template 2
+        N = len(numbers)
+        for i, x in enumerate(numbers[:-1]):
+            t = target - x
+            left, right = i + 1, N - 1
+            while left <= right:
+                mid = left + (right - left) // 2
+                if numbers[mid] == t:
+                    return [i + 1, mid + 1]
+                elif numbers[mid] > t:
+                    right = mid - 1
+                else:
+                    left = mid + 1
+        return []
+    
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # Pattern: Two Pointers
+        lo, hi = 0, len(numbers) - 1
+        while lo <= hi:
+            s = numbers[lo] + numbers[hi]
+            if s == target:
+                return [lo + 1, hi + 1]
+            elif s > target:
+                hi -= 1
+            else:
+                lo += 1
+```
+
+### [719. Find K-th Smallest Pair Distance](https://leetcode.com/problems/find-k-th-smallest-pair-distance/)
+```python
+class Solution:
+    def smallestDistancePair(self, nums: List[int], k: int) -> int:
+        def possible(guess):
+            # Is it poosible to have k - 1 distances smaller than
+            # guess?
+            # Why left is global? Cuz the goal is to find num
+            # of diff smaller than guess, if left is larger for
+            # cur right, it is larger for next right, so no need
+            # to start from 0
+            count = left = 0
+            for right in range(len(nums)):
+                while nums[right] - nums[left] > guess:
+                    left += 1
+                count += right - left
+            return count >= k
+        
+        nums.sort()
+        lo, hi = 0, nums[-1] - nums[0]
+        while lo < hi:
+            mid = lo + (hi - lo) // 2
+            if possible(mid):
+                hi = mid
+            else:
+                lo = mid + 1
+        
+        return lo
+```
+
+### [410. Split Array Largest Sum](https://leetcode.com/problems/split-array-largest-sum/)
+
+```python
+class Solution:
+    def splitArray(self, nums: List[int], K: int) -> int:
+        # TLE
+        N = len(nums)
+        dp = [[math.inf] * (K + 1) for _ in range(N + 1)]
+        dp[0][0] = 0
+        
+        for i in range(1, N + 1):
+            for k in range(1, min(K, i) + 1):
+                dp[i][k] = math.inf
+                prefix_sum = 0
+                for j in range(i, k - 1, -1):
+                    # When k is 1, j has to be 1, but we still do iteration,
+                    # because when k == 0, dp[i][k] = inf except when i = 0,
+                    # so the interation is not inf only when j = 1 (first element)
+                    prefix_sum += nums[j - 1]
+                    dp[i][k] = min(dp[i][k], max(dp[j - 1][k - 1], prefix_sum))
+        
+        return dp[-1][-1]
+        
+    def splitArray(self, nums: List[int], K: int) -> int:
+        # Alg: Binary Search
+        # Intuition: Search for min max sum of one partition, left is max of nums, right
+        # is sum of nums. The lager of the ans, the fewer the partions. The answer is
+        # the min value can keep <= K partitions, decrease by 1, the partitions will > K.
+        # So it is the edge value that can be found by binary search.
+        # The edge case is gauanteed to make l and r meet.
+        N = len(nums)
+        l = r = 0
+        
+        for x in nums:
+            r += x
+            l = x if x > l else l
+        
+        ans = r
+        while l < r:
+            mid = (l + r) // 2
+            
+            sum_, counts = 0, 1
+            for x in nums:
+                sum_ += x
+                if sum_ > mid:
+                    counts += 1
+                    sum_ = x
+            
+            if counts <= K:
+                r = mid
+            else:
+                l = mid + 1
+        
+        return l
+```
+
+### [4. Median of Two Sorted Arrays](https://leetcode.com/problems/median-of-two-sorted-arrays/)
+
+```python
+# Fav
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        m, n = len(nums1), len(nums2)
+        
+        # Make sure nums1 longer than nums2, so it is easier
+        if m > n:
+            nums1, nums2, m, n = nums2, nums1, n, m
+            
+        if n == 0:
+            raise ValueError()
+            
+        # Partition nums1 and nums2,  all in 2 first parts less than all in 2 second parts
+        # Use binary search
+        
+        # Why +1? if (m + n) is even, 1 doesn't have any effect, if odd 1 will make the middle 
+        # in first section
+        half_len = (m + n + 1) // 2
+        
+        # Do binary search on nums1 which is longer, nums2 will be calculated according to nums1
+        m_left, m_right = 0, m
+        while m_left <= m_right:
+            # Must use m_left <= m_right otherwise i never reach to m
+            # i is the seperator of nums1 smaller|bigger
+            # j should be the num of remaining first half
+            # i and j should be first index of second half, cuz index alwasy n-1 
+            # i must be [0, m] because there is corner case i == m where all nums1 are smaller
+            #   When m == n and nums1[-1] < nums2[0], i should move to right but cannot
+            i = (m_left + m_right) // 2
+            j = half_len - i
+            
+            # Move i and j until to the begin/end
+            # The corner cases are
+            # 1. nums2 are completely smaller or bigger than nums1
+            # 2. Based on case1, m == n
+            # This corner cases result in i or j to be 0 or end
+            
+            if i > 0 and j < n and nums1[i - 1] > nums2[j]:
+                # If i can move to left and j can move to right and nums1.smaller[-1] still bigger 
+                # than nums2.bigger[0]
+                m_right = i -1
+            elif i < m and j > 0 and nums1[i] < nums2[j - 1]:
+                # If i can move to right and j can move to left and nums1.bigger[0] still smaller 
+                # than nums2.smaller[-1]
+                m_left = i + 1
+            else:
+                if i == 0:
+                    left_max = nums2[j - 1]
+                elif j == 0:
+                    left_max = nums1[i - 1]
+                else:
+                    left_max = max(nums1[i - 1], nums2[j - 1])
+                    
+                if (m + n) % 2 == 1:
+                    return left_max
+                
+                if i == m:
+                    right_min = nums2[j]
+                elif j == n:
+                    right_min = nums1[i]
+                else:
+                    right_min = min(nums1[i], nums2[j])
+                    
+                return (left_max + right_min) / 2.0
+                
+    def findMedianSortedArrays(self, A: List[int], B: List[int]) -> float:
+        
+        def kth(a, s1, e1, b, s2, e2, k):
+            # Intuition: kth() returns the item which is kth smallest in a and b
+            # keep reducing the range in a and be util one of it is out of eligible
+            # values in kth smallest.
+            
+            # Trick: Don't use array slicing [i:], it is O(n), instead use
+            # start/end indexes
+            
+            # If s1 doesn't have available items anymore,
+            # s1's items in k is exhausted, so items in b within k
+            # is k - s1 + 1 the index is k - s1
+            if s1 > e1:
+                return b[k - s1]
+            if s2 > e2:
+                return a[k - s2]
+
+            ia, ib = (s1 + e1) // 2, (s2 + e2) // 2
+            ma, mb = a[ia], b[ib]
+
+            if ia + ib < k:
+                if ma < mb:
+                    return kth(a, ia + 1, e1, b, s2, e2, k)
+                else:
+                    return kth(a, s1, e1, b, ib + 1, e2, k)
+            else:
+                if ma < mb:
+                    return kth(a, s1, e1, b, s2, ib - 1, k)
+                else:
+                    return kth(a, s1, ia - 1, b, s2, e2, k)
+
+        M, N = len(A), len(B)
+        mid = (M + N) // 2
+
+        if (M + N) % 2 == 1:
+            return kth(A, 0, M - 1, B, 0, N - 1, mid)
+        else:
+            return (kth(A, 0, M - 1, B, 0, N - 1, mid) + kth(A, 0, M - 1, B, 0, N - 1, mid - 1)) / 2.0
+```
 
 ## Others
 

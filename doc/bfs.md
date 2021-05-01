@@ -376,3 +376,76 @@ class Solution:
         
         return -1
 ```
+
+### [130. Surrounded Regions](https://leetcode.com/problems/surrounded-regions/)
+
+```python
+# Fav
+class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        if not board or not board[0]:
+            return
+        
+        def dfs(r, c):
+            if 0 <= r < rows and 0 <= c < cols:
+                if board[r][c] == 'O':
+                    board[r][c] = 'E'
+                    for d in directs:
+                        dfs(r + d[0], c + d[1])
+                        
+        def bfs(r, c):
+            q = deque([(r, c)])
+            while q:
+                # Trick: One line change from q.pop() -> q.popleft() to make bfs to dfs
+                row, col = q.pop()
+                if board[row][col] != 'O':
+                    continue
+                board[row][col] = 'E'
+                # Trick: Another way to example 4 nei
+                if row > 0: q.appendleft((row - 1, col))
+                if col > 0: q.appendleft((row, col - 1))
+                if row < rows - 1: q.appendleft((row + 1, col))
+                if col < cols - 1: q.appendleft((row, col + 1))
+                
+        def bfs1(r, c):
+            q = deque([(r, c)])
+            while q:
+                r, c  = q.pop()
+                # Trick: Have to check if eligible, cuz there might be multiple
+                # node put in queue, and first one is set to 'E'
+                if board[r][c] != 'O':
+                    continue
+                board[r][c] = 'E'
+                for d in directs:
+                    _r, _c = r + d[0], c + d[1]
+                    if 0 <= _r < rows and 0 <= _c < cols and board[_r][_c] == 'O':
+                        q.appendleft((_r, _c))
+        
+        rows, cols = len(board), len(board[0])
+        directs = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        
+        # Trick: Use itertools.product to generate boarder coordinators
+        from itertools import product
+        boarders = list(product(range(rows), [0, cols - 1])) + list(product([0, rows - 1], range(cols)))
+        
+        # Trick: It is important to choose what to search, in this case all the boarders and connected 'O's
+        for r, c in boarders:
+            # Either bfs or dfs works
+            bfs(r, c)
+            # dfs(r, c)
+
+        for r in range(rows):
+            for c in range(cols):
+                if board[r][c] == 'O':
+                    board[r][c] = 'X'
+                elif board[r][c] == 'E':
+                    board[r][c] = 'O'
+        
+        return board
+```
+
+### [200. Number of Islands](https://leetcode.com/problems/number-of-islands/)
+

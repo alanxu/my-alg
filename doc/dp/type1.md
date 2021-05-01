@@ -113,6 +113,39 @@ class Solution(object):
         return res
 ```
 
+### [128. Longest Consecutive Sequence](https://leetcode.com/problems/longest-consecutive-sequence/)
+
+```python
+class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        local_max, global_max = 1, 1
+        nums.sort()
+        for i in range(1, len(nums)):
+            if nums[i] != nums[i - 1]:
+                if nums[i] == nums[i - 1] + 1:
+                    local_max += 1
+                    global_max = max(global_max, local_max)
+                else:
+                    local_max = 1
+        return global_max
+
+    def longestConsecutive(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        nums.sort()
+        N = len(nums)
+        dp = [1] * N
+        for i in range(1, N):
+            if nums[i] == nums[i - 1]:
+                dp[i] = dp[i - 1]
+            elif nums[i] == nums[i - 1] + 1:
+                dp[i] = dp[i - 1] + 1
+
+        return max(dp)
+```
+
 ### [1191. K-Concatenation Maximum Sum](https://leetcode.com/problems/k-concatenation-maximum-sum/)
 
 

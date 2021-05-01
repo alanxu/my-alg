@@ -264,3 +264,25 @@ class Solution:
             max_xor |= any(cur_xor ^ p in prefixes for p in prefixes)
         return max_xor
 ```
+
+### [7. Reverse Integer](https://leetcode.com/problems/reverse-integer/)
+
+```python
+class Solution:
+    def reverse(self, x: int) -> int:
+        sign = [1, -1][x < 0]
+        x = int(str(abs(x))[::-1]) * sign
+        return x if -(2**31) <= x < 2 ** 31 else 0
+```
+
+### [190. Reverse Bits](https://leetcode.com/problems/reverse-bits/)
+
+```python
+class Solution:
+    def reverseBits(self, n):
+        ans = 0
+        for _ in range(32):
+            ans = (ans << 1) | (n & 1)
+            n >>= 1
+        return ans
+```

@@ -1,4 +1,31 @@
-## Problems
+## Find Duplicate Subtrees
+
+### [652. Find Duplicate Subtrees](https://leetcode.com/problems/find-duplicate-subtrees/)
+```python
+class Solution(object):
+    def findDuplicateSubtrees(self, root):
+        trees = collections.defaultdict()
+        # Trick: Generate unique increasing (0, 1, 2, ...) ids for unique keys
+        trees.default_factory = trees.__len__
+        count = collections.Counter()
+        ans = []
+        def lookup(node):
+            if node:
+                # Trick: Generate empty value for leaf's children to avoid duplicate cases
+                # 572. Subtree of Another Tree
+                uid = trees[node.val, lookup(node.left), lookup(node.right)]
+                count[uid] += 1
+                if count[uid] == 2:
+                    ans.append(node)
+                return uid
+        lookup(root)
+        return ans
+```
+
+### [572. Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)
+
+
+## Others
 
 ### [297. Serialize and Deserialize Binary Tree](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/)
 

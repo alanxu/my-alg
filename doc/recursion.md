@@ -42,3 +42,33 @@ class Solution:
             return ans
         return dfs(1, n)
 ```
+
+### [572. Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def match(self, s, t):
+        if not (s and t):
+            return s is t
+        if s.val == t.val and self.match(s.left, t.left) and self.match(s.right, t.right):
+            return True
+        return False
+    
+    def isSubtree(self, root: TreeNode, subRoot: TreeNode) -> bool:
+        # O(M * N)
+        if self.match(root, subRoot):
+            return True
+        if not root:
+            return False
+        if self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot):
+            return True
+        return False
+```
+
+### [24. Swap Nodes in Pairs](https://leetcode.com/problems/swap-nodes-in-pairs/)

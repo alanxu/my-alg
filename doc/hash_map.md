@@ -1,3 +1,41 @@
+
+## Two Sum
+
+###[1010. Pairs of Songs With Total Durations Divisible by 60](https://leetcode.com/problems/pairs-of-songs-with-total-durations-divisible-by-60/)
+
+```python
+class Solution:
+    def numPairsDivisibleBy60(self, time: List[int]) -> int:
+        mp, ans = defaultdict(int), 0
+        for i, t in enumerate(time):
+            k = 60 - t % 60
+            ans += mp[k]
+            mp[t % 60] += 1
+        return ans + mp[0] * (mp[0] - 1) // 2
+```
+
+### [15. 3Sum](https://leetcode.com/problems/3sum/)
+
+```python
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        res, dups = set(), set()
+        seen = {}
+        
+        for i, v1 in enumerate(nums):
+            if v1 in dups:
+                continue
+            dups.add(v1)
+            
+            for j, v2 in enumerate(nums[i + 1:]):
+                complement = -v1 - v2
+                if complement in seen and seen[complement] == i:
+                    res.add(tuple(sorted((v1, v2, complement))))
+                seen[v2] = i
+        return res
+```
+
+
 ## Max Size Subarray Sum Equals K
 
 ### [325. Maximum Size Subarray Sum Equals k](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/)

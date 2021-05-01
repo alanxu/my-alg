@@ -1,7 +1,58 @@
 # Linked List
 Dummy Node
-Flow Fast Pointers
+Slow Fast Pointers
 
+## Slow Fast Pointers
+
+### [19. Remove Nth Node From End of List](https://leetcode.com/problems/remove-nth-node-from-end-of-list/)
+
+```python
+class Solution:
+    def removeNthFromEnd(self, head: ListNode, n: int) -> ListNode:
+        # Trick: Fast Slow Pointers
+        slow = fast = head
+        # Fast is n ahead of Flow
+        for _ in range(n):
+            fast = fast.next
+        # If n is len(list), remove the head, so return head.next
+        if not fast:
+            return head.next
+        # Move slow and fast together until fast points to the end
+        # Trick: check fast.next not None
+        while fast.next:
+            fast = fast.next
+            slow = slow.next
+        
+        # The nth node is next to the Slow, so skip it
+        # Trick: slow.next = slow.next.next
+        slow.next = slow.next.next
+        return head
+```
+
+## Recursion
+
+### [24. Swap Nodes in Pairs](https://leetcode.com/problems/swap-nodes-in-pairs/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def swapPairs(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return head
+        
+        first, second = head, head.next
+        
+        first.next = self.swapPairs(second.next)
+        second.next = first
+        
+        return second
+```
+
+## Others
 ### [61. Rotate List](https://leetcode.com/problems/rotate-list/)
 
 ```python
@@ -141,3 +192,4 @@ class Solution:
         
         return second
 ```
+
