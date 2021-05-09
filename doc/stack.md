@@ -1,6 +1,205 @@
 
 
-## Problems
+## Iterator
+
+### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
+
+```python
+class BSTIterator:
+
+    def __init__(self, root: TreeNode):
+        self.stack = []
+        self.push(root)
+
+    def next(self) -> int:
+        if self.stack:
+            node = self.stack.pop()
+            if node.right:
+                self.push(node.right)
+            return node.val
+
+    def hasNext(self) -> bool:
+        if self.stack:
+            return True
+        return False
+        
+    def push(self, node):
+        if node:
+            self.stack.append(node)
+            if node.left:
+                self.push(node.left)
+```
+
+### [341. Flatten Nested List Iterator](https://leetcode.com/problems/flatten-nested-list-iterator/)
+
+```python
+class NestedIterator:
+    def __init__(self, nestedList: [NestedInteger]):
+        self.stack = list(reversed(nestedList))
+    
+    def next(self) -> int:
+        self.make_stack_top_a_integer()
+        return self.stack.pop().getInteger()
+        
+    
+    def hasNext(self) -> bool:
+        self.make_stack_top_a_integer()
+        return len(self.stack) > 0
+         
+    def make_stack_top_a_integer(self):
+        while self.stack and not self.stack[-1].isInteger():
+            self.stack.extend(reversed(self.stack.pop().getList()))
+```
+
+## Monotonic Stack
+
+### [84. Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/)
+
+```python
+class Solution:
+    def largestRectangleArea(self, height):
+        stack = []
+        ans = 0
+        height.append(0)
+        for i in range(len(height)):
+            while stack and height[i] < height[stack[-1]]:
+                h = height[stack.pop()]
+                w = i - stack[-1] - 1 if stack else i
+                ans = max(ans, h * w)
+            stack.append(i)
+            
+        return ans
+```
+
+### [85. Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/)
+
+```python
+class Solution:
+    def maximalRectangle(self, matrix: List[List[str]]) -> int:
+        
+        if not matrix:
+            return 0
+        
+        def _84(height):
+            ans = 0
+            stack = []
+            height.append(0)
+            
+            for i in range(len(height)):
+                while stack and height[i] < height[stack[-1]]:
+                    h = height[stack.pop()]
+                    w = i - stack[-1] - 1 if stack else i
+                    ans = max(ans, h * w)
+                    
+                stack.append(i)
+                
+            height.pop()
+            return ans
+        
+        ans = 0
+        height = [0] * len(matrix[0])
+        for row in matrix:
+            for i in range(len(row)):
+                height[i] = height[i] + 1 if row[i] == '1' else 0
+            # print(height)
+            ans = max(ans, _84(height))
+                
+        return ans
+```
+
+### [739. Daily Temperatures](https://leetcode.com/problems/daily-temperatures/)
+
+```python
+class Solution:
+    def dailyTemperatures(self, T: List[int]) -> List[int]:
+        stack = []
+        ans = [0] * len(T)
+        
+        for d in range(len(T)):
+            while stack and T[d] > T[(stack[-1])]:
+                _d = stack.pop()
+                ans[_d] = d - _d
+                
+            stack.append(d)
+            
+        return ans
+```
+
+### [402. Remove K Digits](https://leetcode.com/problems/remove-k-digits/)
+
+```python
+class Solution:
+    def removeKdigits(self, num: str, k: int) -> str:
+        num_stack = []
+        
+        # Trick: Construct a monotonic increasing sequency
+        # starting from left. Simple append remaining numbers
+        # once k deletion is already made.
+        for d in num:
+            while k and num_stack and num_stack[-1] > d:
+                num_stack.pop()
+                k -= 1
+                
+            num_stack.append(d)
+        # If k is exausted, it yeild the num_stack with the significant
+        # digits handled as much as possible with k deletions, and less 
+        # significant parts remains unchanged so it is the final minimum mumber;
+        # If k is not exausted, it means the whole num is
+        # made monotonic increasing with <k deletions, so just 
+        # remove remaining deletion quotas (<k)
+        final_stack = num_stack[:-k] if k else num_stack
+        return ''.join(final_stack).lstrip('0') or '0'
+```
+
+### [503. Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/)
+
+```python
+class Solution:
+    def nextGreaterElements(self, A):
+        stack = []
+        ans = [-1] * len(A)
+        
+        for i, a in enumerate(A):
+            while stack and a > A[stack[-1]]:
+                ans[stack.pop()] = a
+            stack.append(i)
+            
+        for i, a in enumerate(A):
+            while stack and a > A[stack[-1]]:
+                ans[stack.pop()] = a
+            if not stack:
+                break
+        
+        return ans
+```
+
+### [581. Shortest Unsorted Continuous Subarray](https://leetcode.com/problems/shortest-unsorted-continuous-subarray/)
+
+```python
+class Solution:
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        # The solutin uses Monotonic Stack
+        stack = []
+        left, right = float('inf'), float('-inf')
+        
+        for i in range(len(nums)):
+            while stack and nums[stack[-1]] > nums[i]:
+                # Find the mostleft index not in correct position based on current value
+                left = min(left, stack.pop())
+                print(left)
+            stack.append(i)
+        
+        stack = []
+        for i in range(len(nums) - 1, -1, -1):
+            while stack and nums[stack[-1]] < nums[i]:
+                right = max(right, stack.pop())
+                #print(right)
+            stack.append(i)
+            
+        return 0 if left > right else right - left + 1
+```
+
+## Others
 
 ### [316. Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/)
 ```python
@@ -86,53 +285,277 @@ class Solution:
         return stack[-1]
 ```
 
-## Iterator
-
-### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
+### [71. Simplify Path](https://leetcode.com/problems/simplify-path/)
 
 ```python
-class BSTIterator:
-
-    def __init__(self, root: TreeNode):
-        self.stack = []
-        self.push(root)
-
-    def next(self) -> int:
-        if self.stack:
-            node = self.stack.pop()
-            if node.right:
-                self.push(node.right)
-            return node.val
-
-    def hasNext(self) -> bool:
-        if self.stack:
-            return True
-        return False
+class Solution:
+    def simplifyPath(self, path: str) -> str:
+        path_segments = path.split('/')
+        stack = []
         
-    def push(self, node):
-        if node:
-            self.stack.append(node)
-            if node.left:
-                self.push(node.left)
+        for seg in path_segments:
+            if not seg or seg == '.':
+                continue
+            elif seg == '..':
+                if stack:
+                    stack.pop()
+            else:
+                stack.append(seg)
+                
+        return '/' + '/'.join(stack)
 ```
 
-### [341. Flatten Nested List Iterator](https://leetcode.com/problems/flatten-nested-list-iterator/)
+
+### [224. Basic Calculator](https://leetcode.com/problems/basic-calculator/)
 
 ```python
-class NestedIterator:
-    def __init__(self, nestedList: [NestedInteger]):
-        self.stack = list(reversed(nestedList))
-    
-    def next(self) -> int:
-        self.make_stack_top_a_integer()
-        return self.stack.pop().getInteger()
+class Solution:
+    def calculate(self, s: str) -> int:
         
-    
-    def hasNext(self) -> bool:
-        self.make_stack_top_a_integer()
-        return len(self.stack) > 0
-         
-    def make_stack_top_a_integer(self):
-        while self.stack and not self.stack[-1].isInteger():
-            self.stack.extend(reversed(self.stack.pop().getList()))
+        def update(op, v):
+            if op == "+": stack.append(v)
+            if op == "-": stack.append(-v)
+            if op == "*": stack.append(stack.pop() * v)
+            if op == "/": stack.append(int(stack.pop() / v))
+
+        num, sign = 0, '+'
+        stack = []
+        idx = 0
+        
+        while idx < len(s):
+            c = s[idx]
+            
+            if c.isdigit():
+                num = num * 10 + int(c)
+            elif c in '+-*/':
+                update(sign, num)
+                num, sign = 0, c
+            elif c == '(':
+                num, j = self.calculate(s[idx + 1:])
+                idx += j
+            elif c == ')':
+                update(sign, num)
+                print(stack)
+                return sum(stack), idx + 1
+                
+            idx += 1
+
+        update(sign, num)
+
+        return sum(stack)
+```
+
+### [227. Basic Calculator II](https://leetcode.com/problems/basic-calculator-ii/)
+
+```python
+class Solution:
+    def calculate(self, s: str) -> int:
+        
+        def update(op, v):
+            if op == "+": stack.append(v)
+            if op == "-": stack.append(-v)
+            if op == "*": stack.append(stack.pop() * v)
+            if op == "/": stack.append(int(stack.pop() / v))
+
+        num, sign = 0, '+'
+        stack = []
+        
+        for idx in range(len(s)):
+            c = s[idx]
+            
+            if c.isdigit():
+                num = num * 10 + int(c)
+            elif c in '+-*/':
+                update(sign, num)
+                num, sign = 0, c
+        print(stack)
+        update(sign, num)
+        
+        return sum(stack)
+```
+
+### [772. Basic Calculator III](https://leetcode.com/problems/basic-calculator-iii/)
+
+```python
+class Solution:
+    def calculate(self, s: str):
+        
+        def update(op, v):
+            if op == "+": stack.append(v)
+            if op == "-": stack.append(-v)
+            if op == "*": stack.append(stack.pop() * v)
+            if op == "/": stack.append(int(stack.pop() / v))
+
+        num, sign = 0, '+'
+        stack = []
+        idx = 0
+        
+        while idx < len(s):
+            c = s[idx]
+            
+            if c.isdigit():
+                num = num * 10 + int(c)
+            elif c in '+-*/':
+                update(sign, num)
+                num, sign = 0, c
+            elif c == '(':
+                num, j = self.calculate(s[idx + 1:])
+                idx += j
+            elif c == ')':
+                update(sign, num)
+                print(stack)
+                return sum(stack), idx + 1
+                
+            idx += 1
+
+        update(sign, num)
+
+        return sum(stack)
+```
+
+### [394. Decode String](https://leetcode.com/problems/decode-string/)
+
+```python
+class Solution:
+    def decodeString(self, s: str) -> str:
+        number_stack, str_stack = [], []
+        
+        # Current str is result, of current layer, it bump to last/next level according to []
+        k_str, cur_str = '', ''
+        for c in s:
+            if c.isdigit():
+                k_str += c
+            elif c == '[':
+                number_stack.append(int(k_str))
+                str_stack.append(cur_str)
+                k_str, cur_str = '', ''
+            elif c == ']':
+                decoded_str = str_stack.pop()
+                k = number_stack.pop()
+                cur_str = decoded_str + cur_str * k
+            else:
+                cur_str += c
+        return cur_str
+```
+
+### [636. Exclusive Time of Functions](https://leetcode.com/problems/exclusive-time-of-functions/)
+
+```python
+class Solution:
+    def exclusiveTime(self, n: int, logs: List[str]) -> List[int]:
+        stack = []
+        time = [0] * n
+        for log in logs:
+            log_segs = log.split(':')
+            fun_id, status, ts = int(log_segs[0]), log_segs[1], int(log_segs[2])
+            #print((fun_id, status, ts))
+            if status == 'start':
+                stack.append((fun_id, ts))
+            elif status == 'end':
+                _fun_id, _ts = stack.pop()
+                # print((_fun_id, ts, _ts))
+                elapse_time = ts - _ts + 1
+                time[_fun_id] += elapse_time
+                
+                if stack:
+                    # If stack is not empty, the current func has a parent func,
+                    # the parent func's exclusive time needs to minus the child func.
+                    # Inclusive time can be found from log, so no need worry calculate outter level
+                    # The parent func don't need to be poped, cuz you don't know when it ends atm
+                    # but what you are sure is the parent func's time must minus the current func time
+                    # so you just deduct it so it counts when parent func inclusive time is calculated
+                    time[stack[-1][0]] -= elapse_time
+        return time
+```
+
+### [735. Asteroid Collision](https://leetcode.com/problems/asteroid-collision/)
+
+```python
+class Solution:
+    def asteroidCollision(self, asteroids: List[int]) -> List[int]:
+        stack = []
+        for new in asteroids:
+            explod = False
+            # Trick: Check negative and positive numbers 
+            while stack and new < 0 < stack[-1]:
+                if stack[-1] > -new:
+                    explod = True
+                    break
+                elif stack[-1] == -new:
+                    explod = True
+                    stack.pop()
+                    break
+                elif stack[-1] < -new:
+                    stack.pop()
+            
+            if not explod:
+                stack.append(new)
+                
+        return stack
+```
+
+### [901. Online Stock Span](https://leetcode.com/problems/online-stock-span/)
+
+```python
+class StockSpanner:
+
+    def __init__(self):
+        self.stack = []
+
+    def next(self, price: int) -> int:
+        span = 1
+        while self.stack and self.stack[-1][0] <= price:
+            span += self.stack.pop()[1]
+        self.stack.append((price, span))
+        return span
+        
+
+
+# Your StockSpanner object will be instantiated and called as such:
+# obj = StockSpanner()
+# param_1 = obj.next(price)
+```
+
+### [1209. Remove All Adjacent Duplicates in String II](https://leetcode.com/problems/remove-all-adjacent-duplicates-in-string-ii/)
+
+```python
+class Solution:
+    def removeDuplicates(self, s, k):
+        stack = [['#', 0]]
+        for c in s:
+            if stack[-1][0] == c:
+                stack[-1][1] += 1
+                if stack[-1][1] == k:
+                    stack.pop()
+            else:
+                stack.append([c, 1])
+        return ''.join(c * k for c, k in stack)
+```
+
+### [1249. Minimum Remove to Make Valid Parentheses](https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/)
+
+```python
+class Solution:
+    def minRemoveToMakeValid(self, s: str) -> str:
+        stack = []
+        result = ''
+        
+        for i, c in enumerate(s):
+            if c == '(':
+                stack.append(i)
+                result += c
+            elif c == ')':
+                if len(stack) == 0:
+                    result += '*'
+                else:
+                    stack.pop()
+                    result += c
+            else:
+                result += c
+        
+        result = list(result)
+        for i, c in enumerate(stack):
+            result[c] = '*'
+            
+        return ''.join([c for c in result if c != '*'])
 ```

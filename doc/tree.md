@@ -24,6 +24,94 @@ class Solution(object):
 
 ### [572. Subtree of Another Tree](https://leetcode.com/problems/subtree-of-another-tree/)
 
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def match(self, s, t):
+        if not (s and t):
+            return s is t
+        if s.val == t.val and self.match(s.left, t.left) and self.match(s.right, t.right):
+            return True
+        return False
+    
+    def isSubtree(self, root: TreeNode, subRoot: TreeNode) -> bool:
+        # O(M * N)
+        if self.match(root, subRoot):
+            return True
+        if not root:
+            return False
+        if self.isSubtree(root.left, subRoot) or self.isSubtree(root.right, subRoot):
+            return True
+        return False
+```
+
+### [1367. Linked List in Binary Tree](https://leetcode.com/problems/linked-list-in-binary-tree/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def match(self, head, root):
+        if not head: return True
+        elif not root: return False
+        return head.val == root.val and (self.match(head.next, root.left) or self.match(head.next, root.right))
+    
+    def isSubPath(self, head: ListNode, root: TreeNode) -> bool:
+        if not head: return True
+        elif not root: return False
+        return self.match(head, root) or self.isSubPath(head, root.left) or self.isSubPath(head, root.right)
+```
+
+## Balanced Tree
+
+### [729. My Calendar I](https://leetcode.com/problems/my-calendar-i/solution/)
+
+```python
+class Node:
+    __slots__ = 'start', 'end', 'left', 'right'
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+        self.left = self.right = None
+
+    def insert(self, node):
+        if node.start >= self.end:
+            if not self.right:
+                self.right = node
+                return True
+            return self.right.insert(node)
+        elif node.end <= self.start:
+            if not self.left:
+                self.left = node
+                return True
+            return self.left.insert(node)
+        else:
+            return False
+
+class MyCalendar(object):
+    def __init__(self):
+        self.root = None
+
+    def book(self, start, end):
+        if self.root is None:
+            self.root = Node(start, end)
+            return True
+        return self.root.insert(Node(start, end))
+```
 
 ## Others
 
@@ -902,3 +990,397 @@ class Solution:
             
         return dfs(root)
 ```
+
+### [606. Construct String from Binary Tree](https://leetcode.com/problems/construct-string-from-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def tree2str(self, t: TreeNode) -> str:
+        # Intuition: Only add quotes at parent level
+        def dfs(node):
+            if not node:
+                return ''
+            if node.right:
+                return f'{node.val}({dfs(node.left)})({dfs(node.right)})'
+            elif node.left:
+                return f'{node.val}({dfs(node.left)})'
+            else:
+                return f'{node.val}'
+        return dfs(t)
+    
+    def tree2str(self, t: TreeNode) -> str:
+        if not t:
+            return ''
+        stack, visited, ans = [t], set(), ''
+        while stack:
+            node = stack[-1]
+            if node in visited:
+                stack.pop()
+                ans += ')'
+            else:
+                visited.add(node)
+                ans += f'({node.val}'
+                if not node.left and node.right:
+                    ans += '()'
+                if node.right:
+                    stack.append(node.right)
+                if node.left:
+                    stack.append(node.left)
+        return ans[1:-1]
+```
+
+### [95. Unique Binary Search Trees II](https://leetcode.com/problems/unique-binary-search-trees-ii/)
+
+```python
+class Solution:
+    def generateTrees(self, n: int) -> List[TreeNode]:
+        @functools.lru_cache(None)
+        def dfs(start, end):
+            # Thought about use start == end as termination
+            # condition, to use that, you still needs to 
+            # handle end > start, say for s,...,e, when root
+            # is s, we need to get left, we call dfs(s, s - 1),
+            # this call needs to return [None], we can handle
+            # it at end but it is messy.
+            if start > end:
+                return [None]
+            
+            ans = []
+            for root in range(start, end + 1):
+                lefts = dfs(start, root - 1)
+                rights = dfs(root + 1, end)
+                
+                for l in lefts:
+                    for r in rights:
+                        tree = TreeNode(root, l, r)
+                        ans.append(tree)
+            return ans
+        return dfs(1, n)
+```
+
+### [102. Binary Tree Level Order Traversal](https://leetcode.com/problems/binary-tree-level-order-traversal/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def levelOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return []
+        q = collections.deque()
+        q.appendleft(root)
+        ans = []
+        while q:
+            Len = len(q)
+            level = []
+            for i in range(Len):
+                node = q.pop()
+                level.append(node.val)
+                if node.left: q.appendleft(node.left)
+                if node.right: q.appendleft(node.right)
+            ans.append(level)
+        return ans
+```
+
+### [103. Binary Tree Zigzag Level Order Traversal](https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+from collections import deque
+
+class Solution:
+    def zigzagLevelOrder(self, root):
+        """
+        :type root: TreeNode
+        :rtype: List[List[int]]
+        """
+        ret = []
+        level_list = deque()
+        if root is None:
+            return []
+        # start with the level 0 with a delimiter
+        node_queue = deque([root, None])
+        is_order_left = True
+
+        while len(node_queue) > 0:
+            curr_node = node_queue.popleft()
+
+            if curr_node:
+                if is_order_left:
+                    level_list.append(curr_node.val)
+                else:
+                    level_list.appendleft(curr_node.val)
+
+                if curr_node.left:
+                    node_queue.append(curr_node.left)
+                if curr_node.right:
+                    node_queue.append(curr_node.right)
+            else:
+                # we finish one level
+                ret.append(level_list)
+                # add a delimiter to mark the level
+                if len(node_queue) > 0:
+                    node_queue.append(None)
+
+                # prepare for the next level
+                level_list = deque()
+                is_order_left = not is_order_left
+
+        return ret
+```
+
+### [105. Construct Binary Tree from Preorder and Inorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+
+```python
+class Solution(object):
+    def buildTree(self, preorder, inorder):
+        """
+        :type preorder: List[int]
+        :type inorder: List[int]
+        :rtype: TreeNode
+        """
+        
+        # Recursive solution
+        if inorder:   
+            # Find index of root node within in-order traversal
+            index = inorder.index(preorder.pop(0))
+            root = TreeNode(inorder[index])
+            
+            # Recursively generate left subtree starting from 
+            # 0th index to root index within in-order traversal
+            root.left = self.buildTree(preorder, inorder[:index])
+            
+            # Recursively generate right subtree starting from 
+            # next of root index till last index
+            root.right = self.buildTree(preorder, inorder[index+1:])
+            return root
+```
+
+### [106. Construct Binary Tree from Inorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+        # For a given range (lower, upper) initially (0, n - 1);
+        # Last ndoe in postorder is the root;
+        # Given root, we can find the left/right subtree range in inorder;
+        # Exlude last node in postorder, remmaining = (postorder left subtree )+ (postorder right substree)
+        # Starting from right, when right subtree is done, the remaining postorder is for left subtree
+        def build(lower, upper):
+            if lower > upper:
+                return None
+            
+            val = postorder.pop()
+            idx = idx_map[val]
+            root = TreeNode(val)
+            
+            # Right first
+            root.right = build(idx + 1, upper)
+            root.left = build(lower, idx - 1)
+            
+            return root
+
+        idx_map = {v: i for i, v in enumerate(inorder)}
+        
+        return build(0, len(inorder) - 1)
+```
+
+### [199. Binary Tree Right Side View](https://leetcode.com/problems/binary-tree-right-side-view/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rightSideView(self, root: TreeNode) -> List[int]:
+        
+        if not root:
+            return []
+        
+        q = deque([root])
+        
+        rightside = []
+        
+        while q:
+            length = len(q)
+            
+            for i in range(length):
+                node = q.popleft()
+                
+                if i == length - 1:
+                    rightside.append(node.val)
+                    
+                if node.left:
+                    q.append(node.left)
+                    
+                if node.right:
+                    q.append(node.right)
+        return rightside
+```
+
+### [314. Binary Tree Vertical Order Traversal](https://leetcode.com/problems/binary-tree-vertical-order-traversal/)
+
+```python
+from collections import defaultdict
+class Solution:
+    def verticalOrder(self, root: TreeNode) -> List[List[int]]:
+        columnTable = defaultdict(list)
+        queue = deque([(root, 0)])
+
+        while queue:
+            node, column = queue.popleft()
+
+            if node is not None:
+                columnTable[column].append(node.val)
+                
+                queue.append((node.left, column - 1))
+                queue.append((node.right, column + 1))
+                        
+        return [columnTable[x] for x in sorted(columnTable.keys())]
+```
+
+### [449. Serialize and Deserialize BST](https://leetcode.com/problems/serialize-and-deserialize-bst/)
+
+```python
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Codec:
+
+    def serialize(self, root: TreeNode) -> str:
+        """Encodes a tree to a single string.
+        """
+        def postorder(node):
+            return postorder(node.left) + postorder(node.right) + [node.val] if node else []
+        return ','.join(map(str, postorder(root)))
+
+    def deserialize(self, data: str) -> TreeNode:
+        """Decodes your encoded data to tree.
+        """
+        def redeserialize(lower=-math.inf, upper=math.inf):
+            if not data or data[-1] < lower or data[-1] > upper:
+                return None
+            val = data.pop()
+            root = TreeNode(val)
+            root.right = redeserialize(val, upper)
+            root.left = redeserialize(lower, val)
+            return root
+        data = [int(x) for x in data.split(',') if x]
+        return redeserialize()
+        
+        
+
+# Your Codec object will be instantiated and called as such:
+# Your Codec object will be instantiated and called as such:
+# ser = Codec()
+# deser = Codec()
+# tree = ser.serialize(root)
+# ans = deser.deserialize(tree)
+# return ans
+```
+
+### [987. Vertical Order Traversal of a Binary Tree](https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def verticalTraversal(self, root: TreeNode) -> List[List[int]]:
+        node_list = []
+        
+        def bfs(root):
+            q = deque([(root, 0, 0)])
+            while q:
+                n, r, c = q.popleft()
+                
+                if n:
+                    node_list.append((c, r, n.val))
+
+                    q.append((n.left, r + 1, c - 1))
+                    q.append((n.right, r + 1, c + 1))
+                
+                
+        bfs(root)
+        
+        node_list.sort()
+        
+        ret = OrderedDict()
+        for column, row, value in node_list:
+            if column in ret:
+                ret[column].append(value)
+            else:
+                ret[column] = [value]
+
+        return ret.values()
+```
+
+### [1382. Balance a Binary Search Tree](https://leetcode.com/problems/balance-a-binary-search-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def balanceBST(self, root: TreeNode) -> TreeNode:
+        nodes = []
+        #node_map = 
+        def traverse(node):
+            if node:
+                traverse(node.left)
+                nodes.append(node.val)
+                traverse(node.right)
+            
+        def construct(nodes):
+            if nodes:
+                l = len(nodes)
+                mid = l // 2
+                root = TreeNode(nodes[mid])
+                root.left = construct(nodes[:mid])
+                root.right = construct(nodes[mid+1:])
+                return root
+            
+            
+        traverse(root)
+        return construct(nodes)
+```
+

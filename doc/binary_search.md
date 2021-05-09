@@ -342,38 +342,7 @@ class Solution:
         return letters[pos] if letters[pos] > target else letters[0]
 ```
 
-### [167. Two Sum II - Input array is sorted](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/)
 
-```python
-class Solution:
-    def twoSum(self, numbers: List[int], target: int) -> List[int]:
-        # Pattern: Binary Search template 2
-        N = len(numbers)
-        for i, x in enumerate(numbers[:-1]):
-            t = target - x
-            left, right = i + 1, N - 1
-            while left <= right:
-                mid = left + (right - left) // 2
-                if numbers[mid] == t:
-                    return [i + 1, mid + 1]
-                elif numbers[mid] > t:
-                    right = mid - 1
-                else:
-                    left = mid + 1
-        return []
-    
-    def twoSum(self, numbers: List[int], target: int) -> List[int]:
-        # Pattern: Two Pointers
-        lo, hi = 0, len(numbers) - 1
-        while lo <= hi:
-            s = numbers[lo] + numbers[hi]
-            if s == target:
-                return [lo + 1, hi + 1]
-            elif s > target:
-                hi -= 1
-            else:
-                lo += 1
-```
 
 ### [719. Find K-th Smallest Pair Distance](https://leetcode.com/problems/find-k-th-smallest-pair-distance/)
 ```python
@@ -570,15 +539,208 @@ class Solution:
             return (kth(A, 0, M - 1, B, 0, N - 1, mid) + kth(A, 0, M - 1, B, 0, N - 1, mid - 1)) / 2.0
 ```
 
+### [209. Minimum Size Subarray Sum](https://leetcode.com/problems/minimum-size-subarray-sum/)
+
+```python
+class Solution:
+    def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        
+        l = len(nums)
+        sums = [0] * l
+        sums[0] = nums[0]
+        
+        for i in range(1, l):
+            sums[i] = sums[i - 1] + nums[i]
+        
+        ans = float('inf')
+        
+        for i in range(0, l):
+            if sums[i] >= s:
+                ans = min(ans, i + 1)
+            to_find = s + sums[i]
+            
+            left, right = i + 1, l - 1
+            while left <= right:
+                mid = (left + right) // 2
+                if sums[mid] >= to_find:
+                    ans = min(ans, mid - i)
+                    right = mid - 1
+                else:
+                    left = mid + 1
+                    
+        return ans if ans != float('inf') else 0
+```
+
+## K Sum
+
+### [259. 3Sum Smaller](https://leetcode.com/problems/3sum-smaller/)
+
+```python
+class Solution:
+    def threeSumSmaller(self, nums: List[int], target: int) -> int:
+        nums.sort()
+        sum = 0
+        for i in range(len(nums)):
+            sum += self.twoSumSmaller(nums[i + 1:], target - nums[i])
+            
+        return sum
+            
+    def twoSumSmaller(self, nums, target):
+        lo, hi = 0, len(nums) - 1
+        sum = 0
+        
+        while lo < hi:
+            s = nums[lo] + nums[hi]
+            if s < target:
+                sum += hi - lo
+                lo += 1
+            else:
+                hi -= 1
+        return sum
+```
+
+### [167. Two Sum II - Input array is sorted](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/)
+
+```python
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # Pattern: Binary Search template 2
+        N = len(numbers)
+        for i, x in enumerate(numbers[:-1]):
+            t = target - x
+            left, right = i + 1, N - 1
+            while left <= right:
+                mid = left + (right - left) // 2
+                if numbers[mid] == t:
+                    return [i + 1, mid + 1]
+                elif numbers[mid] > t:
+                    right = mid - 1
+                else:
+                    left = mid + 1
+        return []
+    
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        # Pattern: Two Pointers
+        lo, hi = 0, len(numbers) - 1
+        while lo <= hi:
+            s = numbers[lo] + numbers[hi]
+            if s == target:
+                return [lo + 1, hi + 1]
+            elif s > target:
+                hi -= 1
+            else:
+                lo += 1
+```
+
+## Search Matrix
+
+### [240. Search a 2D Matrix II](https://leetcode.com/problems/search-a-2d-matrix-ii/)
+
+```python
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        # an empty matrix obviously does not contain `target` (make this check
+        # because we want to cache `width` for efficiency's sake)
+        if len(matrix) == 0 or len(matrix[0]) == 0:
+            return False
+
+        # cache these, as they won't change.
+        height = len(matrix)
+        width = len(matrix[0])
+
+        # start our "pointer" in the bottom-left
+        row = height - 1
+        col = 0
+
+        while col < width and row >= 0:
+            if matrix[row][col] > target:
+                row -= 1
+            elif matrix[row][col] < target:
+                col += 1
+            else: # found it
+                return True
+        
+        return False
+```
+### [1428. Leftmost Column with at Least a One](https://leetcode.com/problems/leftmost-column-with-at-least-a-one/)
+
+```python
+# """
+# This is BinaryMatrix's API interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class BinaryMatrix(object):
+#    def get(self, row: int, col: int) -> int:
+#    def dimensions(self) -> list[]:
+
+class Solution:
+    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
+        
+        rows, cols = binaryMatrix.dimensions()
+        
+        # Set pointers to the top-right corner.
+        current_row = 0
+        current_col = cols - 1
+        
+        # Repeat the search until it goes off the grid.
+        while current_row < rows and current_col >= 0:
+            if binaryMatrix.get(current_row, current_col) == 0:
+                current_row += 1
+            else:
+                current_col -= 1
+        
+        # If we never left the last column, it must have been all 0's.
+        return current_col + 1 if current_col != cols - 1 else -1
+```
+
 ## Others
 
-378. Kth Smallest Element in a Sorted Matrix
 410. Split Array Largest Sum
 1011. Capacity To Ship Packages Within D Days
 1231. Divide Chocolate
 875. Koko Eating Bananas
 774. Minimize Max Distance to Gas Station
 1201. Ugly Number III
+
+### [378. Kth Smallest Element in a Sorted Matrix](https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/)
+
+```python
+class Solution:
+    def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+        def count_less_equal(num):
+            smaller, larger = float('-inf'), float('inf')
+            count, n = 0, len(matrix)
+            row, col = n - 1, 0
+            
+            while row >= 0 and col <= n - 1:
+                if matrix[row][col] > num:
+                    larger = min(larger, matrix[row][col])
+                    row -= 1
+                else:
+                    count += row + 1
+                    smaller = max(smaller, matrix[row][col])
+                    col += 1
+            return count, smaller, larger
+        
+        n = len(matrix)
+        start, end = matrix[0][0], matrix[n - 1][n - 1]
+        
+        while start < end:
+            mid = (start + end) // 2
+            count, smaller, larger = count_less_equal(mid)
+            print(f'{count} - {smaller} - {larger}')
+            
+            if count == k:
+                return smaller
+            elif count > k:
+                end = smaller
+            else:
+                start = larger
+                
+        return start
+```
 
 ### [1060. Missing Element in Sorted Array](https://leetcode.com/problems/missing-element-in-sorted-array/)
 
@@ -714,4 +876,95 @@ class Solution:
             else:
                 right = mid
         return left
+```
+
+### [74. Search a 2D Matrix](https://leetcode.com/problems/search-a-2d-matrix/)
+
+```python
+class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+        if not matrix:
+            return False
+        
+        m, n = len(matrix), len(matrix[0])
+        
+        left, right = 0, m * n - 1
+        
+        # If both left and right move +/-1, use left <= right
+        while left <= right:
+            mid = (left + right) // 2
+            # Trick: Map a index to matrix coordinatts
+            v = matrix[mid // n][mid % n]
+            if target == v:
+                return True
+            elif target < v:
+                right = mid - 1
+            else:
+                left = mid + 1
+        return False
+```
+
+### [528. Random Pick with Weight](https://leetcode.com/problems/random-pick-with-weight/)
+
+```python
+class Solution:
+
+    def __init__(self, w: List[int]):
+        self.prefix_sums = []
+        prefix_sum = 0
+        for weight in w:
+            prefix_sum += weight
+            self.prefix_sums.append(prefix_sum)
+        self.total_sum = prefix_sum
+
+    def pickIndex(self) -> int:
+        target = self.total_sum * random.random()
+        
+        low, high = 0, len(self.prefix_sums) - 1
+        while low < high:
+            mid = low + (high - low) // 2
+            if target > self.prefix_sums[mid]:
+                low = mid + 1
+            else:
+                high = mid
+        return low
+            
+
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(w)
+# param_1 = obj.pickIndex()
+```
+
+### [704. Binary Search](https://leetcode.com/problems/binary-search/)
+
+```python
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        left, right = 0, len(nums) - 1
+        while left <= right:
+            mid = left + (right - left) // 2
+            if nums[mid] == target:
+                return mid
+            if nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return -1
+```
+
+### [1283. Find the Smallest Divisor Given a Threshold](https://leetcode.com/problems/find-the-smallest-divisor-given-a-threshold/)
+
+```python
+class Solution:
+    def smallestDivisor(self, A, threshold):
+        l, r = 1, max(A)
+        while l < r:
+            m = (l + r) // 2
+            # math.ceil(i/m)
+            if sum(math.ceil(i/m) for i in A) > threshold:
+                l = m + 1
+            else:
+                r = m
+        return l
 ```

@@ -31,6 +31,91 @@ class Solution:
         return "".join(roman_digits)
 ```
 
+### [273. Integer to English Words](https://leetcode.com/problems/integer-to-english-words/)
+
+```python
+class Solution(object):
+    def numberToWords(self, num):
+        """
+        :type num: int
+        :rtype: str
+        """
+        
+        if not num:
+            return 'Zero'
+        
+        def trans(n):
+            words = {
+                0: 'Zero',
+                1: 'One',
+                2: 'Two',
+                3: 'Three',
+                4: 'Four',
+                5: 'Five',
+                6: 'Six',
+                7: 'Seven',
+                8: 'Eight',
+                9: 'Nine',
+                10: 'Ten',
+                11: 'Eleven',
+                12: 'Twelve',
+                13: 'Thirteen',
+                14: 'Fourteen',
+                15: 'Fifteen',
+                16: 'Sixteen',
+                17: 'Seventeen',
+                18: 'Eighteen',
+                19: 'Nineteen',
+                20: 'Twenty',
+                30: 'Thirty',
+                40: 'Forty',
+                50: 'Fifty',
+                60: 'Sixty',
+                70: 'Seventy',
+                80: 'Eighty',
+                90: 'Ninety'
+            }
+            
+            hundred = n // 100
+            tens = n - hundred * 100
+            
+            
+            result = ''
+            
+            if hundred:
+                result = f'{words[hundred]} Hundred'
+            
+            if tens >= 20:
+                ten = (n - hundred * 100) // 10
+                rest = n - hundred * 100 - ten * 10
+                result = f'{result} {words[ten*10]}'
+                if rest:
+                    result = f'{result} {words[rest]}'
+            elif tens:
+                result = f'{result} {words[tens]}'
+            return result
+        
+        billion = num // 1000000000
+        million = (num - billion * 1000000000) // 1000000
+        thousand = (num - billion * 1000000000 - million * 1000000) // 1000
+        rest = num - billion * 1000000000 - million * 1000000 - thousand * 1000
+        
+        result = ''
+        if billion:
+            result = f'{trans(billion)} Billion'
+        if million:
+            result = f'{result} {trans(million)} Million'
+        if thousand:
+            result = f'{result} {trans(thousand)} Thousand'
+        if rest:
+            result = f'{result} {trans(rest)}'
+            
+        while('  ' in result):
+            result = result.replace('  ', ' ')
+
+        return result.strip()
+```
+
 ## Others
 ### [592. Fraction Addition and Subtraction](https://leetcode.com/problems/group-shifted-strings/)
 
@@ -251,3 +336,92 @@ class Solution:
             return 0
 ```
 
+### [29. Divide Two Integers](https://leetcode.com/problems/divide-two-integers/)
+
+### [43. Multiply Strings](https://leetcode.com/problems/multiply-strings/)
+
+```python
+class Solution:
+    def multiply(self, num1: str, num2: str) -> str:
+        # From 2 strs, get each digit and its degree.
+        # The product is the sum of product of each digit
+        # with their correct degree
+        
+        ans = 0
+        for i1, n1 in enumerate(num1[::-1]):
+            for i2, n2 in enumerate(num2[::-1]):
+                ans += int(n1) * (10 ** i1) * int(n2) * (10 ** i2)
+        
+        return str(ans)
+```
+
+### [50. Pow(x, n)](https://leetcode.com/problems/powx-n/)
+
+```python
+class Solution:
+    def myPow(self, x: float, n: int) -> float:
+        if n < 0:
+            return self.myPow(1/x, -n)
+        if n == 0: return 1
+        half = self.myPow(x, n // 2)
+        return half * half * (x if n & 1 else 1)
+```
+
+### [69. Sqrt(x)](https://leetcode.com/problems/sqrtx/)
+
+### [445. Add Two Numbers II](https://leetcode.com/problems/add-two-numbers-ii/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        n1, n2 = 0, 0
+        cur1, cur2 = l1, l2
+        
+        while cur1:
+            n1 += 1
+            cur1 = cur1.next
+        while cur2:
+            n2 += 1
+            cur2 = cur2.next
+            
+        cur1, cur2 = l1, l2
+        head = None
+        while n1 > 0 and n2 > 0:
+            val = 0
+            if n1 >= n2:
+                val += cur1.val
+                cur1 = cur1.next
+                n1 -= 1
+            if n1 < n2:
+                val += cur2.val
+                cur2 = cur2.next
+                n2 -= 1
+                
+            cur = ListNode(val)
+            cur.next = head
+            head = cur
+            
+        cur, head = head, None
+        carry = 0
+        while cur:
+            val = (cur.val + carry) % 10
+            carry = (cur.val + carry) // 10 
+            
+            node = ListNode(val)
+            node.next = head
+            head = node
+            
+            cur = cur.next
+            
+        if carry:
+            node = ListNode(carry)
+            node.next = head
+            head = node
+            
+        return head
+```

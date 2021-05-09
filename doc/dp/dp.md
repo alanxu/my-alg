@@ -66,7 +66,7 @@ class Solution:
         return dp[0][n - 1]
 ```
 
-### [1531. String Compression II](1531. String Compression II)
+### [1531. String Compression II](https://leetcode.com/problems/string-compression-ii/)
 ```python
 class Solution:
     def getLengthOfOptimalCompression(self, s: str, k: int) -> int:
@@ -491,5 +491,92 @@ class Solution:
                         ans += 1
                         words.add(substr)
         
+        return ans
+```
+
+### [91. Decode Ways](https://leetcode.com/problems/decode-ways/)
+
+```python
+class Solution:
+    def numDecodings(self, s: str) -> int:
+        
+        if not s or s[0] == 0:
+            return 0
+        
+        dp = [0 for _ in range(len(s) + 1)]
+        dp[0] = 1
+        dp[1] = 0 if s[0] == '0' else 1
+        
+        for i in range(2, len(s) + 1):
+            last_d = int(s[i - 2])
+            cur_d = int(s[i - 1])
+            
+            n = last_d * 10 + cur_d
+            
+            if n == 0:
+                return 0
+            
+            if cur_d == 0:
+                if n <= 26:
+                    dp[i] = dp[i - 2]
+                else:
+                    return 0
+            elif last_d == 0 or n > 26:
+                dp[i] = dp[i - 1]
+            else:
+                dp[i] = dp[i - 1] + dp[i - 2] 
+                
+        return dp[-1]
+```
+
+### [96. Unique Binary Search Trees](https://leetcode.com/problems/unique-binary-search-trees/)
+
+### [120. Triangle](https://leetcode.com/problems/triangle/)
+
+```python
+class Solution(object):
+    def minimumTotal(self, triangle):
+        """
+        :type triangle: List[List[int]]
+        :rtype: int
+        """
+        m = len(triangle)
+        
+        for i in reversed(range(0, m-1)):
+            for j in range(len(triangle[i])):
+                triangle[i][j] = min(triangle[i+1][j], triangle[i+1][j+1]) + triangle[i][j]
+                
+        print(triangle)
+        
+        return triangle[0][0]
+```
+
+### [1177. Can Make Palindrome from Substring](https://leetcode.com/problems/can-make-palindrome-from-substring/)
+
+```python
+class Solution(object):
+    def canMakePaliQueries(self, s, queries):
+        """
+        :type s: str
+        :type queries: List[List[int]]
+        :rtype: List[bool]
+        """
+        # https://leetcode.com/problems/can-make-palindrome-from-substring/discuss/371999/Python-100-runtime-and-memory
+        
+        S = len(s)
+        dp = [0] * (S + 1)
+        a = ord('a')
+        ints = map(lambda x: ord(x) - a, s)
+        
+        for i in range(1, S + 1):
+            dp[i] = dp[i - 1] ^ (1 << ints[i - 1])
+        
+        ans = []
+        for query in queries:
+            left, right, k = query
+            # Trick: Be carefull on edges when handling prefix difference
+            diff = dp[left] ^ dp[right + 1]
+            ans.append(bin(diff).count('1') <= (k * 2 + 1))
+            
         return ans
 ```

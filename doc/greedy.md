@@ -483,3 +483,117 @@ class Solution:
         
         return max(ans1, ans2, ans2 + sum_ * (k - 2)) % MOD
 ```
+
+### [621. Task Scheduler](https://leetcode.com/problems/task-scheduler/)
+
+```python
+class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+        # Intuition: Each same tasks are seperated with n steps, the optimal
+        # solution is to arrange all task with minimum idel. Think about get
+        # First task with max numbers, it forms an framework:
+        # A _ _ A _ _ A _ _ A
+        # The rest of task just need to put in each interval, one per interval
+        # different tasks can be in one interval. If the number of task B is
+        # equal to A, then the last B will be right of last A. If number of task B is
+        # less than A, all B are able to put in the intervals left of last A.
+        # If there are enough other tasks B, C, ..., it is for sure they will
+        # occupy all the intervals and even expand the interval out, but they
+        # can all put between A's with last one of same length tasks on last A's
+        # right.
+        # So the answer is either len(tasks) when tasks are crowed, or the interval
+        # is not full with same lengh at right.
+        counts = Counter(tasks)
+        freqs, max_count = Counter(counts.values()), max(counts.values())
+        max_count_tasks = freqs[max_count]
+        return max(len(tasks), (max_count - 1) * (n + 1) + max_count_tasks)
+```
+
+
+
+### [778. Swim in Rising Water](https://leetcode.com/problems/swim-in-rising-water/)
+
+```python
+class Solution:
+    def swimInWater(self, grid: List[List[int]]) -> int:
+        # Intuition: Greedy/DFS/Heap
+        # DFS to collect all the possible reachable targets for each
+        # round. Use HEAP instead of stack, so each round we check
+        # the lowest (less time) target. When the final target is reachable
+        # we return the max elevation we check. Remember it takes 0 time
+        # to reach to anywhere.
+        # This is just a standard DFS and just use heap instead stack.
+        N = len(grid)
+        heap = [(grid[0][0], 0, 0)]
+        ans, seen = 0, {(0, 0)}
+        while heap:
+            h, r, c = heapq.heappop(heap)
+            ans = max(ans, h)
+            if r == c == N - 1:
+                return ans
+            
+            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= _r < N and 0 <= _c < N and (_r, _c) not in seen:
+                    seen.add((_r, _c))
+                    heapq.heappush(heap, (grid[_r][_c], _r, _c))
+```
+
+
+### [134. Gas Station](https://leetcode.com/problems/gas-station/)
+
+```python
+class Solution:
+    # If A cannot reach D, all station between A and D cannot reach D
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+        cur_tank, total_tank = 0, 0
+        start = 0
+        
+        for i in range(len(gas)):
+            cur_tank += gas[i] - cost[i]
+            total_tank += gas[i] - cost[i]
+            
+            if cur_tank < 0:
+                start = i + 1
+                cur_tank = 0
+                
+        return start if total_tank >= 0 else -1
+```
+
+### [659. Split Array into Consecutive Subsequences](https://leetcode.com/problems/split-array-into-consecutive-subsequences/)
+
+```python
+class Solution(object):
+    def isPossible(self, nums):
+        counter = collections.Counter(nums)
+        tails = collections.Counter()
+        for x in nums:
+            if counter[x] == 0:
+                continue
+            elif tails[x] > 0:
+                tails[x] -= 1
+                tails[x + 1] += 1
+            elif counter[x + 1] and counter[x + 2]:
+                counter[x + 1] -= 1
+                counter[x + 2] -= 1
+                tails[x + 3] += 1
+            else:
+                return False
+            counter[x] -= 1
+        return True
+```
+
+### [670. Maximum Swap](https://leetcode.com/problems/maximum-swap/)
+
+```python
+class Solution(object):
+    def maximumSwap(self, num):
+        A = map(int, str(num))
+        # Trick: Last duplicated num replace previous
+        last = {x: i for i, x in enumerate(A)}
+        for i, x in enumerate(A):
+            for d in xrange(9, x, -1):
+                if last.get(d, None) > i:
+                    A[i], A[last[d]] = A[last[d]], A[i]
+                    return int("".join(map(str, A)))
+        return num
+```

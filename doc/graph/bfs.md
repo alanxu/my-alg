@@ -449,3 +449,252 @@ class Solution:
 
 ### [200. Number of Islands](https://leetcode.com/problems/number-of-islands/)
 
+### [127. Word Ladder](https://leetcode.com/problems/word-ladder/)
+
+```python
+class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        all_combo = collections.defaultdict(list)
+        
+        l = len(beginWord)
+        
+        for w in wordList:
+            for i in range(l):
+                all_combo[w[:i] + '*' + w[i + 1:]].append(w)
+                
+        q = collections.deque([(beginWord, 1)])
+        visited = set()
+        visited.add(beginWord)
+        
+        while q:
+            cur_w, level = q.popleft()
+            
+            for i in range(l):
+                int_w = cur_w[:i] + '*' + cur_w[i + 1:]
+                    
+                for w in all_combo[int_w]:
+                    if w == endWord:
+                        return level + 1
+                    
+                    if w not in visited:
+                        visited.add(w)
+                        q.append((w, level + 1))
+                        
+                all_combo[int_w] = []
+                
+        return 0
+```
+
+### [909. Snakes and Ladders](https://leetcode.com/problems/snakes-and-ladders/)
+
+```python
+from functools import lru_cache
+class Solution:
+    def snakesAndLadders(self, board: List[List[int]]) -> int:
+        
+        N = len(board)
+
+        def get(s):
+            # Given a square num s, return board coordinates (r, c)
+            quot, rem = divmod(s-1, N)
+            row = N - 1 - quot
+            col = rem if row%2 != N%2 else N - 1 - rem
+            return row, col
+        
+        rows, cols = len(board), len(board[0])
+        
+        @lru_cache
+        def get_location(idx):
+            row = rows - (idx - 1) // rows - 1
+            col = (idx - 1) % cols if row % 2 != rows % 2 else (cols - (idx - 1) % cols -1)
+            return (row, col)
+        
+        q = deque([1])
+        visited = set([1])
+        step = 0
+        
+        while q:
+            print(f'-- step {step} --')
+            l = len(q)
+            for i in range(l):
+                s = q.popleft()
+                
+                for j in range(1, 7):
+                    ss = s + j
+                    
+                    
+                        
+                    if ss > rows * cols:
+                        break
+                    
+                    row, col = get(ss)
+                    
+                    print((ss, row, col))
+                    
+                    ss_v = board[row][col]
+                    
+                    if ss_v == -1 and ss not in visited:
+                        print(f'{s} -> {ss}')
+                        if ss == rows * cols:
+                            return step + 1
+                        q.append(ss)
+                        visited.add(ss)
+                        
+                    elif ss_v != -1 and ss_v not in visited:
+                        print(f'{s} -> {ss} -> {ss_v}')
+                        if ss_v == rows * cols:
+                            return step + 1
+                        q.append(ss_v)
+                        visited.add(ss_v)
+                        
+            step += 1
+        return -1
+```
+
+### [934. Shortest Bridge](https://leetcode.com/problems/shortest-bridge/)
+
+```python
+class Solution:
+    # Trick: Flood Fill
+    def shortestBridge(self, A: List[List[int]]) -> int:
+        directs = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+        rows, cols = len(A), len(A[0])
+        
+        def find_and_mark_one_island():
+            r, c = 0, 0
+            
+            # Find first point in one island as start point
+            for i in range(rows):
+                for j in range(cols):
+                    if A[i][j] == 1:
+                        r, c = i, j
+                        break
+            
+            # Traverse first island, mark it as 2 and collect the boarder in a queue
+            q = deque()
+            
+            def dfs(r, c):                
+
+                A[r][c] = 2
+                
+                for d in directs:
+                    _r, _c = r + d[0], c + d[1]
+                    if 0 <= _r < rows and 0 <= _c < cols:
+                        if A[_r][_c] == 0:
+                            if (r, c) not in q: 
+                                q.appendleft((r, c))
+                        elif A[_r][_c] != 2:
+                            dfs(_r, _c)
+            dfs(r, c)
+            return q
+            
+        def expand_island_1(boarders):
+            # Use multi-source BFS to expand the boarder 1 layer a time util reached to 1 which is island 2
+            q = boarders
+            
+            step = 0
+            
+            while q:
+                Len = len(q)
+                for _ in range(Len):
+                    r, c = q.pop()
+                    for d in directs:
+                        _r, _c = r + d[0], c + d[1]
+                        if 0 <= _r < rows and 0 <= _c < cols:
+                            if A[_r][_c] == 0:
+                                q.appendleft((_r, _c))
+                                A[_r][_c] = 2
+                            elif A[_r][_c] == 1:
+                                return step
+                                
+                step += 1
+
+        q = find_and_mark_one_island() 
+        step = expand_island_1(q)
+        
+        return step
+```
+
+
+### [994. Rotting Oranges](https://leetcode.com/problems/rotting-oranges/)
+
+```python
+from collections import deque
+class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        queue = deque()
+
+        # Step 1). build the initial set of rotten oranges
+        fresh_oranges = 0
+        ROWS, COLS = len(grid), len(grid[0])
+        for r in range(ROWS):
+            for c in range(COLS):
+                if grid[r][c] == 2:
+                    queue.append((r, c))
+                elif grid[r][c] == 1:
+                    fresh_oranges += 1
+
+        # Mark the round / level, _i.e_ the ticker of timestamp
+        queue.append((-1, -1))
+
+        # Step 2). start the rotting process via BFS
+        minutes_elapsed = -1
+        directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        while queue:
+            row, col = queue.popleft()
+            if row == -1:
+                # We finish one round of processing
+                minutes_elapsed += 1
+                if queue:  # to avoid the endless loop
+                    queue.append((-1, -1))
+            else:
+                # this is a rotten orange
+                # then it would contaminate its neighbors
+                for d in directions:
+                    neighbor_row, neighbor_col = row + d[0], col + d[1]
+                    if ROWS > neighbor_row >= 0 and COLS > neighbor_col >= 0:
+                        if grid[neighbor_row][neighbor_col] == 1:
+                            # this orange would be contaminated
+                            grid[neighbor_row][neighbor_col] = 2
+                            fresh_oranges -= 1
+                            # this orange would then contaminate other oranges
+                            queue.append((neighbor_row, neighbor_col))
+
+        # return elapsed minutes if no fresh orange left
+        return minutes_elapsed if fresh_oranges == 0 else -1
+```
+
+### [1197. Minimum Knight Moves](https://leetcode.com/problems/minimum-knight-moves/)
+
+```python
+class Solution:
+    def minKnightMoves(self, x: int, y: int) -> int:
+        directions = [(1, 2), (2, 1), (-1, 2), (2, -1), (1, -2), (-2, 1), (-1, -2), (-2, -1)]
+        q = collections.deque([(0, 0)])
+        visited = set()
+        
+        step = 0
+        while q:
+            length = len(q)
+            
+            for i in range(length):
+                p = q.popleft()
+                
+                if p in visited:
+                    continue
+                
+                if p[0] == abs(x) and p[1] == abs(y):
+                    return step
+                
+                visited.add(p)
+                
+                for d in directions:
+                    pp = (p[0] + d[0], p[1] + d[1])
+                    if pp not in visited and pp[0] >= -1 and pp[1] >= -1:
+                        q.append(pp)
+                    
+                
+            step += 1
+            
+        return 0
+```

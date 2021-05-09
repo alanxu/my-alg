@@ -377,3 +377,88 @@ class Solution:
         gen('', 0, 0)
         return ans
 ```
+
+### [39. Combination Sum](https://leetcode.com/problems/combination-sum/)
+
+### [46. Permutations](https://leetcode.com/problems/permutations/)
+
+```python
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        output = []
+        l = len(nums)
+        def backtrack(first = 0):
+            if first == l:
+                output.append(nums[:])
+                
+            for i in range(first, l):
+                nums[first], nums[i] = nums[i], nums[first]
+                backtrack(first + 1)
+                nums[first], nums[i] = nums[i], nums[first]
+                
+        backtrack()
+        return output
+```
+
+### [78. Subsets](https://leetcode.com/problems/subsets/)
+
+### [79. Word Search](https://leetcode.com/problems/word-search/)
+
+```python
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        self.rows, self.cols = len(board), len(board[0])
+        self.board = board
+        
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.backtrack(r, c, word):
+                    return True
+        return False
+                
+                
+    def backtrack(self, row, col, suffix):
+        if len(suffix) == 0:
+            return True
+        
+        if row < 0 or row >= self.rows or col < 0 or col >= self.cols or self.board[row][col] != suffix[0]:
+            return False
+        
+        self.board[row][col] = '#'
+        
+        di = [(0, 1), (1, 0), (-1, 0), (0, -1)]
+        ret = False
+        
+        for d in di:
+            if self.backtrack(row + d[0], col + d[1], suffix[1:]):
+                ret = True
+                break
+        
+        self.board[row][col] = suffix[0]
+        
+        return ret
+```
+
+### [93. Restore IP Addresses](https://leetcode.com/problems/restore-ip-addresses/)
+
+```python
+class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+        ans = []
+        
+        def backtrack(start=len(s) - 1, curr=[], section=0):
+            if section == 4 :
+                ans.append('.'.join(curr[::-1]))
+            
+            digits = [0, 1, 2] if section < 3 else [start]
+            for d in digits:
+                n = s[start - d :start + 1]
+                if n == '0' or (n and n[0] != '0' and int(n) < 256):
+                    curr.append(n)
+                    backtrack(start - d - 1, curr, section + 1)
+                    curr.pop()
+            
+        backtrack()
+        return ans
+```
+

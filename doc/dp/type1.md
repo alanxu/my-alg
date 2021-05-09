@@ -711,6 +711,28 @@ class Solution:
         return ans
 ```
 
+### [238. Product of Array Except Self](https://leetcode.com/problems/product-of-array-except-self/)
+
+```python
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        l = len(nums)
+        dp_l, dp_r, ans = [0] * l, [0] * l, [0] * l
+        dp_l[0] = 1
+        dp_r[l - 1] = 1
+        
+        for i in range(1, l):
+            dp_l[i] = dp_l[i - 1] * nums[i - 1]
+            
+        for i in reversed(range(l - 1)):
+            dp_r[i] = dp_r[i + 1] * nums[i + 1]
+        
+        for i in range(l):
+            ans[i] = dp_l[i] * dp_r[i]
+        
+        return ans
+```
+
 ### [639. Decode Ways II](https://leetcode.com/problems/decode-ways-ii/)
 
 ```python

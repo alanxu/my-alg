@@ -35,8 +35,25 @@ class Solution:
 
 ## Performance Tuning
 
-[165. Compare Version Numbers](https://leetcode.com/problems/compare-version-numbers/)
+### [165. Compare Version Numbers](https://leetcode.com/problems/compare-version-numbers/)
 
 ## Shift Grouping
 
 [249. Group Shifted Strings](https://leetcode.com/problems/group-shifted-strings/)
+
+## Others
+
+### [1328. Break a Palindrome](https://leetcode.com/problems/break-a-palindrome/)
+
+```python
+class Solution:
+    def breakPalindrome(self, palindrome: str) -> str:
+        s = palindrome
+        for i in range(len(s) // 2):
+            if s[i] != 'a':
+                # Trick: Replace a charactor in string
+                return s[:i] + 'a' + s[i + 1:]
+        return s[:-1] + 'b' if s[:-1] else ''
+```
+
+

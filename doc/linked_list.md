@@ -29,6 +29,73 @@ class Solution:
         return head
 ```
 
+### [142. Linked List Cycle II](https://leetcode.com/problems/linked-list-cycle-ii/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def detectCycle(self, head: ListNode) -> ListNode:
+        intersect = self.detectIntersect(head)
+        if not intersect:
+            return None
+        
+        p1, p2 = head, intersect
+        
+        while p1 != p2:
+            p1 = p1.next
+            p2 = p2.next
+            
+        return p1
+    
+    def detectIntersect(self, head):
+        slow = fast = head
+        
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            
+            if slow == fast:
+                return slow
+        return None
+```
+
+### [148. Sort List](https://leetcode.com/problems/sort-list/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution(object):
+    def merge(self, h1, h2):
+        dummy = tail = ListNode(None)
+        while h1 and h2:
+            if h1.val < h2.val:
+                tail.next, tail, h1 = h1, h1, h1.next
+            else:
+                tail.next, tail, h2 = h2, h2, h2.next
+    
+        tail.next = h1 or h2
+        return dummy.next
+    
+    def sortList(self, head):
+        if not head or not head.next:
+            return head
+    
+        pre, slow, fast = None, head, head
+        while fast and fast.next:
+            pre, slow, fast = slow, slow.next, fast.next.next
+        pre.next = None
+
+        return self.merge(*map(self.sortList, (head, slow)))
+```
+
 ## Recursion
 
 ### [24. Swap Nodes in Pairs](https://leetcode.com/problems/swap-nodes-in-pairs/)
@@ -193,3 +260,131 @@ class Solution:
         return second
 ```
 
+### [61. Rotate List](https://leetcode.com/problems/rotate-list/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def rotateRight(self, head: 'ListNode', k: 'int') -> 'ListNode':
+        # base cases
+        if not head:
+            return None
+        if not head.next:
+            return head
+        
+        # Trick: Rotate list using ring
+        # close the linked list into the ring
+        old_tail = head
+        n = 1
+        while old_tail.next:
+            old_tail = old_tail.next
+            n += 1
+        old_tail.next = head
+        
+        # find new tail : (n - k % n - 1)th node
+        # and new head : (n - k % n)th node
+        new_tail = head
+        for i in range(n - k % n - 1):
+            new_tail = new_tail.next
+        new_head = new_tail.next
+        
+        # break the ring
+        new_tail.next = None
+        
+        return new_head
+```
+
+### [86. Partition List](https://leetcode.com/problems/partition-list/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def partition(self, head: ListNode, x: int) -> ListNode:
+        
+        before = before_head = ListNode(float('-inf')) 
+        after = after_head = ListNode(float('inf')) 
+        
+        while head:
+            if head.val < x:
+                before.next = head
+                before = before.next
+            elif head.val >= x:
+                after.next = head
+                after = after.next
+                
+            head = head.next
+            
+        before.next = after_head.next
+        after.next = None
+        
+        return before_head.next
+```
+
+### [92. Reverse Linked List II](https://leetcode.com/problems/reverse-linked-list-ii/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseBetween(self, head: ListNode, m: int, n: int) -> ListNode:
+        dummyNode = ListNode(-1)
+        dummyNode.next = head
+        pre = dummyNode
+        
+        for _ in range(m - 1):
+            pre = pre.next
+            
+        cur = pre.next
+        reverse = None
+        for _ in range(n - m + 1):
+            next = cur.next
+            cur.next = reverse
+            reverse = cur
+            cur = next
+            
+        pre.next.next = cur
+        pre.next = reverse
+        
+        return dummyNode.next
+```
+
+### [138. Copy List with Random Pointer](https://leetcode.com/problems/copy-list-with-random-pointer/)
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+"""
+
+class Solution:
+    def __init__(self):
+        self.visited = {}
+    def copyRandomList(self, head: 'Node') -> 'Node':
+        if not head:
+            return None
+        
+        if head in self.visited:
+            return self.visited[head]
+        
+        n = head
+        n_ = Node(n.val, None, None)
+        self.visited[n] = n_
+        n_.next = self.copyRandomList(n.next)
+        n_.random = self.copyRandomList(n.random)
+        return n_
+```

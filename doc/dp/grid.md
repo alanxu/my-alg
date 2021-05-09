@@ -85,6 +85,38 @@ class NumMatrix:
         return ans
 ```
 
+## Path Sum
+
+### [64. Minimum Path Sum](https://leetcode.com/problems/minimum-path-sum/)
+
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        r, c = len(grid), len(grid[0])
+        dp = [[grid[0][0] for _ in range(c)] for _ in range(r)]
+        for i in range(1, r):
+            dp[i][0] = dp[i-1][0] + grid[i][0]
+        for j in range(1, c):
+            dp[0][j] = dp[0][j-1] + grid[0][j]
+        for i in range(1, r):
+            for j in range(1, c):
+                dp[i][j] = min(dp[i-1][j], dp[i][j-1]) + grid[i][j]
+        return dp[-1][-1]
+```
+
+### [931. Minimum Falling Path Sum](https://leetcode.com/problems/minimum-falling-path-sum/)
+
+```python
+class Solution:
+    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
+        R, C = len(matrix), len(matrix[0])
+        for r in range(1, R):
+            for c in range(C):
+                # Trick: Gate the border using min/max
+                matrix[r][c] += min(matrix[r - 1][max(0, c - 1):min(C, c + 2)])
+        return min(matrix[-1])
+```
+
 ## Others
 
 
@@ -231,18 +263,7 @@ class Solution:
         return obstacleGrid[-1][-1]
 ```
 
-### [931. Minimum Falling Path Sum](https://leetcode.com/problems/minimum-falling-path-sum/)
 
-```python
-class Solution:
-    def minFallingPathSum(self, matrix: List[List[int]]) -> int:
-        R, C = len(matrix), len(matrix[0])
-        for r in range(1, R):
-            for c in range(C):
-                # Trick: Gate the border using min/max
-                matrix[r][c] += min(matrix[r - 1][max(0, c - 1):min(C, c + 2)])
-        return min(matrix[-1])
-```
 
 ### [576. Out of Boundary Paths](https://leetcode.com/problems/out-of-boundary-paths/)
 
@@ -297,3 +318,4 @@ class Solution:
         return dp[0][0]
 ```
 
+### [85. Maximal Rectangle](https://leetcode.com/problems/maximal-rectangle/)

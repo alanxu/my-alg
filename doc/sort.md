@@ -44,3 +44,17 @@ class Solution:
         #    Both half is reversed
         nums[::2], nums[1::2] = nums[mid::-1], nums[:mid:-1]
 ```
+
+### [179. Largest Number](https://leetcode.com/problems/largest-number/)
+
+```python
+class SortKey(str):
+    def __lt__(x, y):
+        return x + y > y + x
+        
+class Solution:
+    def largestNumber(self, nums: List[int]) -> str:
+        ans = ''.join(sorted(map(str, nums), key=SortKey))
+        return '0' if ans[0] == '0' else ans
+```
+

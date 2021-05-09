@@ -40,7 +40,7 @@ class Solution:
 
 ### [325. Maximum Size Subarray Sum Equals k](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/)
 
-```
+```python
 class Solution:
     def maxSubArrayLen(self, nums: List[int], k: int) -> int:
         # Pattern: Subarray sum of K
@@ -85,6 +85,8 @@ class Solution:
         
         return (N - ans) if ans else -1
 ```
+
+## Others
 
 ### [454. 4Sum II](https://leetcode.com/problems/4sum-ii/)
 ```python
@@ -142,3 +144,29 @@ class Solution:
         return sorted(ans)
 ```
 
+### [36. Valid Sudoku](https://leetcode.com/problems/valid-sudoku/)
+
+### [49. Group Anagrams](https://leetcode.com/problems/group-anagrams/)
+
+```python
+class Solution(object):
+    def groupAnagrams(self, strs):
+        ans = collections.defaultdict(list)
+        for s in strs:
+            # Trick: sorted() can be used 
+            # on str
+            ans[tuple(sorted(s))].append(s)
+        return ans.values()
+```
+
+### [1152. Analyze User Website Visit Pattern](https://leetcode.com/problems/analyze-user-website-visit-pattern/)
+
+```python
+class Solution:
+    def mostVisitedPattern(self, username, timestamp, website):
+        dp = collections.defaultdict(list)
+        for t, u, w in sorted(zip(timestamp, username, website)):
+            dp[u].append(w)
+        count = sum([collections.Counter(set(itertools.combinations(dp[u], 3))) for u in dp], collections.Counter())
+        return list(min(count, key=lambda k: (-count[k], k)))
+```

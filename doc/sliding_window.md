@@ -12,6 +12,8 @@ Two pointers can also have variations like fast-slow pointer.
 
 ## Problems
 
+### [30. Substring with Concatenation of All Words](https://leetcode.com/problems/substring-with-concatenation-of-all-words/)
+
 ### [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)
 
 ```python
@@ -152,3 +154,153 @@ class Solution:
         return ones - ans
 ```
 
+### [76. Minimum Window Substring](https://leetcode.com/problems/minimum-window-substring/)
+
+```python
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        # Variables needed to check the validity of a window
+        t_dict = Counter(t)
+        w_dict = {}
+        required = len(t_dict)
+        formed = 0
+        
+        # ans tuple of the form (window length, left, right)
+        ans = float('inf'), None, None
+        
+        # Pointers of the window, starting from 0, moving to same direction
+        l = r = 0
+        
+        while r < len(s):
+            
+            # Update window status according to new right
+            c = s[r]
+            if c in t_dict:
+                w_dict[c] = w_dict.get(c, 0) + 1
+                if w_dict[c] == t_dict[c]:
+                    formed += 1
+                    
+            while l <= r and formed == required:
+                # When formed == required, record the min window first
+                if r - l + 1 < ans[0]:
+                    ans = (r - l + 1, l, r)
+                    
+                # Move the left to the position that the window not valid again
+                c = s[l]
+                if c in t_dict:
+                    w_dict[c] -= 1
+                    if w_dict[c] < t_dict[c]:
+                        formed -= 1
+                l += 1
+            r += 1
+        return "" if ans[0] == float("inf") else s[ans[1] : ans[2] + 1]
+```
+
+### [159. Longest Substring with At Most Two Distinct Characters](https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters/)
+
+```python
+class Solution:
+    def lengthOfLongestSubstringTwoDistinct(self, s: str) -> int:
+        N, ans = len(s), 0
+        if N < 3:
+            return N
+
+        left = 0
+        for right in range(N):
+            while len(set(s[left:right + 1])) > 2:
+                left += 1
+            ans = max(ans, len(s[left:right + 1]))
+        return ans
+```
+
+### [524. Longest Word in Dictionary through Deleting](https://leetcode.com/problems/longest-word-in-dictionary-through-deleting/)
+
+```python
+class Solution:
+    def findLongestWord(self, s: str, d: List[str]) -> str:
+        # For each work in the list, keep an pointer
+        p = [0] * len(d)
+        
+        # 
+        matched = []
+        for i in range(len(s)):
+            for j in range(len(d)):
+                # Get pointer for a single target word
+                _p = p[j]
+                if _p < len(d[j]) and s[i] == d[j][_p]:
+                    p[j] += 1
+                    if p[j] == len(d[j]):
+                        matched.append(d[j])
+                        
+        matched.sort(key=lambda w: (-len(w), w))
+
+        return matched[0]  if matched else ""   
+```
+
+### [532. K-diff Pairs in an Array](https://leetcode.com/problems/k-diff-pairs-in-an-array/)
+
+```python
+class Solution:
+    def findPairs(self, nums: List[int], k: int) -> int:
+        
+        nums.sort()
+        
+        left, right = 0, 1
+        result = 0
+        
+        while left < len(nums) and right < len(nums):
+            if left == right or nums[right] - nums[left] < k:
+                right += 1
+            elif nums[right] - nums[left] > k:
+                left += 1
+            else:
+                result += 1
+                left += 1
+                while left < len(nums) and nums[left] == nums[left -1]:
+                    left += 1
+                    
+        return result
+```
+
+### [1004. Max Consecutive Ones III](https://leetcode.com/problems/max-consecutive-ones-iii/)
+
+```python
+class Solution:
+    def longestOnes(self, A: List[int], K: int) -> int:
+        left = 0
+        counts_0 = 0
+        ans = 0
+        for right, a in enumerate(A):
+            if a == 0:
+                counts_0 += 1
+            while counts_0 > K and left <= right:
+                if A[left] == 0:
+                    counts_0 -= 1
+                left += 1
+            ans = max(ans, right - left + 1)
+        return ans
+```
+
+### [1423. Maximum Points You Can Obtain from Cards](https://leetcode.com/problems/maximum-points-you-can-obtain-from-cards/)
+
+```python
+class Solution:
+    def maxScore(self, cardPoints: List[int], k: int) -> int:
+        # Find the subarray of length len(cardPoints) - k with minimum sum
+        cards = cardPoints
+        l  = len(cards)
+        # Trick
+        _k = l - k
+        
+        # Create an array of prefix sum
+        s = [0] * (l + 1)
+        
+        for i in range(1, len(s)):
+            s[i] = s[i- 1] + cards[i - 1]
+            
+        ans = float('inf')
+        for i in range(_k, len(s)):
+            ans = min(ans, s[i] - s[i - _k])
+            
+        return s[-1] - ans
+```

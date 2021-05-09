@@ -159,3 +159,40 @@ class Solution:
     def repeatedSubstringPattern(self, s: str) -> bool:
         return s in (s + s)[1:-1]
 ```
+
+### [1764. Form Array by Concatenating Subarrays of Another Array](https://leetcode.com/problems/form-array-by-concatenating-subarrays-of-another-array/)
+
+```python
+class Solution:
+    def canChoose(self, groups: List[List[int]], nums: List[int]) -> bool:
+        # Intuition: KMP for array
+        # Sligth modification to kmp() adding start index for source array,
+        # the i second loop start from 'start' rather than 0. Then loop
+        # the groups, every kmp search start from index after prev group
+        def kmp(s, t, start):
+            M, N = len(s), len(t)
+            i, j = 0, -1
+            lps = [-1] + [0] * N
+            while i < N:
+                while j >= 0 and t[i] != t[j]:
+                    j = lps[j]
+                i, j = i + 1, j + 1
+                lps[i] = j
+                
+            i, j = start, 0
+            while i < M:
+                while j >= 0 and s[i] != t[j]:
+                    j = lps[j]
+                i, j = i + 1, j + 1
+                if j == N:
+                    return i - N
+            return -1
+        
+        pos, l = 0, 0
+        for i in range(len(groups)):
+            pos, l = kmp(nums, groups[i], pos + l), len(groups[i])
+            if pos < 0:
+                return False
+
+        return True
+```
