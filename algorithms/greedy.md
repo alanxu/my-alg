@@ -19,7 +19,182 @@ How to prove that your greedy algorithm provides globally optimal solution?
 
 Usually you could use the proof by contradiction.
 
-## Problems
+
+## Dividion to Consecutive Numbers
+
+### [1296. Divide Array in Sets of K Consecutive Numbers](https://leetcode.com/problems/divide-array-in-sets-of-k-consecutive-numbers/)
+
+```python
+class Solution:
+    def isPossibleDivide(self, nums: List[int], k: int) -> bool:
+        # Same as #659
+        L = len(nums)
+        if L % k != 0:
+            return False
+        heapq.heapify(nums)
+        counts = Counter(nums)
+        
+        for _ in range(L // k):
+            start = heapq.heappop(nums)
+            while counts[start] == 0:
+                start = heapq.heappop(nums)
+            
+            for _ in range(k):
+                if counts[start] == 0:
+                    return False
+                counts[start] -= 1
+                start += 1
+        
+        return True
+```
+
+### [846. Hand of Straights](https://leetcode.com/problems/hand-of-straights/)
+
+```python
+class Solution:
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        # Intuition: Greedy - For each round, pop the min num x from
+        # hand, there should be x + 1, x + 2, x + W - 1 in hand too.
+        # pop all above and repeat in next round until the hand is
+        # empty. If any of x + i is missing or hand is empty in middle, 
+        # return False
+        
+        # O(n^2) time
+        # Not use heap, because removeal of nums will break heap,
+        # and heapify is O(n) cannot repeatedly call.
+        hand = sorted(hand, reverse=True)
+        while hand:
+            start = hand.pop()
+            for _ in range(W - 1):
+                start += 1
+                if start not in hand:
+                    return False
+                else:
+                    hand.remove(start)
+        return True
+    
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        # Same ideal as above, but use heap and counter to
+        # achieve O(n) time
+        L = len(hand)
+        # If cannot divided into L group, return False
+        if L % W != 0:
+            return False
+        round = L // W
+        heapq.heapify(hand)
+        counts = Counter(hand)
+        # Loop for round times to avoid a corner case
+        # that start = heapq.heappop(hand) fails at last
+        # loop
+        for _ in range(round):
+            # heap is jsut keep poping, the poped num
+            # is skiped if it is used tracked by counts
+            start = heapq.heappop(hand)
+            while counts[start] == 0:
+                start = heapq.heappop(hand)
+            
+            # Update counts, and check if all nums are there to
+            # form current group
+            for _ in range(W):
+                if counts[start] == 0:
+                    return False
+                counts[start] -= 1
+                start += 1
+        return True
+    
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        # Another slow solution just use counter
+        counts = collections.Counter(hand)
+        while counts:
+            # Trick: Use min() get smallest key from counter
+            # Get the current smallest, there should be W consecutive
+            # nums starting from it, if no, return False
+            start = min(counts)
+            for nxt in range(start, start + W):
+                if not counts[nxt]:
+                    return False
+                counts[nxt] -= 1
+                if counts[nxt] == 0:
+                    # Have to del so min() will never return it
+                    del counts[nxt]
+        return True
+
+```
+
+### [846. Hand of Straights](https://leetcode.com/problems/hand-of-straights/)
+
+```python
+class Solution:
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        # Intuition: Greedy - For each round, pop the min num x from
+        # hand, there should be x + 1, x + 2, x + W - 1 in hand too.
+        # pop all above and repeat in next round until the hand is
+        # empty. If any of x + i is missing or hand is empty in middle, 
+        # return False
+        
+        # O(n^2) time
+        # Not use heap, because removeal of nums will break heap,
+        # and heapify is O(n) cannot repeatedly call.
+        hand = sorted(hand, reverse=True)
+        while hand:
+            start = hand.pop()
+            for _ in range(W - 1):
+                start += 1
+                if start not in hand:
+                    return False
+                else:
+                    hand.remove(start)
+        return True
+    
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        # Same ideal as above, but use heap and counter to
+        # achieve O(n) time
+        L = len(hand)
+        # If cannot divided into L group, return False
+        if L % W != 0:
+            return False
+        round = L // W
+        heapq.heapify(hand)
+        counts = Counter(hand)
+        # Loop for round times to avoid a corner case
+        # that start = heapq.heappop(hand) fails at last
+        # loop
+        for _ in range(round):
+            # heap is jsut keep poping, the poped num
+            # is skiped if it is used tracked by counts
+            start = heapq.heappop(hand)
+            while counts[start] == 0:
+                start = heapq.heappop(hand)
+            
+            # Update counts, and check if all nums are there to
+            # form current group
+            for _ in range(W):
+                if counts[start] == 0:
+                    return False
+                counts[start] -= 1
+                start += 1
+        return True
+    
+    def isNStraightHand(self, hand: List[int], W: int) -> bool:
+        # Another slow solution just use counter
+        counts = collections.Counter(hand)
+        while counts:
+            # Trick: Use min() get smallest key from counter
+            # Get the current smallest, there should be W consecutive
+            # nums starting from it, if no, return False
+            start = min(counts)
+            for nxt in range(start, start + W):
+                if not counts[nxt]:
+                    return False
+                counts[nxt] -= 1
+                if counts[nxt] == 0:
+                    # Have to del so min() will never return it
+                    del counts[nxt]
+        return True
+
+```
+
+## Others
 
 ### [316. Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/)
 
@@ -422,37 +597,7 @@ class Solution:
         return ans
 ```
 
-### [846. Hand of Straights](https://leetcode.com/problems/hand-of-straights/)
 
-```python
-class Solution:
-    def isNStraightHand(self, hand: List[int], W: int) -> bool:
-        hand = sorted(hand, reverse=True)
-        while hand:
-            start = hand.pop()
-            for _ in range(W - 1):
-                start += 1
-                if start not in hand:
-                    return False
-                else:
-                    hand.remove(start)
-        return True
-    def isNStraightHand(self, hand: List[int], W: int) -> bool:
-        counts = collections.Counter(hand)
-        while counts:
-            # Trick: Use min() get smallest key from counter
-            # Get the current smallest, there should be W consecutive
-            # nums starting from it, if no, return False
-            start = min(counts)
-            for nxt in range(start, start + W):
-                if not counts[nxt]:
-                    return False
-                counts[nxt] -= 1
-                if counts[nxt] == 0:
-                    # Have to del so min() will never return it
-                    del counts[nxt]
-        return True
-```
 
 
 ### [1191. K-Concatenation Maximum Sum](https://leetcode.com/problems/k-concatenation-maximum-sum/)
@@ -463,25 +608,29 @@ class Solution:
         # https://youtu.be/-T19A8DvD6U
         # When sum > 0, even if maxsum in in middle of arr, maxsum_2
         # will be acrose 2 arr...
-        def kadane(arr, k):
-            arr = arr * k
-            global_sum = local_sum = 0
-            for x in arr:
-                local_sum = max(local_sum + x, x)
-                global_sum = max(global_sum, local_sum)
-                
-            return global_sum
-        
+        # Case 1: ....XXX....
+        # Case 2: .........XX XXX........ or ......... XX.........
+        # Case 3: Case 2 adding (K -2) full array in middle
+        #         .........XX <K - 2 copyies> XXX........
+        # If sum(arr) > 0, Case 3 should be considered, otherwise consider other 2
+        def kadane(nums):
+            local_max, global_max = 0, 0
+            for x in nums:
+                local_max = max(local_max + x, x)
+                global_max = max(global_max, local_max)
+            return global_max
         MOD = 10 ** 9 + 7
         
+        # If k is 1, return case 1, elif k is 2, return case 2,
+        # cuz when case 1 is valid, case 2 == case 1
         if k < 3:
-            return kadane(arr, k) % MOD
+            return kadane(arr * k) % MOD
         
         sum_ = sum(arr)
-        ans1 = kadane(arr, 1)
-        ans2 = kadane(arr, 2)
+        case1 = kadane(arr)
+        case2 = kadane(arr * 2)
         
-        return max(ans1, ans2, ans2 + sum_ * (k - 2)) % MOD
+        return max(case1, case2, case2 + sum_ * (k - 2)) % MOD
 ```
 
 ### [621. Task Scheduler](https://leetcode.com/problems/task-scheduler/)
@@ -509,91 +658,82 @@ class Solution:
         return max(len(tasks), (max_count - 1) * (n + 1) + max_count_tasks)
 ```
 
-
-
-### [778. Swim in Rising Water](https://leetcode.com/problems/swim-in-rising-water/)
-
-```python
-class Solution:
-    def swimInWater(self, grid: List[List[int]]) -> int:
-        # Intuition: Greedy/DFS/Heap
-        # DFS to collect all the possible reachable targets for each
-        # round. Use HEAP instead of stack, so each round we check
-        # the lowest (less time) target. When the final target is reachable
-        # we return the max elevation we check. Remember it takes 0 time
-        # to reach to anywhere.
-        # This is just a standard DFS and just use heap instead stack.
-        N = len(grid)
-        heap = [(grid[0][0], 0, 0)]
-        ans, seen = 0, {(0, 0)}
-        while heap:
-            h, r, c = heapq.heappop(heap)
-            ans = max(ans, h)
-            if r == c == N - 1:
-                return ans
-            
-            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
-                if 0 <= _r < N and 0 <= _c < N and (_r, _c) not in seen:
-                    seen.add((_r, _c))
-                    heapq.heappush(heap, (grid[_r][_c], _r, _c))
-```
-
-
 ### [134. Gas Station](https://leetcode.com/problems/gas-station/)
 
 ```python
 class Solution:
-    # If A cannot reach D, all station between A and D cannot reach D
     def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
-        cur_tank, total_tank = 0, 0
-        start = 0
-        
+        # Inuition: Greedy - Test each gas station to see if we can make
+        # a circle starting from it. It seems a N X N alg. The way to
+        # optimize it is that if A cannot reach D, B and C cannot reach
+        # D either, so if we know D is not reached from some point before,
+        # we just restart from D and skip all before.
+        # Another point is if the total cost is greater than total gas,
+        # there is no ans. So we calc total_tank in same loop of test
+        # cur_tank.
+        start, cur_tank, total_tank = 0, 0, 0
         for i in range(len(gas)):
+            # i is not cur station, use start to mark the cur station
             cur_tank += gas[i] - cost[i]
             total_tank += gas[i] - cost[i]
-            
             if cur_tank < 0:
+                # Skip all previous stations and start from unreachable one
+                # If A cannot reach D, all station between A and D cannot reach D
                 start = i + 1
+                # Reset at new starting point
                 cur_tank = 0
-                
         return start if total_tank >= 0 else -1
 ```
 
 ### [659. Split Array into Consecutive Subsequences](https://leetcode.com/problems/split-array-into-consecutive-subsequences/)
 
 ```python
-class Solution(object):
-    def isPossible(self, nums):
-        counter = collections.Counter(nums)
-        tails = collections.Counter()
+class Solution:
+    def isPossible(self, nums: List[int]) -> bool:
+        # Intuition: Greedy
+        # https://youtu.be/5GZ2NCtloW0
+        # Drop the num one by one into consecutive seq
+        # starting from begining. For cur num x, 
+        
+        # First, check if it can be dropped at the end of an
+        # existing valid seq, if can do so, always do
+        # it this way, cuz if there is x cannot be head
+        # of a new seq, it should be appended; if x can
+        # be the head of new seq, it is no harm to append
+        # that new seq to old one; if there are multi x,
+        # append cur one then worry about next x.
+        
+        # Second, x cannot be append to existing seq, it has
+        # to be head of new seq. Check if x can be head of
+        # new seq by checking if x + 1 and x + 2 exist. If
+        # not valid, return False; if True, drop x, x + 1,
+        # and x + 2. Here we drop nums after cur x, later on
+        # we should remember not to duplicate drop them.
+        
+        # Use counts to track remaining nums to be dropped,
+        # and ends for num of seqs ending with num y.
+        counts = Counter(nums)
+        ends = Counter()
         for x in nums:
-            if counter[x] == 0:
+            if counts[x] == 0:
+                # If the cur num x already droped (in case 2), continue
                 continue
-            elif tails[x] > 0:
-                tails[x] -= 1
-                tails[x + 1] += 1
-            elif counter[x + 1] and counter[x + 2]:
-                counter[x + 1] -= 1
-                counter[x + 2] -= 1
-                tails[x + 3] += 1
+            elif ends[x - 1]:
+                # If x can be appended, append it
+                counts[x] -= 1
+                ends[x - 1] -= 1
+                ends[x] += 1
+            elif counts[x + 1] and counts[x + 2]:
+                # If x cannot be appended, but can be head,
+                # drop all x, x + 1, x + 2. x + 2 is the end
+                # of the new seq
+                counts[x + 1] -= 1
+                counts[x + 2] -= 1
+                counts[x] -= 1
+                ends[x + 2] += 1
             else:
+                # If both conditions cannot meet, return False
                 return False
-            counter[x] -= 1
         return True
 ```
 
-### [670. Maximum Swap](https://leetcode.com/problems/maximum-swap/)
-
-```python
-class Solution(object):
-    def maximumSwap(self, num):
-        A = map(int, str(num))
-        # Trick: Last duplicated num replace previous
-        last = {x: i for i, x in enumerate(A)}
-        for i, x in enumerate(A):
-            for d in xrange(9, x, -1):
-                if last.get(d, None) > i:
-                    A[i], A[last[d]] = A[last[d]], A[i]
-                    return int("".join(map(str, A)))
-        return num
-```

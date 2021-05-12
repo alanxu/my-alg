@@ -118,40 +118,76 @@ class MyCalendar(object):
 ### [297. Serialize and Deserialize Binary Tree](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/)
 
 ```python
+# Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
 class Codec:
+    # Intuition: 
+    # First, the key is to nail down the serial
+    # format: <root>,<left_tree>,<right_tree>.
+    # This is the base of a recursion method.
+    # Second: Fill all the leaves with 'null',
+    # this makes it possible for deser to understand.
+    # With a 'full' binary tree, the dfs even doesn't
+    # need to check empty.
+    
+    
 
     def serialize(self, root):
-        self.ans = ''
-        def rserialize(n):
-            if not n:
-                self.ans += 'None, '
-                return
-            self.ans += f'{str(n.val)}, '
-            rserialize(n.left)
-            rserialize(n.right)
+        """Encodes a tree to a single string.
         
-        rserialize(root)
-        return self.ans
-
+        :type root: TreeNode
+        :rtype: str
+        """
+        if not root:
+            return 'null,'
+        # Trick: Only add "," for real step in
+        # a recursion method, this needs to be
+        # understood very well.
+        ans = str(root.val) + ","
+        ans += self.serialize(root.left)
+        ans += self.serialize(root.right)
+        return ans
+        
     def deserialize(self, data):
-        #Trick: Tink about the exit condition
-        def rdeserialize(l):
-            # print(l)
-            if l[0] == 'None':
-                l.pop(0)
-                return None
-            r = TreeNode(l[0])
-            l.pop(0)
-            r.left = rdeserialize(l)
-            r.right = rdeserialize(l)
-            return r
+        """Decodes your encoded data to tree.
         
-        return rdeserialize(data.split(', '))
+        :type data: str
+        :rtype: TreeNode
+        """
+        def rdeserialize(data):
+            # No need check empty, if cur root
+            # is 'null', it won't continue.
+            if data[0] == 'null':
+                data.pop(0)
+                return None
+
+            root = TreeNode(data[0])
+            data.pop(0)
+            root.left = rdeserialize(data)
+            root.right = rdeserialize(data)
+            return root
+        return rdeserialize(data.split(','))
+
+# Your Codec object will be instantiated and called as such:
+# ser = Codec()
+# deser = Codec()
+# ans = deser.deserialize(ser.serialize(root))
 ```
 
 ### [124. Binary Tree Maximum Path Sum](https://leetcode.com/problems/binary-tree-maximum-path-sum/)
 
 ```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 class Solution:
     def maxPathSum(self, root: TreeNode) -> int:
         self.max_path_sum = float('-inf')
@@ -167,7 +203,8 @@ class Solution:
                 return 0
             max_left = max_one_child(node.left)
             max_right = max_one_child(node.right)
-            # Trick: Exclude if the value is negative
+            # Trick: Put 0 in max compasion, if both child path < 0, the max path for
+            # root is just itself
             # Trick: Add one child to analyze path sum
             max_root = node.val + max(0, max_left, max_right)
             max_path_sum = node.val + max(0, max_left) + max(0, max_right)

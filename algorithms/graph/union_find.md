@@ -249,7 +249,18 @@ class Solution:
     def accountsMerge(self, accounts):
         # Intuition: Uniion find on each emails, union emails if they are same input account,
         # for diff input accounts but same account, there is >= 1 email got same parnent (find(email)),
-        # so that email link all emails in same input account to the other account
+        # so that email link all emails in same input account to the other account.
+        
+        # In the initial inputs, emails are grouped by small groups, but small group can
+        # be further grouped to bigger groups. The problem is to get the bigger group.
+        # In the whole process, it is mostly emails' game, accout name is just for display.
+        
+        # There is implicit condition that unique email in diff accounts, the account names are same
+        
+        # Use email as node in graph rather than accounts. Using accounts will work, we can assume
+        # each account is a node, and 2 nodes are connected when there are same email in them. But
+        # it takes O(n^2).
+        
         dsu = UnionFind(10001)
         em_to_name = {}
         em_to_id = {}
@@ -261,12 +272,19 @@ class Solution:
                 if email not in em_to_id:
                     em_to_id[email] = i
                     i += 1
+                # Trick: Just need to union first email and every others in account
                 dsu.union(em_to_id[acc[1]], em_to_id[email])
-
+        
+        # Now we build the disjoint set and know all groups the email can be divide
+        # we just have to phisically group the email as a base for final answer.
+        # Use a dict, key is the parent of that eamail group, value is a list of
+        # all emails in that group
         ans = collections.defaultdict(list)
         for email in em_to_name:
             ans[dsu.find(em_to_id[email])].append(email)
 
+        # Given the email groups dict, output its vlaues (list of emais) after sorting
+        # and add the account name in front of each list.
         return [[em_to_name[v[0]]] + sorted(v) for v in ans.values()]
 ```
 

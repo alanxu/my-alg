@@ -170,3 +170,37 @@ class Solution:
         count = sum([collections.Counter(set(itertools.combinations(dp[u], 3))) for u in dp], collections.Counter())
         return list(min(count, key=lambda k: (-count[k], k)))
 ```
+
+### [670. Maximum Swap](https://leetcode.com/problems/maximum-swap/)
+
+```python
+class Solution:
+    def maximumSwap(self, num: int) -> int:
+        # Inuition: Greedy, Hashmap
+        # Create a map with key = <each digit in num>,
+        # and value = <last index of that value>. For 
+        # each i, x in num, find (j, y) after i where 
+        # y is the max in num[i + 1:], if there are more
+        # than 1 of y, swap the last one. Why last one?
+        # 27376 -> 77326
+        # 27376 -> 72376
+        # Swap with last max always yields greater value.
+        A = list(map(int, str(num)))
+        last_index = { v: i for i, v in enumerate(A)}
+        # Iterate from start of num and return as long
+        # as there is a greater value found for cur i.
+        # Bcuz i is the most significant digit
+        for i, v1 in enumerate(A):
+            # Trick: To find the max value after i, start
+            # from 9 until v1 + 1, look up the index j
+            # in the map. This recude the search for
+            # max to O(1), whilst if loop for all elements
+            # after i, it takes O(n)
+            for v2 in range(9, v1, -1):
+                j = last_index.get(v2, -1)
+                if j > i:
+                    A[i], A[j] = A[j], A[i]
+                    return int(''.join(map(str, A)))
+
+        return num
+```

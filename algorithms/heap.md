@@ -248,3 +248,29 @@ class Solution:
         return ans
 ```
 
+### [778. Swim in Rising Water](https://leetcode.com/problems/swim-in-rising-water/)
+
+```python
+class Solution:
+    def swimInWater(self, grid: List[List[int]]) -> int:
+        # Intuition: Greedy/DFS/Heap
+        # DFS to collect all the possible reachable targets for each
+        # round. Use HEAP instead of stack, so each round we check
+        # the lowest (less time) target. When the final target is reachable
+        # we return the max elevation we check. Remember it takes 0 time
+        # to reach to anywhere.
+        # This is just a standard DFS and just use heap instead stack.
+        N = len(grid)
+        heap = [(grid[0][0], 0, 0)]
+        ans, seen = 0, {(0, 0)}
+        while heap:
+            h, r, c = heapq.heappop(heap)
+            ans = max(ans, h)
+            if r == c == N - 1:
+                return ans
+            
+            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= _r < N and 0 <= _c < N and (_r, _c) not in seen:
+                    seen.add((_r, _c))
+                    heapq.heappush(heap, (grid[_r][_c], _r, _c))
+```
