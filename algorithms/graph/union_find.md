@@ -110,6 +110,49 @@ class Solution:
                             uf.union(r * C + c, _r * C + _c)
 
         return uf.counts
+
+    def numIslands(self, grid: List[List[str]]) -> int:
+        # Inuition: Use DFS to union
+        R, C = len(grid), len(grid[0])
+        N = R * C
+        parents, rank, counts = [-1] * N, [1] * N, 0
+        for r in range(R):
+            for c in range(C):
+                if grid[r][c] == '1':
+                    counts += 1
+                    parents[r * C + c] = r * C + c
+        
+        def find(i):
+            if parents[i] != i:
+                parents[i] = find(parents[i])
+            return parents[i]
+        def union(i, j):
+            nonlocal counts
+            rooti, rootj = find(i), find(j)
+            if rooti == rootj:
+                return
+            if rank[rooti] < rank[rootj]:
+                rooti, rootj = rootj, rooti
+            parents[rootj] = rooti
+            rank[rooti] += rank[rootj]
+            counts -= 1
+        def dfs(r, c):
+            if grid[r][c] == '0':
+                return
+            i = r * C + c
+            grid[r][c] = '0'
+            
+            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                j = _r * C + _c
+                if 0 <= _r < R and 0 <= _c < C and grid[_r][_c] != '0':
+                    union(i, j)
+                    dfs(_r, _c)
+                    
+        for r in range(R):
+            for c in range(C):
+                dfs(r, c)
+
+        return counts
 ```
 
 ### [305. Number of Islands II](https://leetcode.com/problems/number-of-islands-ii/)

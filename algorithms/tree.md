@@ -304,33 +304,7 @@ def distanceK(self, root, target, K):
     return bfs
 ```
 
-### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
 
-```python
-class BSTIterator:
-
-    def __init__(self, root: TreeNode):
-        self.stack = []
-        self.push(root)
-
-    def next(self) -> int:
-        if self.stack:
-            node = self.stack.pop()
-            if node.right:
-                self.push(node.right)
-            return node.val
-
-    def hasNext(self) -> bool:
-        if self.stack:
-            return True
-        return False
-        
-    def push(self, node):
-        if node:
-            self.stack.append(node)
-            if node.left:
-                self.push(node.left)
-```
 
 ### [333. Largest BST Subtree](https://leetcode.com/problems/largest-bst-subtree/)
 

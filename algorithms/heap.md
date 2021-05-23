@@ -228,49 +228,28 @@ class Solution:
 ```python
 class Solution:
     def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
-        if not nums1 or not nums2:
-            return []
+        # Intuition: The sum of 2 first element is guaranteed to be smallest, use a heap
+        # to come up with results. For each valid pair (i, j), the next pair could be
+        # either (i, j + 1) or (i + 1, j). So once pop out one pair, add max 2 next pairs
+        # into the queue. 
+        # A visited set has to be used to avoid duplicated pairs to be added. Why there is
+        # duplication? Cuz when (i, j) is popped up, there is possibility for (i - 1, j + 1)
+        # or (i + 1, j - 1) is added with (i, j) same time and it is possible that one of them
+        # are poped first, thus (i, j + 1) or (i + 1, j) could be added as the neibor of one of
+        # the 2.
+        # 1 3 4 7
+        # 1 5 17 18
+        M, N = len(nums1), len(nums2)
         heap = [(nums1[0] + nums2[0], 0, 0)]
-        
         ans, visited = [], {(0, 0)}
-        while len(ans) < k and heap:
-            pair = heapq.heappop(heap)
-            
-            i1, i2 = pair[1], pair[2]
-            ans.append((nums1[i1], nums2[i2]))
-            
-            if i1 < len(nums1) - 1 and (i1 + 1, i2) not in visited:
-                heapq.heappush(heap, (nums1[i1 + 1] + nums2[i2], i1 + 1, i2))
-                visited.add((i1 + 1, i2))
-            if i2 < len(nums2) - 1 and (i1, i2 + 1) not in visited:
-                heapq.heappush(heap, (nums1[i1] + nums2[i2 + 1], i1, i2 + 1))
-                visited.add((i1, i2 + 1))
+        while heap and len(ans) < k:
+            s, i, j = heapq.heappop(heap)
+            ans.append((nums1[i],nums2[j]))
+            if i < M - 1 and (i + 1, j) not in visited:
+                heapq.heappush(heap, (nums1[i + 1] + nums2[j], i + 1, j))
+                visited.add((i + 1, j))
+            if j < N - 1 and (i, j + 1) not in visited:
+                heapq.heappush(heap, (nums1[i] + nums2[j + 1], i, j + 1))
+                visited.add((i, j + 1))
         return ans
-```
-
-### [778. Swim in Rising Water](https://leetcode.com/problems/swim-in-rising-water/)
-
-```python
-class Solution:
-    def swimInWater(self, grid: List[List[int]]) -> int:
-        # Intuition: Greedy/DFS/Heap
-        # DFS to collect all the possible reachable targets for each
-        # round. Use HEAP instead of stack, so each round we check
-        # the lowest (less time) target. When the final target is reachable
-        # we return the max elevation we check. Remember it takes 0 time
-        # to reach to anywhere.
-        # This is just a standard DFS and just use heap instead stack.
-        N = len(grid)
-        heap = [(grid[0][0], 0, 0)]
-        ans, seen = 0, {(0, 0)}
-        while heap:
-            h, r, c = heapq.heappop(heap)
-            ans = max(ans, h)
-            if r == c == N - 1:
-                return ans
-            
-            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
-                if 0 <= _r < N and 0 <= _c < N and (_r, _c) not in seen:
-                    seen.add((_r, _c))
-                    heapq.heappush(heap, (grid[_r][_c], _r, _c))
 ```

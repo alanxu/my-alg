@@ -1,4 +1,157 @@
 
+## Parenthsese
+
+### [1249. Minimum Remove to Make Valid Parentheses](https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/)
+
+```python
+class Solution:
+    def minRemoveToMakeValid(self, s: str) -> str:
+        stack = []
+        result = ''
+        
+        for i, c in enumerate(s):
+            if c == '(':
+                stack.append(i)
+                result += c
+            elif c == ')':
+                if len(stack) == 0:
+                    result += '*'
+                else:
+                    stack.pop()
+                    result += c
+            else:
+                result += c
+        
+        result = list(result)
+        for i, c in enumerate(stack):
+            result[c] = '*'
+            
+        return ''.join([c for c in result if c != '*'])
+```
+
+### [32. Longest Valid Parentheses](https://leetcode.com/problems/longest-valid-parentheses/)
+
+```python
+class Solution:
+    def longestValidParentheses(self, s: str) -> int:
+        # Intuition: Stack - Indexes not in stack are
+        # part of a valid str
+        #
+        # Iterate s:
+        # If '(' always
+        # in stack; 
+        #
+        # If ')' at k, can match '(' in stack top at j,
+        # the valid parenthess substr len is (k - i), 
+        # because there might be valid ans between i and j
+        # that removed
+        # x x (        )
+        #   i j        k
+        #
+        # If ')' no matched '(' at stack top, ')' in stack,
+        # and it will never be popped up, it becomes a anchor
+        # for (k - i)
+        
+        # Trick: Dummy entry for no entry in stack (all str are
+        # valid)
+        stack = [(-1, ')')]
+        ans = 0
+        for i, x in enumerate(s):
+            if x == ')' and stack[-1][1] == '(':
+                stack.pop()
+                ans = max(ans, i - stack[-1][0])
+            else:
+                stack.append((i, x))
+        return ans
+```
+
+### [636. Exclusive Time of Functions](https://leetcode.com/problems/exclusive-time-of-functions/)
+
+```python
+class Solution:
+    def exclusiveTime(self, n: int, logs: List[str]) -> List[int]:
+        stack = []
+        time = [0] * n
+        for log in logs:
+            log_segs = log.split(':')
+            fun_id, status, ts = int(log_segs[0]), log_segs[1], int(log_segs[2])
+            #print((fun_id, status, ts))
+            if status == 'start':
+                stack.append((fun_id, ts))
+            elif status == 'end':
+                _fun_id, _ts = stack.pop()
+                # print((_fun_id, ts, _ts))
+                # We know if cur status is 'end', the stack top
+                # is always the matching 'start', cuz we pop everytime for an 'end'
+                elapse_time = ts - _ts + 1
+                time[_fun_id] += elapse_time
+                
+                if stack:
+                    # If stack is not empty, the current func has a parent func,
+                    # the parent func's exclusive time needs to minus the child func.
+                    # Inclusive time can be found from log, so no need worry calculate outter level
+                    # The parent func don't need to be poped, cuz you don't know when it ends atm
+                    # but what you are sure is the parent func's time must minus the current func time
+                    # so you just deduct it so it counts when parent func inclusive time is calculated
+                    time[stack[-1][0]] -= elapse_time
+        return time
+```
+
+### [856. Score of Parentheses](https://leetcode.com/problems/score-of-parentheses/)
+
+```python
+class Solution(object):
+    def scoreOfParentheses(self, S):
+        # Intuition: The whole structure is a forest.
+        # (if there is a parentheses that capture everything 
+        # then it's a tree). Essentially we're calculating the 
+        # sum of leaves. For each leave, the weight is 2^(depth-1)
+        ans = bal = 0
+        for i, x in enumerate(S):
+            # Trick: Use balance to track depth of quotes
+            if x == '(':
+                bal += 1
+            else:
+                bal -= 1
+                if S[i - 1] == '(':
+                    ans += 1 << bal
+        return ans
+    
+    def scoreOfParentheses(self, S):
+        # Intuition: Still image this is a forest.
+        # Use stack to trace score of each depth.
+        # When '(', a new depth/branch is started, put 
+        # 0 first, when ')' a branch is closed, pop
+        # it and handle next
+        stack = [0]
+        for x in S:
+            if x == '(':
+                stack.append(0)
+            else:
+                v = stack.pop()
+                stack[-1] += max(2 * v, 1)
+        return stack.pop()
+```
+
+### [1190. Reverse Substrings Between Each Pair of Parentheses](https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/)
+
+```python
+class Solution:
+    def reverseParentheses(self, s: str) -> str:
+        stack = []
+        for x in s:
+            if x!=")": #push everything into stack except ")"
+                stack.append(x)
+            else: #if we meet ")", pop all the letters until we meet "("
+                new_s = ""
+                while(stack):
+                    last = stack.pop()
+                    if last == "(":
+                        break
+                    new_s += last[::-1]
+                stack.append(new_s) #append the reverse substring
+        return "".join(stack)
+```
 
 ## Iterator
 
@@ -12,22 +165,28 @@ class BSTIterator:
         self.push(root)
 
     def next(self) -> int:
-        if self.stack:
-            node = self.stack.pop()
-            if node.right:
-                self.push(node.right)
-            return node.val
+        node = self.stack.pop()
+        # If node has right, it is
+        # a root of that sub tree,
+        # In order requires right to 
+        # be processed after root, so
+        # push node.right;
+        # If node doesnt have right,
+        # it means its subtree is 
+        # complete
+        if node.right:
+            self.push(node.right)
+        return node.val
 
     def hasNext(self) -> bool:
-        if self.stack:
-            return True
-        return False
-        
+        return not not self.stack
+    
     def push(self, node):
-        if node:
-            self.stack.append(node)
-            if node.left:
-                self.push(node.left)
+        # Recursively push root and left
+        # the most left node is on top
+        self.stack.append(node)
+        if node.left:
+            self.push(node.left)
 ```
 
 ### [341. Flatten Nested List Iterator](https://leetcode.com/problems/flatten-nested-list-iterator/)
@@ -229,6 +388,53 @@ class Solution:
             q.append(i)
         
         return dp[-1]
+```
+
+### [155. Min Stack](https://leetcode.com/problems/min-stack/)
+
+```python
+class MinStack:
+    # Intuition: Monotonic Stack
+    # Use a monotonic decreasing stack to track
+    # the desc seq in the stack, when the stack
+    # top eques mono stack top in pop, pop both
+    # otherwise it means mono stack top is not
+    # reached in stack;
+    # When push, onl push to mono stack when
+    # val is a new min
+    def __init__(self):
+        """
+        initialize your data structure here.
+        """
+        self.stack = [math.inf]
+        self.mono_desc_stack = [math.inf]
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        # <= is important to handle same val
+        if val <= self.mono_desc_stack[-1]:
+            self.mono_desc_stack.append(val)
+
+    def pop(self) -> None:
+        x = self.stack.pop()
+        if x == self.mono_desc_stack[-1]:
+            self.mono_desc_stack.pop()
+
+    def top(self) -> int:
+        x = self.stack[-1]
+        return x if x != math.inf else None
+
+    def getMin(self) -> int:
+        x = self.mono_desc_stack[-1]
+        return x if x != math.inf else None
+
+
+# Your MinStack object will be instantiated and called as such:
+# obj = MinStack()
+# obj.push(val)
+# obj.pop()
+# param_3 = obj.top()
+# param_4 = obj.getMin()
 ```
 
 ## Others
@@ -470,36 +676,6 @@ class Solution:
         return cur_str
 ```
 
-### [636. Exclusive Time of Functions](https://leetcode.com/problems/exclusive-time-of-functions/)
-
-```python
-class Solution:
-    def exclusiveTime(self, n: int, logs: List[str]) -> List[int]:
-        stack = []
-        time = [0] * n
-        for log in logs:
-            log_segs = log.split(':')
-            fun_id, status, ts = int(log_segs[0]), log_segs[1], int(log_segs[2])
-            #print((fun_id, status, ts))
-            if status == 'start':
-                stack.append((fun_id, ts))
-            elif status == 'end':
-                _fun_id, _ts = stack.pop()
-                # print((_fun_id, ts, _ts))
-                elapse_time = ts - _ts + 1
-                time[_fun_id] += elapse_time
-                
-                if stack:
-                    # If stack is not empty, the current func has a parent func,
-                    # the parent func's exclusive time needs to minus the child func.
-                    # Inclusive time can be found from log, so no need worry calculate outter level
-                    # The parent func don't need to be poped, cuz you don't know when it ends atm
-                    # but what you are sure is the parent func's time must minus the current func time
-                    # so you just deduct it so it counts when parent func inclusive time is calculated
-                    time[stack[-1][0]] -= elapse_time
-        return time
-```
-
 ### [735. Asteroid Collision](https://leetcode.com/problems/asteroid-collision/)
 
 ```python
@@ -564,30 +740,166 @@ class Solution:
         return ''.join(c * k for c, k in stack)
 ```
 
-### [1249. Minimum Remove to Make Valid Parentheses](https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/)
+### [225. Implement Stack using Queues](https://leetcode.com/problems/implement-stack-using-queues/)
+
+```python
+class MyStack:
+    # Intuition: On push call, following push of
+    # the cur value, pop and push previous
+    # values L - 1 times, so the queue is
+    # NEW OLD1 OLD2 OLD3 ...
+    def __init__(self):
+        self.q = deque()
+        self.l = 0
+
+    def push(self, x: int) -> None:
+        self.q.append(x)
+        self.l += 1
+        for _ in range(self.l - 1):
+            self.q.append(self.q.popleft())
+
+    def pop(self) -> int:
+        if self.l > 0: self.l -= 1
+        return self.q.popleft()
+
+    def top(self) -> int:
+        return self.q[0]
+
+    def empty(self) -> bool:
+        return self.l == 0
+```
+
+### [232. Implement Queue using Stacks](https://leetcode.com/problems/implement-queue-using-stacks/)
+
+```python
+class MyQueue:
+
+    def __init__(self):
+        self.stack1, self.stack2 = [], []
+        
+    # Solution 1: When push every value, use
+    # two stack to make sure latest always
+    # at bottom.
+    # push: O(n), pop: O(1)
+    def push(self, x: int) -> None:
+        while self.stack1:
+            self.stack2.append(self.stack1.pop())
+        self.stack1.append(x)
+        while self.stack2:
+            self.stack1.append(self.stack2.pop())
+        
+    def pop(self) -> int:
+        return self.stack1.pop()
+
+    def peek(self) -> int:
+        return self.stack1[-1]
+        
+    def empty(self) -> bool:
+        return not self.stack1
+    
+    # Solution 2: Use 2 stack to reverse order
+    # of elements. This works only when s2 is empty
+    # Use s1 as a cache, s2 is the primary.
+    # When peek(), check if primary is empty, if not
+    # just use primary, if empty, copy from s1 in reversed
+    # order. When push, just push to s1
+    # push: O(1), pop: amortized O(1)
+    
+    # Alg: amortized O(1) means most of call is O(1), but
+    # sometime could be O(n), e.g. ArrayList resize
+    def push(self, x: int) -> None:
+        self.stack1.append(x)
+        
+    def pop(self) -> int:
+        self.peek()
+        return self.stack2.pop()
+
+    def peek(self) -> int:
+        if not self.stack2:
+            while self.stack1:
+                self.stack2.append(self.stack1.pop())
+        return self.stack2[-1]
+        
+    def empty(self) -> bool:
+        return not self.stack1 and not self.stack2
+```
+
+### [456. 132 Pattern](https://leetcode.com/problems/132-pattern/submissions/)
 
 ```python
 class Solution:
-    def minRemoveToMakeValid(self, s: str) -> str:
+    def find132pattern(self, nums: List[int]) -> bool:
+        N = len(nums)
+        
+        # Iterate array to calc min value at left of i
+        # including i
+        left_min = [nums[0]] + [-1] * (N - 1)
+        for i in range(1, N):
+            left_min[i] = min(left_min[i - 1], nums[i])
+        
+        # Reversely traverse array, for every x
         stack = []
-        result = ''
-        
-        for i, c in enumerate(s):
-            if c == '(':
-                stack.append(i)
-                result += c
-            elif c == ')':
-                if len(stack) == 0:
-                    result += '*'
-                else:
-                    stack.pop()
-                    result += c
-            else:
-                result += c
-        
-        result = list(result)
-        for i, c in enumerate(stack):
-            result[c] = '*'
+        for x in range(N - 1, 0, -1):
+            # Examin if x has a valid i, if
+            # not x cannot by j, and because
+            # x < left_min[x], x < any left_min[j]
+            # where 0 <= j < x.
+            # So x cannot be j, k, so dump it
+            # and x cannot be i, cuz if it is
+            # a valid i, the programme has returned
+            # True.
+            if nums[x] <= left_min[x]:
+                continue
             
-        return ''.join([c for c in result if c != '*'])
+            # If x has valid i, examin if x could be j
+            while stack and stack[-1] <= left_min[x]:
+                # Check the stack from top, if the top
+                # is smaller than smallest at left of x,
+                # it cannot be x's k, and it cannot be k
+                # for any j at left of x, so dmp it.
+                # And it cannot be i and j otherwise it 
+                # should not be here.
+                stack.pop()
+            
+            # After popping out all too-small k, check
+            # if k < j, if so return True.
+            # Why just check top? If stack[-1] >= nums[x], 
+            # why x cannot be j? Because the stack is
+            # actually a monotonic increas stack, top
+            # is the smallest in stack. So if first one
+            # is too big, all others is too big too.
+            if stack and stack[-1] < nums[x]:
+                return True
+            
+            # If x cannot be i and j, maybe it can
+            # be k, so push to stack.
+            # Why use Stack? Because we have to check top
+            # in monotonic increasing order. Why it is
+            # monotonic increasing? First, starting from
+            # right, all x in stack is not the smallest
+            # of his left (inclusive) which means it must
+            # be smallest on it's right, otherwise it already
+            # return True, so each the stack is in monotonic
+            # order, and only Stack can maintain this and
+            # process in correct order.
+            stack.append(nums[x])
+        return False
+```
+
+### [946. Validate Stack Sequences](https://leetcode.com/problems/validate-stack-sequences/)
+
+```python
+class Solution:
+    def validateStackSequences(self, pushed: List[int], popped: List[int]) -> bool:
+        # Intuition: Greedy - Push nums in order, after push each x,
+        # try pop if stack top matched the num to be popped, for each
+        # push, needs a loop to keep checking pop until not matching.
+        stack = []
+        for x in pushed:
+            stack.append(x)
+            while stack and stack[-1] == popped[0]:
+                stack.pop()
+                popped.pop(0)
+
+        return not popped
 ```
