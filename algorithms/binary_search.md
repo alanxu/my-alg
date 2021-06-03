@@ -539,39 +539,7 @@ class Solution:
             return (kth(A, 0, M - 1, B, 0, N - 1, mid) + kth(A, 0, M - 1, B, 0, N - 1, mid - 1)) / 2.0
 ```
 
-### [209. Minimum Size Subarray Sum](https://leetcode.com/problems/minimum-size-subarray-sum/)
 
-```python
-class Solution:
-    def minSubArrayLen(self, s: int, nums: List[int]) -> int:
-        if not nums:
-            return 0
-        
-        l = len(nums)
-        sums = [0] * l
-        sums[0] = nums[0]
-        
-        for i in range(1, l):
-            sums[i] = sums[i - 1] + nums[i]
-        
-        ans = float('inf')
-        
-        for i in range(0, l):
-            if sums[i] >= s:
-                ans = min(ans, i + 1)
-            to_find = s + sums[i]
-            
-            left, right = i + 1, l - 1
-            while left <= right:
-                mid = (left + right) // 2
-                if sums[mid] >= to_find:
-                    ans = min(ans, mid - i)
-                    right = mid - 1
-                else:
-                    left = mid + 1
-                    
-        return ans if ans != float('inf') else 0
-```
 
 ## K Sum
 

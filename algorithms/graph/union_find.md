@@ -153,57 +153,103 @@ class Solution:
                 dfs(r, c)
 
         return counts
+
+        def numIslands(self, grid: List[List[str]]) -> int:
+        R, C = len(grid), len(grid[0])
+        self.counts = 0
+        for r in range(R):
+            for c in range(C):
+                if grid[r][c] == '1':
+                    self.counts += 1
+        
+        parents, rank = [x for x in range(R * C)], [1] * (R * C)
+        def find(i):
+            if parents[i] != i:
+                parents[i] = find(parents[i])
+            return parents[i]
+        def union(i, j):
+            rooti, rootj = find(i), find(j)
+            if rooti != rootj:
+                if rank[i] < rank[j]:
+                    rooti, rootj = rootj, rooti
+                parents[rootj] = rooti
+                rank[rooti] += rank[rootj]
+                self.counts -= 1
+        
+        for r in range(R):
+            for c in range(C):
+                if grid[r][c] == '1':
+                    grid[r][c] = '0'
+                    # Trick: Only vsite right and down
+                    # Trick: Index cell in grid: r * C + c
+                    for _r, _c in ((r + 1, c), (r, c + 1)):
+                        if 0 <= _r < R and 0 <= _c < C and grid[_r][_c] == '1':
+                            union(r * C + c, _r * C + _c)
+                            
+        return self.counts
+    
+    def numIslands(self, grid: List[List[str]]) -> int:
+        R, C = len(grid), len(grid[0])
+        def dfs(r, c):
+            grid[r][c] = '0'
+            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= _r < R and 0 <= _c < C and grid[_r][_c] == '1':
+                    dfs(_r, _c)
+        ans = 0
+        for r in range(R):
+            for c in range(C):
+                # Only run dfs() when find a new '1', this prunes the repeated
+                # checks
+                if grid[r][c] == '1':
+                    ans += 1
+                    dfs(r, c)
+
+        return ans
 ```
 
 ### [305. Number of Islands II](https://leetcode.com/problems/number-of-islands-ii/)
 
 ```python
-class UnionFind:
-    def __init__(self, m, n):
-        self.R = m
-        self.C = n
-        self.count = 0
-        self.parent = [i for i in range(m * n)]
-        self.rank = [0] * (m * n)
-        
-    def find(self, i):
-        if self.parent[i] != i:
-            self.parent[i] = self.find(self.parent[i])
-        return self.parent[i]
-    
-    def union(self, i, j):
-        rooti, rootj = self.find(i), self.find(j)
-        if rooti == rootj:
-            return
-        if self.rank[rooti] < self.rank[rootj]:
-            rooti, rootj = rootj, rooti
-        self.parent[rootj] = rooti
-        self.rank[i] += self.rank[j]
-        self.count -= 1
-        
-    def add(self, i):
-        self.parent[i] = i
-        self.rank[i] = 1
-        self.count += 1
-        
-        
 class Solution:
     def numIslands2(self, m: int, n: int, positions: List[List[int]]) -> List[int]:
-        uf = UnionFind(m, n)
+        # Alg - Disjoint Set
+        # With path compression and union by rank, the find() and union() method
+        # can be amortized O(1)
+        # So the total time is O(m * n + L), m * n is time for consturction initial
+        # disjoint set, L is num of operations we need to process one by one.
+        parents, rank, self.counts = [x for x in range(m * n)], [1] * (m * n), 0
+        def find(i):
+            # Alg: Disjoint set - path compression
+            if parents[i] != i:
+                parents[i] = find(parents[i])
+            return parents[i]
+        def union(i, j):o
+            rooti, rootj = find(i), find(j)
+            if rooti != rootj:
+                # Alg: Disjoint set - union by rank
+                if rank[rooti] < rank[rootj]:
+                    rooti, rootj = rootj, rooti
+                parents[rootj] = rooti
+                rank[rooti] += rank[rootj]
+                self.counts -= 1
+        def add(i):
+            self.counts += 1
+        
         ans, seen = [], set()
         for p in map(tuple, positions):
             if p in seen:
-                ans.append(uf.count)
+                # Use seen to handle duplicated operation
+                ans.append(self.counts)
                 continue
             seen.add(p)
             i = p[0] * n + p[1]
-            uf.add(i)
-            
-            for d in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
-                _r, _c = p[0] + d[0], p[1] + d[1]
-                if (_r, _c) in seen:
-                    uf.union(i, _r * n + _c)
-            ans.append(uf.count)
+            add(i)
+            for d in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                r, c = p[0] + d[0], p[1] + d[1]
+                # Use seen to find if cur island can be merged
+                if (r, c) in seen:
+                    union(i, r * n + c)
+            ans.append(self.counts)
         return ans
 ```
 

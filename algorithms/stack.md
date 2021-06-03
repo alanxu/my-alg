@@ -1,4 +1,15 @@
 
+
+1130. Minimum Cost Tree From Leaf Values
+907. Sum of Subarray Minimums
+901. Online Stock Span
+856. Score of Parentheses
+503. Next Greater Element II
+496. Next Greater Element I
+84. Largest Rectangle in Histogram
+42. Trapping Rain Water
+
+
 ## Parenthsese
 
 ### [1249. Minimum Remove to Make Valid Parentheses](https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/)
@@ -6,27 +17,27 @@
 ```python
 class Solution:
     def minRemoveToMakeValid(self, s: str) -> str:
-        stack = []
-        result = ''
-        
-        for i, c in enumerate(s):
-            if c == '(':
+        stack, result = [], ''
+        for i, x in enumerate(s):
+            if x == '(':
                 stack.append(i)
-                result += c
-            elif c == ')':
-                if len(stack) == 0:
-                    result += '*'
-                else:
+                result += x
+            elif x == ')':
+                if stack:
                     stack.pop()
-                    result += c
+                    result += x
+                else:
+                    result += '*'
             else:
-                result += c
+                result += x
         
+        # Trick: Cast str to list to replace a char
         result = list(result)
-        for i, c in enumerate(stack):
-            result[c] = '*'
-            
-        return ''.join([c for c in result if c != '*'])
+        for i in stack:
+            # In stack is the index
+            result[i] = '*'
+        
+        return ''.join(x for x in result if x != '*')
 ```
 
 ### [32. Longest Valid Parentheses](https://leetcode.com/problems/longest-valid-parentheses/)
@@ -153,6 +164,64 @@ class Solution:
         return "".join(stack)
 ```
 
+### [726. Number of Atoms](https://leetcode.com/problems/number-of-atoms/)
+
+```python
+class Solution:
+    def countOfAtoms(self, f: str) -> str:
+        N = len(f)
+        # Trick: Use Counter for each level
+        stack = [collections.Counter()]
+        i = 0
+        # Trick: Use while and len based index for flexible control
+        while i < N:
+            if f[i] == '(':
+                stack.append(collections.Counter())
+                i += 1
+            elif f[i] == ')':
+                i += 1
+                i_start = i
+                while i < N and f[i].isdigit(): i += 1
+                quantity = int(f[i_start:i] or 1)
+                # If cur is ')', look for quantity then, the quantity
+                # is applied for the whole thing in (), and pop the top
+                # () and update outter using top's data and quantity.
+                top = stack.pop()
+                for name, v in top.items():
+                    stack[-1][name] += v * quantity
+            else:
+                # If cur is letter or number, scan name and quantity 
+                # seperately and updat cur stack top
+                i_start = i
+                i += 1
+                while i < N and f[i].islower(): i += 1
+                name = f[i_start:i]
+                i_start = i
+                while i < N and f[i].isdigit(): i += 1
+                quantity = int(f[i_start:i] or 1)
+                stack[-1][name] += quantity
+                
+        return "".join(name + (str(stack[-1][name] if stack[-1][name] > 1 else '')) for name in sorted(stack[-1]))
+    
+    def countOfAtoms(self, formula):
+        parse = re.findall(r"([A-Z][a-z]*)(\d*)|(\()|(\))(\d*)", formula)
+        stack = [collections.Counter()]
+        for name, m1, left_open, right_open, m2 in parse:
+            print((name, m1, left_open, right_open, m2))
+            if name:
+              stack[-1][name] += int(m1 or 1)
+            if left_open:
+              stack.append(collections.Counter())
+            if right_open:
+                top = stack.pop()
+                for k in top:
+                  stack[-1][k] += top[k] * int(m2 or 1)
+
+        return "".join(name + (str(stack[-1][name]) if stack[-1][name] > 1 else '')
+                       for name in sorted(stack[-1]))
+```
+
+
 ## Iterator
 
 ### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
@@ -194,18 +263,20 @@ class BSTIterator:
 ```python
 class NestedIterator:
     def __init__(self, nestedList: [NestedInteger]):
+        # Use reversed() because we want first
+        # element in stack top
         self.stack = list(reversed(nestedList))
     
     def next(self) -> int:
-        self.make_stack_top_a_integer()
-        return self.stack.pop().getInteger()
-        
+        self.flaten_stack_top()
+        return self.stack.pop()
     
     def hasNext(self) -> bool:
-        self.make_stack_top_a_integer()
+        self.flaten_stack_top()
         return len(self.stack) > 0
-         
-    def make_stack_top_a_integer(self):
+        
+    def flaten_stack_top(self) -> None:
+        # Use while so stack top is guaranteed to be int
         while self.stack and not self.stack[-1].isInteger():
             self.stack.extend(reversed(self.stack.pop().getList()))
 ```
@@ -215,18 +286,38 @@ class NestedIterator:
 ### [84. Largest Rectangle in Histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/)
 
 ```python
+# Fav
 class Solution:
-    def largestRectangleArea(self, height):
-        stack = []
-        ans = 0
-        height.append(0)
-        for i in range(len(height)):
-            while stack and height[i] < height[stack[-1]]:
-                h = height[stack.pop()]
+    def largestRectangleArea(self, heights: List[int]) -> int:
+        # Intuition: Monotonic Stack
+        # For each bar index x, maintain a monotonic increase stack 
+        # with x as stack top. 
+        # Before push x to stack, check the stack
+        # top y, if height of y > x, y needs to be popped. Then we
+        # got x, y and cur stack top z. We know that all bars btw
+        # z and y are higher than y and y/x should be adjecent.
+        # So if heights[y] > heights[x], it means a max rectangle 
+        # determins by y can be calculated, the width is [z + 1:x - 1]
+        # there is corner case that y is only elements, meaning y
+        # is smaller than all bars before it, then width is [0:x - 1]
+        # After calculated y in case of height[y] > height[x], we can
+        # push x to stack, if otherwise height[y] <= height[x], then
+        # y and x are both in stack and wait for a smaller bar in future
+        # to clear both.
+        # Time: O(n) - n bars pushed and poped
+        # Space: O(n)
+        ans, stack = 0, []
+        # Trick: Dummy 0-heighted bar to clear all remaining bars if any
+        heights.append(0)
+        for i, x in enumerate(heights):
+            # Trick: Use index in mono stack cuz height can be
+            # obtained from heights array.
+            # Note using while not if
+            while stack and x < heights[stack[-1]]:
+                h = heights[stack.pop()]
                 w = i - stack[-1] - 1 if stack else i
-                ans = max(ans, h * w)
+                ans = max(ans, w * h)
             stack.append(i)
-            
         return ans
 ```
 
@@ -235,34 +326,29 @@ class Solution:
 ```python
 class Solution:
     def maximalRectangle(self, matrix: List[List[str]]) -> int:
+        # Intuition: For each row, treat it as ground, each column
+        # are bars. For each row calc the max rectangle, and get max
+        # using #84
+        def _84(heights):
+            ans, stack = 0, []
+            heights.append(0)
+            for i, x in enumerate(heights):
+                while stack and x < heights[stack[-1]]:
+                    h = heights[stack.pop()]
+                    w = i - stack[-1] - 1 if stack else i
+                    ans = max(ans, h * w)
+                stack.append(i)
+            return ans
         
         if not matrix:
             return 0
-        
-        def _84(height):
-            ans = 0
-            stack = []
-            height.append(0)
-            
-            for i in range(len(height)):
-                while stack and height[i] < height[stack[-1]]:
-                    h = height[stack.pop()]
-                    w = i - stack[-1] - 1 if stack else i
-                    ans = max(ans, h * w)
-                    
-                stack.append(i)
-                
-            height.pop()
-            return ans
-        
         ans = 0
-        height = [0] * len(matrix[0])
+        heights = [0] * len(matrix[0])
         for row in matrix:
             for i in range(len(row)):
-                height[i] = height[i] + 1 if row[i] == '1' else 0
-            # print(height)
-            ans = max(ans, _84(height))
-                
+                # Trick: if-else is greedy
+                heights[i] = heights[i] + 1 if row[i] == '1' else 0
+            ans = max(ans, _84(heights))  
         return ans
 ```
 
@@ -270,17 +356,19 @@ class Solution:
 
 ```python
 class Solution:
-    def dailyTemperatures(self, T: List[int]) -> List[int]:
-        stack = []
-        ans = [0] * len(T)
-        
-        for d in range(len(T)):
-            while stack and T[d] > T[(stack[-1])]:
-                _d = stack.pop()
-                ans[_d] = d - _d
-                
-            stack.append(d)
-            
+    def dailyTemperatures(self, temperatures: List[int]) -> List[int]:
+        # Intuition: Monotonic Decreasing Stack
+        # Calc ans for each item when popped out from stack. A item j
+        # is popped out when there is another item after j greater than j.
+        # It means j has an non-zero answer. All items remaining in stack
+        # when loop finish dont have an i greater than them, so ans for
+        # them is 0.
+        ans, stack = [0] * len(temperatures), []
+        for i, x in enumerate(temperatures):
+            while stack and x > temperatures[stack[-1]]:
+                j = stack.pop()
+                ans[j] = i - j
+            stack.append(i)
         return ans
 ```
 
@@ -289,32 +377,55 @@ class Solution:
 ```python
 class Solution:
     def removeKdigits(self, num: str, k: int) -> str:
-        num_stack = []
+        stack = []
         
-        # Trick: Construct a monotonic increasing sequency
+        # Intuition: The num is smallest when keep a mono increase
+        # stack and remove others. If k is small, make more significant
+        # digits mono increase, else if k is big enough to make all
+        # digits mono increase and has remaining, use the remaining to
+        # remove from tail, cuz it is mono increasing.
+        
+        # Construct a monotonic increasing sequency
         # starting from left. Simple append remaining numbers
         # once k deletion is already made.
         for d in num:
-            while k and num_stack and num_stack[-1] > d:
-                num_stack.pop()
+            while k and stack and stack[-1] > d:
+                stack.pop()
                 k -= 1
                 
-            num_stack.append(d)
+            stack.append(d)
         # If k is exausted, it yeild the num_stack with the significant
         # digits handled as much as possible with k deletions, and less 
         # significant parts remains unchanged so it is the final minimum mumber;
         # If k is not exausted, it means the whole num is
         # made monotonic increasing with <k deletions, so just 
         # remove remaining deletion quotas (<k)
-        final_stack = num_stack[:-k] if k else num_stack
-        return ''.join(final_stack).lstrip('0') or '0'
+        stack = stack[:-k] if k else stack
+        
+        # Trick: lstrip('0')
+        return ''.join(stack).lstrip('0') or '0'
 ```
 
 ### [503. Next Greater Element II](https://leetcode.com/problems/next-greater-element-ii/)
 
 ```python
+# Fav
 class Solution:
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+        # Intuition: Duplicate the nums, then it becomes 739.
+        # Higer Tempreture. Only return first half of ans.
+        N = len(nums)
+        nums, stack, ans = nums * 2, [], [-1] * N * 2
+        for i, x in enumerate(nums):
+            while stack and nums[stack[-1]] < x:
+                j = stack.pop()
+                ans[j] = x
+            stack.append(i)
+        return ans[:N]
+    
     def nextGreaterElements(self, A):
+        # Intuition: Improve time and space by doing
+        # two loops rather than duplicate array.
         stack = []
         ans = [-1] * len(A)
         
@@ -326,6 +437,8 @@ class Solution:
         for i, a in enumerate(A):
             while stack and a > A[stack[-1]]:
                 ans[stack.pop()] = a
+            # Trick: Don't push in 2nd loop, only use 2nd
+            # loop to pop 1st loop in stack.
             if not stack:
                 break
         
@@ -337,25 +450,51 @@ class Solution:
 ```python
 class Solution:
     def findUnsortedSubarray(self, nums: List[int]) -> int:
-        # The solutin uses Monotonic Stack
-        stack = []
-        left, right = float('inf'), float('-inf')
+        # Doesn't work
+        stack, start, end = [], math.inf, math.inf
+        for i, x in enumerate(nums):
+            while stack and nums[stack[-1]] >= x:
+                start, end = min(start, stack.pop()), i
+            stack.append(i)
+        return end - start + 1 if start != math.inf else 0
+    
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        # Intuition: Mono Increasing Stack.
+        # While constructing mono increaseing stack, 
+        # If the array is perfectly sorted ascendingly, no
+        # item will be popped. On the other hand, if a
+        # item is popped, it means the item needs to be resorted.
+        # If we can find the beging of the popped item as start, and
+        # track the last item that squeez others out as end, we
+        # can resolve the problem.
+        # But, above solution doesn't work for cases with duplication.
+        # 1 3 2 2 2
+        # In this case, multiple 2s won't squeeze each other, so
+        # we cannot find correct end.
+        # But we know we can get correct start, so we just need to
+        # do the process 2nd time with reversed order to find the
+        # end.
+        stack, start, end = [], math.inf, -math.inf
         
-        for i in range(len(nums)):
-            while stack and nums[stack[-1]] > nums[i]:
-                # Find the mostleft index not in correct position based on current value
-                left = min(left, stack.pop())
-                print(left)
+        for i, x in enumerate(nums):
+            while stack and nums[stack[-1]] > x:
+                start = min(start, stack.pop())
             stack.append(i)
         
         stack = []
-        for i in range(len(nums) - 1, -1, -1):
-            while stack and nums[stack[-1]] < nums[i]:
-                right = max(right, stack.pop())
-                #print(right)
+        for i, x in reversed(list(enumerate(nums))):
+            while stack and nums[stack[-1]] < x:
+                end = max(end, stack.pop())
             stack.append(i)
+        
+        return 0 if start > end else end - start + 1
+    
+    def findUnsortedSubarray(self, nums: List[int]) -> int:
+        # Intuition: Sort nums and compare with original one,
+        # get the first and last pos that the number doesn't same.
+        ans = [i for i, (a, b) in enumerate(zip(nums, sorted(nums))) if a != b]
+        return ans[-1] - ans[0] + 1 if ans else 0
             
-        return 0 if left > right else right - left + 1
 ```
 
 ### [1696. Jump Game VI](https://leetcode.com/problems/jump-game-vi/)
@@ -437,8 +576,6 @@ class MinStack:
 # param_4 = obj.getMin()
 ```
 
-## Others
-
 ### [316. Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/)
 ```python
 class Solution:
@@ -447,9 +584,12 @@ class Solution:
         
         for i in range(len(s)):
             # Why ignore s[i] when the value already used? - It will never generate 
-            # more optimal solotion. It will never supass previous same value, and
-            # it will not help to get optimal value after previous same value, values
-            # after s[i] will keep optimze remaining
+            # more optimal solotion. It will never supass previous same value - If
+            # prev same value cannot pop values in from it, neither the cur value;
+            # and it will not help to get optimal value after previous same value, values
+            # after s[i] will keep optimze remaining:
+            # Consider "abczcyz", 2nd c is ignored, but y can pop first z, so leave it
+            # for capable people, dont do everything yourself.
             if s[i] not in stack:
                 while stack and stack[-1] > s[i] and stack[-1] in s[i:]:
                     stack.pop()
@@ -457,6 +597,11 @@ class Solution:
             
         return ''.join(stack)
 ```
+
+
+## Others
+
+
 
 
 ### [907. Sum of Subarray Minimums](https://leetcode.com/problems/sum-of-subarray-minimums/)

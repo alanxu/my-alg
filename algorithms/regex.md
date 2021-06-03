@@ -15,3 +15,4 @@ class Solution:
         return "IPv6" if self.patten_IPv6.match(IP) else "Neither" 
 ```
 
+### [726. Number of Atoms](https://leetcode.com/problems/number-of-atoms/)
