@@ -388,3 +388,69 @@ class Solution:
         n_.random = self.copyRandomList(n.random)
         return n_
 ```
+
+### [146. LRU Cache](https://leetcode.com/problems/lru-cache/)
+
+```python
+class LinkedListNode:
+    def __init__(self, key=None, val=-1):
+        self.key = key
+        self.val = val
+        self.prev = None
+        self.next = None
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.size = 0
+        self.capacity = capacity
+        self.cache = {}
+        self.head, self.tail = LinkedListNode(), LinkedListNode()
+        self.head.next, self.tail.prev = self.tail, self.head
+    
+    def _add_node(self, node):
+        node.prev = self.head
+        node.next = self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _remove_node(self, node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+    
+    def _move_to_head(self, node):
+        self._remove_node(node)
+        self._add_node(node)
+        
+    def _pop_tail(self):
+        node = self.tail.prev
+        self._remove_node(node)
+        return node
+
+    def get(self, key: int) -> int:
+        node = self.cache.get(key)
+        if not node:
+            return -1
+        self._move_to_head(node)
+        return node.val
+
+    def put(self, key: int, value: int) -> None:
+        node = self.cache.get(key)
+        if not node:
+            node = LinkedListNode(key, value)
+            self.cache[key] = node
+            self._add_node(node)
+            self.size += 1
+            if self.size > self.capacity:
+                node = self._pop_tail()
+                del self.cache[node.key]
+                self.size -= 1
+        else:
+            node.val = value
+            self._move_to_head(node)
+
+
+# Your LRUCache object will be instantiated and called as such:
+# obj = LRUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)
+```

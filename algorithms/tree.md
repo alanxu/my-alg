@@ -33,6 +33,9 @@ class Solution(object):
 #         self.right = right
 class Solution:
     def match(self, s, t):
+        # Trick: If s or t is None, (s and t) returns False, if s and t both are None,
+        # (s and t) also return False, so (s is t) is True if both None, False if one
+        # is None.
         if not (s and t):
             return s is t
         if s.val == t.val and self.match(s.left, t.left) and self.match(s.right, t.right):
@@ -113,7 +116,194 @@ class MyCalendar(object):
         return self.root.insert(Node(start, end))
 ```
 
-## Others
+## BFS
+
+### [103. Binary Tree Zigzag Level Order Traversal](https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return []
+        q, ans = deque([None, root]), []
+        order = 1
+        level_list = deque()
+        while q:
+            node = q.pop()
+            if node:
+                # If node not None, meaning cur level not complete
+                
+                # Construct cur level_list as per order
+                if order:
+                    level_list.append(node.val)
+                else:
+                    level_list.appendleft(node.val)
+                
+                # Enqueue next level nodes
+                if node.left:
+                    q.appendleft(node.left)
+                if node.right:
+                    q.appendleft(node.right)
+            else:
+                # If node is None, means cur level is complete and next
+                # level is 100% in queue
+                
+                # Collect ans for cur level
+                ans.append(level_list)
+                # Clean level_list for next level
+                level_list = deque()
+                # Reverse the order
+                order ^= 1
+                # Add only if there are next level
+                if q:
+                    q.appendleft(None)
+        return ans
+```
+
+### [117. Populating Next Right Pointers in Each Node II](117. Populating Next Right Pointers in Each Node II)
+```python
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        if not root: return root
+        q = collections.deque()
+        q.appendleft(root)
+            
+        while q:
+            Len = len(q)
+            for i in range(Len):
+                node = q.pop()
+                if node.left: q.appendleft(node.left)
+                if node.right: q.appendleft(node.right)
+                if i < Len - 1:
+                    node.next = q[-1]
+                
+        return root
+```
+
+
+## Tree to Graph
+
+### [863. All Nodes Distance K in Binary Tree](https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def distanceK(self, root: TreeNode, target: TreeNode, k: int) -> List[int]:
+        # Intuition: Tread tree as undirectional graph, then BFS for k levels.
+        
+        # Build graph
+        graph = defaultdict(list)
+        def connect(parent, child):
+            if not child:
+                return
+            if parent:
+                graph[parent.val].append(child.val)
+                graph[child.val].append(parent.val)
+            connect(child, child.left)
+            connect(child, child.right)
+        connect(None, root)
+        
+        # BFS starting from target, do it k times
+        # nodes remaining in the q is the ans
+        q, visited = deque([target.val]), {target.val}
+        for _ in range(k):
+            # Trick: Use len, each loop, the reaming
+            # nodes in the q are ALL nodes of next level
+            l = len(q)
+            for _ in range(l):
+                node = q.pop()
+                for nei in graph[node]:
+                    if nei not in visited:
+                        q.appendleft(nei)
+                        visited.add(nei)
+        return list(q)
+```
+
+## BST
+
+### [98. Validate Binary Search Tree](https://leetcode.com/problems/validate-binary-search-tree/)
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isValidBST(self, root: TreeNode) -> bool:
+        # Intuition: BST's pre-order traverse yields
+        # a increasing sequence. So we just needs
+        # to pre-order traverse the tree and check
+        # every node is bigger than previous one in travese.
+        self.pre = -math.inf
+        def dfs(node):
+            if not node:
+                return True
+            if not dfs(node.left):
+                return False
+            if node.val <= self.pre:
+                return False
+            self.pre = node.val
+            if not dfs(node.right):
+                return False
+            return True
+        return dfs(root)
+```
+
+### [333. Largest BST Subtree](https://leetcode.com/problems/largest-bst-subtree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def largestBSTSubtree(self, root: TreeNode) -> int:
+        self.ans = 0
+        def check(node):
+            # Check if the tree with node as root is a valid
+            # BST, returns (num_of_nodes, max_v, min_v). If
+            # the tree is not valid, return (-1, None, None).
+            # If tree is a single node, (1, node.vale, node.val).
+            # If tree is None, (0, None, None)
+            if not node:
+                return 0, None, None
+            lnum, lmax, lmin = check(node.left)
+            rnum, rmax, rmin = check(node.right)
+            lvalid, rvalid = False, False
+            curnum, curmax,curmin = -1, None, None
+
+            if lnum >= 0:
+                lvalid = lmax < node.val if lnum > 0 else True
+                curmin = lmin if lnum > 0 else node.val
+            if rnum >= 0:
+                rvalid = rmin > node.val if rnum > 0 else True
+                curmax = rmax if rnum > 0 else node.val
+            
+            if lvalid and rvalid:
+                curnum = 1 + lnum + rnum
+                self.ans = max(self.ans, curnum)
+            return curnum, curmax, curmin
+
+        check(root)
+        return self.ans
+```
+
+## Recursion
 
 ### [297. Serialize and Deserialize Binary Tree](https://leetcode.com/problems/serialize-and-deserialize-binary-tree/)
 
@@ -162,16 +352,18 @@ class Codec:
         def rdeserialize(data):
             # No need check empty, if cur root
             # is 'null', it won't continue.
-            if data[0] == 'null':
-                data.pop(0)
+            # No need to strip endding ',', cuz
+            # it will always next to a 'null',
+            # so it will return.
+            x = data.popleft()
+            if x== 'null':
                 return None
 
-            root = TreeNode(data[0])
-            data.pop(0)
+            root = TreeNode(x)
             root.left = rdeserialize(data)
             root.right = rdeserialize(data)
             return root
-        return rdeserialize(data.split(','))
+        return rdeserialize(deque(data.split(',')))
 
 # Your Codec object will be instantiated and called as such:
 # ser = Codec()
@@ -220,154 +412,34 @@ class Solution:
 ### [236. Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
 
 ```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
 class Solution:
     def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
         def find_lca(root, p, q):
-            """
-            Given a node, find the LCA for p and q if they both under node. If only one under node,
-            return p/q directly.
-            KEY is: There is one and only one node for p and q, that p is in its left and q is in its right
-                    if p and q are not directly adjacent. This node is the LCA.
-                    And if p or q are each others acestor, then the lower one is the LCA.
-            For each current node in func, There are several cases
-            - The node is the LCA, or LCA is in node's left or right child (we can find LCA)
-            - The node is in left or right child of LCA. (we can find p or q or None)
-            """
-            if root == p or root == q or not root:
+            # Find lca of p or q, return None if no result find
+            if not root or root == p or root == q:
                 return root
-            
+            # Find lca for p or q on root's left and right sub tree
             left = find_lca(root.left, p, q)
             right = find_lca(root.right, p, q)
             
-            # We just need to know has any or has none
+            # If left and right both non-None, p and q are on different side of root,
+            # then root is ans;
+            # Otherwise, both p and q must be on left or right;
+            # There must be an ans.
             return root if left and right else left or right
-        
         return find_lca(root, p, q)
 ```
 
-### [98. Validate Binary Search Tree](https://leetcode.com/problems/validate-binary-search-tree/)
-```python
-class Solution:
-    def isValidBST(self, root: TreeNode) -> bool:
-        self.pre = float('-inf')
-        def traverse(node):
-            if not node:
-                return True
-
-            if not traverse(node.left):
-                return False
-            
-            if node.val <= self.pre:
-                return False
-            
-            self.pre = node.val
-            
-            if not traverse(node.right):
-                return False
-
-            return True
-        return traverse(root)
-```
+## Others
 
 
-### [863. All Nodes Distance K in Binary Tree](https://leetcode.com/problems/all-nodes-distance-k-in-binary-tree/)
-
-```python
-def distanceK(self, root, target, K):
-    conn = collections.defaultdict(list)
-    def connect(parent, child):
-        # both parent and child are not empty
-        if parent and child:
-            # building an undirected graph representation, assign the
-            # child value for the parent as the key and vice versa
-            conn[parent.val].append(child.val)
-            conn[child.val].append(parent.val)
-        # in-order traversal
-        if child.left: connect(child, child.left)
-        if child.right: connect(child, child.right)
-    # the initial parent node of the root is None
-    connect(None, root)
-    # start the breadth-first search from the target, hence the starting level is 0
-    bfs = [target.val]
-    seen = set(bfs)
-    # all nodes at (k-1)th level must also be K steps away from the target node
-    for i in range(K):
-        # expand the list comprehension to strip away the complexity
-        new_level = []
-        for q_node_val in bfs:
-            for connected_node_val in conn[q_node_val]:
-                if connected_node_val not in seen:
-                    new_level.append(connected_node_val)
-        bfs = new_level
-        # add all the values in bfs into seen
-        seen |= set(bfs)
-    return bfs
-```
-
-
-
-### [333. Largest BST Subtree](https://leetcode.com/problems/largest-bst-subtree/)
-
-```python
-class Solution:
-    def largestBSTSubtree(self, root: TreeNode) -> int:
-        # Recursively calculate/compare current node and based on its left/right subtree
-        # KEY is to know if the left/right subtree is valid BST, and if yes, what is their min/max
-        # Use the returned nums to indicate if the current node's left/right subtree is valide BST
-        #  ==0: no subtree, valid, consider node itself.
-        #  >0: there are subtree, valid, consider subtree
-        #  -1: subtree invalid, so current node as root is invalid
-        
-        # When both left/right are valid BST, when len(left/right) > 0, need to compare the lmax 
-        # and rmin. If all valid, calculate current min, max and n. 
-        self.ans = 0
-        def find(node):
-            if not node:
-                return None, None, 0
-            
-            lmin, lmax, lnum = find(node.left)
-            rmin, rmax, rnum = find(node.right)
-            
-            left_valid, right_valid, curmin, curmax = False, False, None, None
-            
-            if lnum >= 0:
-                left_valid = node.val > lmax if lnum > 0 else True
-                curmin = lmin if lnum > 0 else node.val
-            
-            if rnum >= 0:
-                right_valid = node.val < rmin if rnum > 0 else True
-                curmax = rmax if rnum > 0 else node.val
-                
-            if left_valid and right_valid:
-                n = lnum + rnum + 1
-                self.ans = max(self.ans, n)
-                return curmin, curmax, n
-            else:
-                return None, None, -1
-            
-        find(root)
-        return self.ans
-```
-
-### [117. Populating Next Right Pointers in Each Node II](117. Populating Next Right Pointers in Each Node II)
-```python
-class Solution:
-    def connect(self, root: 'Node') -> 'Node':
-        if not root: return root
-        q = collections.deque()
-        q.appendleft(root)
-            
-        while q:
-            Len = len(q)
-            for i in range(Len):
-                node = q.pop()
-                if node.left: q.appendleft(node.left)
-                if node.right: q.appendleft(node.right)
-                if i < Len - 1:
-                    node.next = q[-1]
-                
-        return root
-```
 
 ### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
 ```python
@@ -1103,63 +1175,7 @@ class Solution:
         return ans
 ```
 
-### [103. Binary Tree Zigzag Level Order Traversal](https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal/)
 
-```python
-# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, x):
-#         self.val = x
-#         self.left = None
-#         self.right = None
-from collections import deque
-
-class Solution:
-    def zigzagLevelOrder(self, root):
-        """
-        :type root: TreeNode
-        :rtype: List[List[int]]
-        """
-        ret = []
-        level_list = deque()
-        if root is None:
-            return []
-        # start with the level 0 with a delimiter
-        node_queue = deque([root, None])
-        is_order_left = True
-
-        while len(node_queue) > 0:
-            curr_node = node_queue.popleft()
-
-            if curr_node:
-                if is_order_left:
-                    level_list.append(curr_node.val)
-                else:
-                    level_list.appendleft(curr_node.val)
-
-                if curr_node.left:
-                    node_queue.append(curr_node.left)
-                if curr_node.right:
-                    node_queue.append(curr_node.right)
-            else:
-                # we finish one level
-                ret.append(level_list)
-                # add a delimiter to mark the level
-                if len(node_queue) > 0:
-                    node_queue.append(None)
-
-                # prepare for the next level
-                level_list = deque()
-                is_order_left = not is_order_left
-
-        return ret
-```
 
 ### [105. Construct Binary Tree from Preorder and Inorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
 

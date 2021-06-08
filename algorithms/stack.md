@@ -12,6 +12,29 @@
 
 ## Parenthsese
 
+### [20. Valid Parentheses](https://leetcode.com/problems/valid-parentheses/)
+
+```python
+class Solution:
+    def isValid(self, s: str) -> bool:
+        # Edge cases: Odd-lenthed s, '((', '))'
+        # Intuition: Push every left quaots, for
+        # each right quaot, return False if stack
+        # is empty (no match left), return False if
+        # there is left but not same type.
+        # Finally check if stack is exausted to avoid
+        # '((' case.
+        if len(s) % 2: return False
+        stack = []
+        pairs = {'{': '}', '[': ']', '(': ')'}
+        for x in s:
+            if x in pairs:
+                stack.append(x)
+            elif not stack or pairs[stack.pop()] != x:
+                    return False
+        return not stack
+```
+
 ### [1249. Minimum Remove to Make Valid Parentheses](https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/)
 
 ```python

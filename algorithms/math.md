@@ -425,3 +425,28 @@ class Solution:
             
         return head
 ```
+
+### [66. Plus One](https://leetcode.com/problems/plus-one/)
+
+```python
+class Solution:
+    def plusOne(self, digits: List[int]) -> List[int]:
+        N = len(digits)
+        carry = 1
+        for i in range(N - 1, -1, -1):
+            carry, value  = divmod(digits[i] + carry, 10)
+            digits[i] = value
+            if not carry:
+                break
+        return digits if not carry else [carry] + digits
+    
+    def plusOne(self, digits: List[int]) -> List[int]:
+        if digits == [9]:
+            return [1, 0]
+        if digits[-1] == 9:
+            digits[-1] = 0
+            digits[:-1] = self.plusOne(digits[:-1])
+        else:
+            digits[-1] += 1
+        return digits
+```
