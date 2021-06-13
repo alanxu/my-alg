@@ -231,6 +231,42 @@ class Solution:
         return list(q)
 ```
 
+### [742. Closest Leaf in a Binary Tree](https://leetcode.com/problems/closest-leaf-in-a-binary-tree/)
+
+```python
+class Solution:
+    def findClosestLeaf(self, root: TreeNode, k: int) -> int:
+        graph, leaves = defaultdict(list), set()
+        
+        def build_graph(node):
+            if node.left:
+                graph[node.val].append(node.left.val)
+                graph[node.left.val].append(node.val)
+                build_graph(node.left)
+            if node.right:
+                graph[node.val].append(node.right.val)
+                graph[node.right.val].append(node.val)
+                build_graph(node.right)
+            if not node.left and not node.right:
+                leaves.add(node.val)
+                
+        build_graph(root)
+        # Trick: Use val as the keys since it is unique, save lookup time
+        q = collections.deque([k])
+        # Trick: Use memory to skip visited node in graph traverse
+        seen = set(q)
+        
+        # Trick: No need to mark end of each level in this problem
+        while q:
+            val = q.pop()
+            if val in leaves:
+                return val
+            for nei in graph[val]:
+                if nei not in seen:
+                    seen.add(nei)
+                    q.appendleft(nei)
+```
+
 ## BST
 
 ### [98. Validate Binary Search Tree](https://leetcode.com/problems/validate-binary-search-tree/)
@@ -301,6 +337,118 @@ class Solution:
 
         check(root)
         return self.ans
+```
+
+### [285. Inorder Successor in BST](https://leetcode.com/problems/inorder-successor-in-bst/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+        self.last = None
+        def dfs(node):
+            if not node:
+                return
+            l = dfs(node.left)
+            if l:    
+                return l
+            if self.last and self.last == p:
+                return node
+            self.last = node
+            r = dfs(node.right)
+            if r:    
+                return r
+            return None
+        return dfs(root)
+    
+    def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+        # Time Complexity: O(N) since we might end up encountering a skewed 
+        # tree and in that case, we will just be discarding one node at a time. 
+        # For a balanced binary-search tree, however, the time complexity will 
+        # be O(logN) which is what we usually find in practice.
+        if not root: 
+            return None
+        if root.val > p.val:
+            return self.inorderSuccessor(root.left, p) or root
+        else:
+            return self.inorderSuccessor(root.right, p)
+```
+
+### [510. Inorder Successor in BST II](https://leetcode.com/problems/inorder-successor-in-bst-ii/)
+
+```python
+class Solution:
+    def inorderSuccessor(self, node: 'Node') -> 'Node':
+        # KEY is to find the closet node bigger than node.
+        # If node has right substree, the next is the smallest node on its right
+        # substree, which is the very left node in substree
+        if node.right:
+            node = node.right
+            while node.left:
+                node = node.left
+            return node
+        
+        # If node does not have right subtree, the next is the smallest node in
+        # its nearest parent that current node is in its left subtree
+        while node.parent and node == node.parent.right:
+            node = node.parent
+        return node.parent
+
+# Node = 13
+# 15
+#   6          18
+#  3   7     17 20
+# 2 4    13
+#       9
+```
+
+### [426. Convert Binary Search Tree to Sorted Doubly Linked List](https://leetcode.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/)
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+"""
+
+class Solution:
+    def treeToDoublyList(self, root: 'Node') -> 'Node':
+        # Intuition: Inorder DFS
+        # Use last to check if the cur node is first (left-most leaves)
+        # first is the smallest. If it's first, set the first. For every
+        # cur node processed in dfs, it is last, so point last to it by
+        # set the left/right pointers, note only when cur node is not first.
+        
+        if not root:
+            return root
+        first = last = None
+        def dfs(node):
+            # Trick: DFS for tree
+            # All template, logic on cur node logic
+            nonlocal first, last
+            if not node:
+                return
+            dfs(node.left)
+            if not last:
+                first = node
+            else:
+                last.right = node
+                node.left = last
+            last = node
+            dfs(node.right)
+        dfs(root)
+        first.left = last
+        last.right = first
+        return first
 ```
 
 ## Recursion
@@ -437,6 +585,72 @@ class Solution:
         return find_lca(root, p, q)
 ```
 
+### [437. Path Sum III](https://leetcode.com/problems/path-sum-iii/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def pathSum(self, root: TreeNode, sum: int) -> int:
+        # Prefix sum is widely used to resolve subset sum problems.
+        # In this problem, the challenges are
+        # - Maintain prefix sum for the current path: Use preorder and
+        #   reverse the change to the cursum once left/right is processed
+        # - How to track pre sum of indirect prevous nodes in one path: You
+        #   dont have to, instead you can just use dict to save the presum of 
+        #   previous node and the counts of same prefix sum before
+        
+        pre_sums = defaultdict(int, {0: 1})
+        ans = 0
+        def dfs(node, cursum=0):
+            if not node:
+                return
+            # Trick: use nonlocal
+            nonlocal ans
+            cursum += node.val
+            ans += pre_sums[cursum - sum]
+            pre_sums[cursum] += 1
+            
+            dfs(node.left, cursum)
+            dfs(node.right, cursum)
+            
+            # Must only maintain the presum for current path,
+            # remove the current 
+            pre_sums[cursum] -= 1
+        
+        dfs(root)
+        return ans
+
+    def pathSum(self, root: TreeNode, targetSum: int) -> int:
+        self.ans = 0
+        def dfs(node=root, target=targetSum):
+            # Intuition: 2-level Revursion
+            # DFS over the tree, for each node, check how
+            # many pathes STARTed with cur node
+            if not node:
+                return
+            check(node, target)
+            dfs(node.left, target)
+            dfs(node.right, target)
+            
+        def check(node, target):
+            # Check starting from cur node, how may matching path
+            # found
+            if not node:
+                return
+            if node.val == target:
+                self.ans += 1
+            check(node.left, target - node.val)
+            check(node.right, target - node.val)
+            
+        dfs()
+        return self.ans
+```
+
 ## Others
 
 
@@ -468,107 +682,11 @@ class BSTIterator:
                 self.push(node.left)
 ```
 
-### [742. Closest Leaf in a Binary Tree](https://leetcode.com/problems/closest-leaf-in-a-binary-tree/)
 
-```python
-class Solution:
-    def findClosestLeaf(self, root: TreeNode, k: int) -> int:
-        graph, leaves = defaultdict(list), set()
-        
-        def build_graph(node):
-            if node.left:
-                graph[node.val].append(node.left.val)
-                graph[node.left.val].append(node.val)
-                build_graph(node.left)
-            if node.right:
-                graph[node.val].append(node.right.val)
-                graph[node.right.val].append(node.val)
-                build_graph(node.right)
-            if not node.left and not node.right:
-                leaves.add(node.val)
-                
-        build_graph(root)
-        # Trick: Use val as the keys since it is unique, save lookup time
-        q = collections.deque([k])
-        # Trick: Use memory to skip visited node in graph traverse
-        seen = set(q)
-        
-        # Trick: No need to mark end of each level in this problem
-        while q:
-            val = q.pop()
-            if val in leaves:
-                return val
-            for nei in graph[val]:
-                if nei not in seen:
-                    seen.add(nei)
-                    q.appendleft(nei)
-```
 
-### [426. Convert Binary Search Tree to Sorted Doubly Linked List](https://leetcode.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/)
 
-```python
-class Solution:
-    def treeToDoublyList(self, root: 'Node') -> 'Node':
-        first, last = None, None
-        def dfs(node):
-            # Trick: Use nonlocal
-            nonlocal first, last
-            if not node:
-                return
-            dfs(node.left)
-            # new_node = Node(node.val)
-            if not last:
-                first = node
-            else:
-                node.left = last
-                last.right = node
-            last = node
-            dfs(node.right)
-        
-        if not root:
-            return root
-        
-        dfs(root)
-        
-        first.left = last
-        last.right = first
-        return first
-```
 
-### [437. Path Sum III](https://leetcode.com/problems/path-sum-iii/)
 
-```python
-class Solution:
-    def pathSum(self, root: TreeNode, sum: int) -> int:
-        # Prefix sum is widely used to resolve subset sum problems.
-        # In this problem, the challenges are
-        # - Maintain prefix sum for the current path: Use preorder and
-        #   reverse the change to the cursum once left/right is processed
-        # - How to track pre sum of indirect prevous nodes in one path: You
-        #   dont have to, instead you can just use dict to save the presum of 
-        #   previous node and the counts of same prefix sum before
-        
-        pre_sums = defaultdict(int, {0: 1})
-        ans = 0
-        def dfs(node, cursum=0):
-            if not node:
-                return
-            # Trick: use nonlocal
-            nonlocal ans
-            cursum += node.val
-            ans += pre_sums[cursum - sum]
-            pre_sums[cursum] += 1
-            
-            dfs(node.left, cursum)
-            dfs(node.right, cursum)
-            
-            # Must only maintain the presum for current path,
-            # remove the current 
-            pre_sums[cursum] -= 1
-        
-        dfs(root)
-        return ans
-```
 
 ### [114. Flatten Binary Tree to Linked List](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
 
@@ -586,9 +704,7 @@ class Solution:
             preorder(right)
             
         preorder(root)
-```
-```python
-class Solution:
+
     def flatten(self, root: TreeNode) -> None:
         self.previous_right = None
         def helper(root = root):
@@ -598,6 +714,20 @@ class Solution:
                 root.right, self.previous_right = self.previous_right, root
                 root.left = None
         helper()
+
+    def flatten(self, root: TreeNode) -> None:
+        last = TreeNode()
+        def dfs(node):
+            if not node:
+                return
+            nonlocal last
+            left, right = node.left, node.right
+            node.left, node.right = None, None
+            last.right = node
+            last = node
+            dfs(left)
+            dfs(right)
+        dfs(root)
 ```
 
 ### [116. Populating Next Right Pointers in Each Node](https://leetcode.com/problems/populating-next-right-pointers-in-each-node/)
@@ -891,26 +1021,7 @@ class Solution:
         return dp[-1]
 ```
 
-### [510. Inorder Successor in BST II](https://leetcode.com/problems/inorder-successor-in-bst-ii/)
 
-```python
-class Solution:
-    def inorderSuccessor(self, node: 'Node') -> 'Node':
-        # KEY is to find the closet node bigger than node.
-        # If node has right substree, the next is the smallest node on its right
-        # substree, which is the very left node in substree
-        if node.right:
-            node = node.right
-            while node.left:
-                node = node.left
-            return node
-        
-        # If node does not have right subtree, the next is the smallest node in
-        # its nearest parent that current node is in its left subtree
-        while node.parent and node == node.parent.right:
-            node = node.parent
-        return node.parent
-```
 
 ### [1110. Delete Nodes And Return Forest](https://leetcode.com/problems/delete-nodes-and-return-forest/)
 

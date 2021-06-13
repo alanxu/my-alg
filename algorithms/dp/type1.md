@@ -480,9 +480,15 @@ class Solution(object):
         dp[1][0][1] = -prices[0]
         
         # k starts from 0, because dp[k][i][0] needs to be set to 0, and
-        # dp[k][i][1] still -inf. We can do a seperate loop to set that,
+        # dp[k][i][1] still -inf. Here we use same loops to set value for
+        # all scenarios when k=0, rather than set it as initial value.
+        # We can do a seperate loop to set that,
         # but to simplify it, we do it toegher with k > 0, but we need
-        # to check k > 0 when we set dp[k][i][1]
+        # to check k > 0 when we set dp[k][i][1].
+        # n starts from 1, because initial values for day 0 already set
+        # for k > 1, all -math.inf for day 0.
+        # We check k > 0, before calc dp[k][n][1], because at least 1
+        # transaction is required to hold 1 stock.
         ans = 0
         # Trick: It is ok to switch k and n
         for k in range(K + 1):
