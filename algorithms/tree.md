@@ -186,6 +186,49 @@ class Solution:
         return root
 ```
 
+## DFS
+
+### [114. Flatten Binary Tree to Linked List](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
+
+```python
+class Solution:
+    def flatten(self, root: TreeNode) -> None:
+        last = None
+        def preorder(node):
+            if not node: return
+            nonlocal last
+            if last: last.right = node
+            last = node
+            left, right, node.left, node.right = node.left, node.right, None, None
+            preorder(left)
+            preorder(right)
+            
+        preorder(root)
+
+    def flatten(self, root: TreeNode) -> None:
+        self.previous_right = None
+        def helper(root = root):
+            if root:
+                helper(root.right)
+                helper(root.left)
+                root.right, self.previous_right = self.previous_right, root
+                root.left = None
+        helper()
+
+    def flatten(self, root: TreeNode) -> None:
+        last = TreeNode()
+        def dfs(node):
+            if not node:
+                return
+            nonlocal last
+            left, right = node.left, node.right
+            node.left, node.right = None, None
+            last.right = node
+            last = node
+            dfs(left)
+            dfs(right)
+        dfs(root)
+```
 
 ## Tree to Graph
 
@@ -519,6 +562,117 @@ class Codec:
 # ans = deser.deserialize(ser.serialize(root))
 ```
 
+### [536. Construct Binary Tree from String](https://leetcode.com/problems/construct-binary-tree-from-string/)
+```python
+# Fav
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def str2tree(self, s: str) -> TreeNode:
+        if not s:
+            return None
+        # Intuition: Use pointer i to mark cur pos,
+        # If cur is char, append it to value of cur
+        # node/root, 
+        # if cur is '(', we meet cur's child, if cur
+        # root is None, meaning the following chars are
+        # for cur root's left child, so create the root,
+        # then do a recursive call with i + 1, otherwise
+        # root is not None, meaning we meet cu's right
+        # child, the root has already be created before left
+        # child is processed.
+        # If cur is ')', the current node is done, so just
+        # return it and i + 1
+        L = len(s)
+        def build(i=0):
+            root_val, root = [], None
+            while i < L:
+                if s[i] in '()':
+                    if not root:
+                        root = TreeNode(''.join(root_val))
+                    if s[i] == '(':
+                        if not root.left:
+                            root.left, i = build(i + 1)
+                        else:
+                            root.right, i = build(i + 1)
+                    else:
+                        return root, i + 1
+                else:
+                    root_val.append(s[i])
+                    i += 1
+            # To handle case there is no '()' behide root
+            return root if root else TreeNode(''.join(root_val))
+        return build()
+```
+
+### [106. Construct Binary Tree from Inorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
+
+```python
+# Fav
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+        # For a given range (lower, upper) initially (0, n - 1);
+        # Last ndoe in postorder is the root;
+        # Given root, we can find the left/right subtree range in inorder;
+        # Exlude last node in postorder, remmaining = (postorder left subtree )+ (postorder right substree)
+        # Starting from right, when right subtree is done, the remaining postorder is for left subtree
+        def build(lower, upper):
+            if lower > upper:
+                return None
+            
+            val = postorder.pop()
+            idx = idx_map[val]
+            root = TreeNode(val)
+            
+            # Right first
+            root.right = build(idx + 1, upper)
+            root.left = build(lower, idx - 1)
+            
+            return root
+
+        idx_map = {v: i for i, v in enumerate(inorder)}
+        
+        return build(0, len(inorder) - 1)
+```
+
+### [889. Construct Binary Tree from Preorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/)
+
+```python
+class Solution:
+    def constructFromPrePost(self, pre: List[int], post: List[int]) -> TreeNode:
+        # Don't try to understand how each single node move.
+        # KEY is for current step, get the root, then figure out the correct input for next interate
+        # For each interate, the input of pre/post must be a VALID pre/post of a smaller tree
+        
+        # Handle edge case first
+        # For each interate, get root from first pre
+        if not pre: return None
+        root = TreeNode(pre[0])
+        if len(pre) == 1: return root
+        
+        # For each interate, Both pre and post can be sepeated to 3 parts:
+        # pre  = root + pre left + pre right
+        # post = post left + post right + root
+        # We need to find each part and call next resursion
+        
+        # Get root of left sub tree and use it as seperator
+        # L is the length of current left tree, beause it is the last element in left tree in post
+        L = post.index(pre[1]) + 1
+        
+        # When L is figured out:
+        # pre left  = pre[1:L+1], pre right  = pre[L+1:]
+        # post left = post[:L],   post right = post[L:-1]
+        root.left  = self.constructFromPrePost(pre[1:L+1], post[:L])
+        root.right = self.constructFromPrePost(pre[L+1:], post[L:-1])
+        return root
+```
+
+
+
 ### [124. Binary Tree Maximum Path Sum](https://leetcode.com/problems/binary-tree-maximum-path-sum/)
 
 ```python
@@ -583,6 +737,31 @@ class Solution:
             # There must be an ans.
             return root if left and right else left or right
         return find_lca(root, p, q)
+```
+
+### [113. Path Sum II](https://leetcode.com/problems/path-sum-ii/)
+
+```python
+class Solution:
+    def pathSum(self, root: TreeNode, targetSum: int) -> List[List[int]]:
+        ans = []
+        # Trick: Use remining sum for path sum
+        def dfs(node=root, path=[], remaining_sum=targetSum):
+            if not node:
+                return
+            
+            path.append(node.val)
+            
+            if node.val == remaining_sum and not node.left and not node.right:
+                ans.append(path[:])
+            else:
+                dfs(node.left, path, remaining_sum - node.val)
+                dfs(node.right, path, remaining_sum - node.val)
+            
+            path.pop()
+            
+        dfs()
+        return ans
 ```
 
 ### [437. Path Sum III](https://leetcode.com/problems/path-sum-iii/)
@@ -651,112 +830,41 @@ class Solution:
         return self.ans
 ```
 
-## Others
-
-
-
-### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
-```python
-class BSTIterator:
-
-    def __init__(self, root: TreeNode):
-        self.stack = []
-        self.push(root)
-
-    def next(self) -> int:
-        if self.stack:
-            node = self.stack.pop()
-            if node.right:
-                self.push(node.right)
-            return node.val
-
-    def hasNext(self) -> bool:
-        if self.stack:
-            return True
-        return False
-        
-    def push(self, node):
-        if node:
-            self.stack.append(node)
-            if node.left:
-                self.push(node.left)
-```
-
-
-
-
-
-
-
-### [114. Flatten Binary Tree to Linked List](https://leetcode.com/problems/flatten-binary-tree-to-linked-list/)
-
-```python
-class Solution:
-    def flatten(self, root: TreeNode) -> None:
-        last = None
-        def preorder(node):
-            if not node: return
-            nonlocal last
-            if last: last.right = node
-            last = node
-            left, right, node.left, node.right = node.left, node.right, None, None
-            preorder(left)
-            preorder(right)
-            
-        preorder(root)
-
-    def flatten(self, root: TreeNode) -> None:
-        self.previous_right = None
-        def helper(root = root):
-            if root:
-                helper(root.right)
-                helper(root.left)
-                root.right, self.previous_right = self.previous_right, root
-                root.left = None
-        helper()
-
-    def flatten(self, root: TreeNode) -> None:
-        last = TreeNode()
-        def dfs(node):
-            if not node:
-                return
-            nonlocal last
-            left, right = node.left, node.right
-            node.left, node.right = None, None
-            last.right = node
-            last = node
-            dfs(left)
-            dfs(right)
-        dfs(root)
-```
-
-### [116. Populating Next Right Pointers in Each Node](https://leetcode.com/problems/populating-next-right-pointers-in-each-node/)
-
-```python
-class Solution:
-    def connect(self, root: 'Node') -> 'Node':
-        # Utilize feature of perfect binary tree.
-        # On interate process one level, current interate is changing
-        # next level.
-        # Leftmost needs to be maintained to find next level
-        
-        leftmost = root
-        # Check root is not None or not last level
-        while leftmost and leftmost.left:
-            cur = leftmost
-            while cur:
-                cur.left.next = cur.right
-                cur.right.next = cur.next.left if cur.next else None
-                cur = cur.next
-            
-            leftmost = leftmost.left
-        return root
-```
-
 ### [222. Count Complete Tree Nodes](https://leetcode.com/problems/count-complete-tree-nodes/)
 
 ```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 class Solution:
+    def countNodes(self, root: TreeNode) -> int:
+        # Intuition
+        # If left sub tree height equals right sub tree height then,
+        #   a. left sub tree is perfect binary tree
+        #   b. right sub tree is complete binary tree
+        # If left sub tree height greater than right sub tree height then,
+        #   a. left sub tree is complete binary tree
+        #   b. right sub tree is perfect binary tree
+        if not root:
+            return 0
+        left_depth = self.get_depth(root.left)
+        right_depth = self.get_depth(root.right)
+        # Trick: Number of nodes in a complete binary tree:
+        # pow(2, depth_of_the tree) - 1
+        # In below, plus 1 to cound root 
+        if left_depth == right_depth:
+            return 1 + pow(2, left_depth) - 1 + self.countNodes(root.right)
+        elif left_depth > right_depth:
+            return 1 + self.countNodes(root.left) + pow(2, right_depth) - 1
+        
+    def get_depth(self, node):
+        if not node:
+            return 0
+        return 1 + self.get_depth(node.left)
+    
     def countNodes(self, root: TreeNode) -> int:
         def compute_depth(node):
             """
@@ -803,133 +911,9 @@ class Solution:
         # Trick: All nodes above last level in a complete binary tree: 2^0 + 2^1 + ... + 2^(d-1) = 2^d - 1
         # Trick: All nodes in complete binary tree: 2^d - 1 + (number of leaves)
         return 2**d - 1 + left
-```
-```python
-class Solution:
+
     def countNodes(self, root: TreeNode) -> int:
         return 1 + self.countNodes(root.right) + self.countNodes(root.left) if root else 0
-```
-
-
-### [106. Construct Binary Tree from Inorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/)
-
-```python
-# Fav
-class Solution:
-    def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
-        # For a given range (lower, upper) initially (0, n - 1);
-        # Last ndoe in postorder is the root;
-        # Given root, we can find the left/right subtree range in inorder;
-        # Exlude last node in postorder, remmaining = (postorder left subtree )+ (postorder right substree)
-        # Starting from right, when right subtree is done, the remaining postorder is for left subtree
-        def build(lower, upper):
-            if lower > upper:
-                return None
-            
-            val = postorder.pop()
-            idx = idx_map[val]
-            root = TreeNode(val)
-            
-            # Right first
-            root.right = build(idx + 1, upper)
-            root.left = build(lower, idx - 1)
-            
-            return root
-
-        idx_map = {v: i for i, v in enumerate(inorder)}
-        
-        return build(0, len(inorder) - 1)
-```
-
-### [889. Construct Binary Tree from Preorder and Postorder Traversal](https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/)
-
-```python
-class Solution:
-    def constructFromPrePost(self, pre: List[int], post: List[int]) -> TreeNode:
-        # Don't try to understand how each single node move.
-        # KEY is for current step, get the root, then figure out the correct input for next interate
-        # For each interate, the input of pre/post must be a VALID pre/post of a smaller tree
-        
-        # Handle edge case first
-        # For each interate, get root from first pre
-        if not pre: return None
-        root = TreeNode(pre[0])
-        if len(pre) == 1: return root
-        
-        # For each interate, Both pre and post can be sepeated to 3 parts:
-        # pre  = root + pre left + pre right
-        # post = post left + post right + root
-        # We need to find each part and call next resursion
-        
-        # Get root of left sub tree and use it as seperator
-        # L is the length of current left tree, beause it is the last element in left tree in post
-        L = post.index(pre[1]) + 1
-        
-        # When L is figured out:
-        # pre left  = pre[1:L+1], pre right  = pre[L+1:]
-        # post left = post[:L],   post right = post[L:-1]
-        root.left  = self.constructFromPrePost(pre[1:L+1], post[:L])
-        root.right = self.constructFromPrePost(pre[L+1:], post[L:-1])
-        return root
-```
-
-### [113. Path Sum II](https://leetcode.com/problems/path-sum-ii/)
-
-```python
-class Solution:
-    def pathSum(self, root: TreeNode, targetSum: int) -> List[List[int]]:
-        ans = []
-        # Trick: Use remining sum for path sum
-        def dfs(node=root, path=[], remaining_sum=targetSum):
-            if not node:
-                return
-            
-            path.append(node.val)
-            
-            if node.val == remaining_sum and not node.left and not node.right:
-                ans.append(path[:])
-            else:
-                dfs(node.left, path, remaining_sum - node.val)
-                dfs(node.right, path, remaining_sum - node.val)
-            
-            path.pop()
-            
-        dfs()
-        return ans
-```
-
-### [536. Construct Binary Tree from String](https://leetcode.com/problems/construct-binary-tree-from-string/)
-
-```python
-# Fav
-class Solution:
-    def str2tree(self, s: str) -> TreeNode:
-        def build(i=0):
-            root_val = []
-            root = None
-            while i <= len(s) - 1:
-                if s[i] in ('(', ')'):
-                    if not root:
-                        root = TreeNode(''.join(root_val))
-                        
-                    if s[i] == '(':
-                        if not root.left:
-                            root.left, i = build(i + 1)
-                        else:
-                            root.right, i = build(i + 1)
-                    else:
-                        return root, i + 1
-                else:
-                    root_val.append(s[i])
-                    i += 1
-
-            return root if root else TreeNode(''.join(root_val)) 
-        
-        
-        if not s:
-            return None
-        
-        return build()
 ```
 
 ### [652. Find Duplicate Subtrees](https://leetcode.com/problems/find-duplicate-subtrees/)
@@ -991,26 +975,125 @@ class Solution:
 ### [100. Same Tree](https://leetcode.com/problems/same-tree/)
 
 ```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 class Solution:
     def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
-        def dfs(node1, node2):
-            
-            if not node1 and not node2:
-                return True
-            
-            if (not node2) or (not node1) or (node1.val != node2.val):
+        def dfs(a, b):
+            if a is None or b is None:
+                return a is b
+            if a.val != b.val:
                 return False
-            
-            return dfs(node1.left, node2.left) and dfs(node1.right, node2.right)
-        
+            return dfs(a.left, b.left) and dfs(a.right, b.right)
         return dfs(p, q)
 ```
+
+## Others
+
+
+
+### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
+```python
+class BSTIterator:
+
+    def __init__(self, root: TreeNode):
+        self.stack = []
+        self.push(root)
+
+    def next(self) -> int:
+        if self.stack:
+            node = self.stack.pop()
+            if node.right:
+                self.push(node.right)
+            return node.val
+
+    def hasNext(self) -> bool:
+        if self.stack:
+            return True
+        return False
+        
+    def push(self, node):
+        if node:
+            self.stack.append(node)
+            if node.left:
+                self.push(node.left)
+```
+
+
+
+
+
+
+
+
+
+### [116. Populating Next Right Pointers in Each Node](https://leetcode.com/problems/populating-next-right-pointers-in-each-node/)
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+        # Utilize feature of perfect binary tree that all parents have
+        # both left and right.
+        # Starting from root as first level, cur level is responsible
+        # to handle next level, when you are in cur level, the next
+        # of cur level already been set in prev level.
+        # Use a lefmost pointer to mark the cur level, only point to leftmost
+        # nodes, then use cur pointer to traverse cur level via next (set in 
+        # prev level).
+        
+        leftmost = root
+        # Check root is not None or not last level
+        while leftmost and leftmost.left:
+            cur = leftmost
+            while cur:
+                cur.left.next = cur.right
+                cur.right.next = cur.next.left if cur.next else None
+                cur = cur.next
+            
+            leftmost = leftmost.left
+        return root
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### [96. Unique Binary Search Trees](https://leetcode.com/problems/unique-binary-search-trees/)
 
 ```python
 class Solution:
     def numTrees(self, n: int) -> int:
+        # Intuition: dp[i] is ans for num [1:i]
+        # dp[i] = sum(p(j)) where p(j) is possiblities with j as
+        # root () where j in [1:i].
+        # p(j) = dp[left] * dp[right]
+        # dp[left] is all possibilities for num [1:j-1]
+        # dp[right] is all possiblilities for num [j+1, i] = [1: i-j]
         dp = [0] * (n + 1)
         dp[0] = dp[1] = 1
         
