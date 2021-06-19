@@ -1109,7 +1109,36 @@ class Solution:
 ### [1110. Delete Nodes And Return Forest](https://leetcode.com/problems/delete-nodes-and-return-forest/)
 
 ```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 class Solution:
+    def delNodes(self, root: TreeNode, to_delete: List[int]) -> List[TreeNode]:
+        to_delete = set(to_delete)
+        self.ans = [root] if root.val not in to_delete else []
+        def dfs(node):
+            if not node:
+                return
+            left, right = node.left, node.right
+            if node.val in to_delete:
+                if left and left.val not in to_delete:
+                    self.ans.append(left)
+                if right and right.val not in to_delete:
+                    self.ans.append(right)
+                    
+            if left and left.val in to_delete:
+                node.left = None
+            if right and right.val in to_delete:
+                node.right = None
+            
+            dfs(left)
+            dfs(right)
+        dfs(root)
+        return self.ans
+    
     def delNodes(self, root: TreeNode, to_delete: List[int]) -> List[TreeNode]:
         ans = []
         def dfs(node=root, parent=None, side='left',):
@@ -1158,6 +1187,25 @@ class Solution:
             return max(left, right)
         
         return dfs(root, -math.inf, math.inf)
+    def maxAncestorDiff(self, root: TreeNode) -> int:
+        # Intuition: dfs(node) returns max and min of tree with node as root.
+        # While calculate max/min, update ans with max distance between node
+        # and max/min of it's subtrees.
+        ans = -1
+        def dfs(node):
+            nonlocal ans
+            max_v = min_v = node.val
+            if node.left:
+                left_max, left_min = dfs(node.left)
+                ans = max(ans, abs(node.val - left_max), abs(node.val - left_min))
+                max_v, min_v = max(max_v, left_max), min(min_v, left_min)
+            if node.right:
+                right_max, right_min = dfs(node.right)
+                ans = max(ans, abs(node.val - right_max), abs(node.val - right_min))
+                max_v, min_v = max(max_v, right_max), min(min_v, right_min)
+            return max_v, min_v
+        dfs(root)
+        return ans
 ```
 
 ### [979. Distribute Coins in Binary Tree](https://leetcode.com/problems/distribute-coins-in-binary-tree/)

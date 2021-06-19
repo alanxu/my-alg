@@ -322,7 +322,7 @@ class Solution:
 
 ### [1574. Shortest Subarray to be Removed to Make Array Sorted](https://leetcode.com/submissions/detail/452769445/)
 
-```python
+```
 class Solution {
 public:
     int findLengthOfShortestSubarray(vector<int>& A) {
@@ -340,4 +340,67 @@ public:
         return ans;
     }
 };
+```
+
+### [68. Text Justification](https://leetcode.com/problems/text-justification/)
+
+```python
+class Solution:
+    def fullJustify(self, words: List[str], maxWidth: int) -> List[str]:
+        # Intuition: Use two pointers to 'cut' the words, use a func justify_line()
+        # to format each line. 
+        def justify_line(start, end, total_len):
+            # Use start/end instead of slicing to improve spead and space
+            # Use total_len to denote the total len of all words in this line, this
+            # is to save time to repeat claculating word lens
+            
+            # Given len of words in the line, calculate how many spaces required
+            space_len = maxWidth - total_len
+            if end > start:
+                # If more than 1 words in the line, calc average space b/w each word
+                # and also total spare spaces needs to spread in front words.
+                space_unit, space_offset = divmod(space_len, end - start)
+                # Compose output starting from first word
+                outputs = [words[start]]
+                for i in range(end - start):
+                    # Starting from 2nd word, append average len of spaces first
+                    outputs.append(' ' * space_unit)
+                    # Then spread the offset space, the number of space is guaranteed
+                    # to be less than (end - start) i.e. gaps b/w words in the line.
+                    # So each gap will have at most 1 offset space.
+                    if space_offset:
+                        outputs.append(' ')
+                        space_offset -= 1
+                    # After fill the spaces, add the word
+                    outputs.append(words[start + i + 1])
+                return ''.join(outputs)
+            else:
+                # If only one word in the line, returns word followed by spaces.
+                return words[start] + ' ' * space_len
+        
+        N = len(words)
+        start = end = 0
+        total_len = 0
+        ans = []
+        # Use two pointers, use end to add new items
+        while start <= end and end < N:
+            l = len(words[end])
+            # Trick: Don't directly update the status, check if cur end should be
+            # added to cur line or a new line.
+            if total_len + l + end - start > maxWidth:
+                # Note to consider num of spaces when compare with maxWidth (end - start)
+                # is num of words in cur line minus one, it equals the mininum spaces required
+                # If add cur word no longer valid, update cur line
+                ans.append(justify_line(start, end - 1, total_len))
+                total_len = l
+                start = end
+            else:
+                # If can add to cur line, update cur line and continue looping
+                total_len += l
+            end += 1
+        # Don't forget to process last line, last line requires 1 spaces in b/w, followed by
+        # padding spaces.
+        last_line = ' '.join(words[start:end])
+        ans.append(''.join([last_line, ' ' * (maxWidth - len(last_line))]))
+        return ans
 ```
