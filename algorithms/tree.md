@@ -711,6 +711,49 @@ class Solution:
         return self.max_path_sum
 ```
 
+### [1026. Maximum Difference Between Node and Ancestor](https://leetcode.com/problems/maximum-difference-between-node-and-ancestor/)
+
+```python
+# Fav
+class Solution:
+    def maxAncestorDiff(self, root: TreeNode) -> int:
+        def dfs(node, cur_max, cur_min):
+            # The distance only calculate at leaf level
+            if not node:
+                return cur_max - cur_min
+            
+            # For each node, calculate max and min and pass on
+            # to next level.
+            # Before and after recursive call matters, the return
+            # value does not impact any behavior
+            cur_max = max(cur_max, node.val)
+            cur_min = min(cur_min, node.val)
+            left = dfs(node.left, cur_max, cur_min)
+            right = dfs(node.right, cur_max, cur_min)
+            return max(left, right)
+        
+        return dfs(root, -math.inf, math.inf)
+    def maxAncestorDiff(self, root: TreeNode) -> int:
+        # Intuition: dfs(node) returns max and min of tree with node as root.
+        # While calculate max/min, update ans with max distance between node
+        # and max/min of it's subtrees.
+        ans = -1
+        def dfs(node):
+            nonlocal ans
+            max_v = min_v = node.val
+            if node.left:
+                left_max, left_min = dfs(node.left)
+                ans = max(ans, abs(node.val - left_max), abs(node.val - left_min))
+                max_v, min_v = max(max_v, left_max), min(min_v, left_min)
+            if node.right:
+                right_max, right_min = dfs(node.right)
+                ans = max(ans, abs(node.val - right_max), abs(node.val - right_min))
+                max_v, min_v = max(max_v, right_max), min(min_v, right_min)
+            return max_v, min_v
+        dfs(root)
+        return ans
+```
+
 ### [236. Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
 
 ```python
@@ -1165,48 +1208,7 @@ class Solution:
 ```
 
 
-### [1026. Maximum Difference Between Node and Ancestor](https://leetcode.com/problems/maximum-difference-between-node-and-ancestor/)
 
-```python
-# Fav
-class Solution:
-    def maxAncestorDiff(self, root: TreeNode) -> int:
-        def dfs(node, cur_max, cur_min):
-            # The distance only calculate at leaf level
-            if not node:
-                return cur_max - cur_min
-            
-            # For each node, calculate max and min and pass on
-            # to next level.
-            # Before and after recursive call matters, the return
-            # value does not impact any behavior
-            cur_max = max(cur_max, node.val)
-            cur_min = min(cur_min, node.val)
-            left = dfs(node.left, cur_max, cur_min)
-            right = dfs(node.right, cur_max, cur_min)
-            return max(left, right)
-        
-        return dfs(root, -math.inf, math.inf)
-    def maxAncestorDiff(self, root: TreeNode) -> int:
-        # Intuition: dfs(node) returns max and min of tree with node as root.
-        # While calculate max/min, update ans with max distance between node
-        # and max/min of it's subtrees.
-        ans = -1
-        def dfs(node):
-            nonlocal ans
-            max_v = min_v = node.val
-            if node.left:
-                left_max, left_min = dfs(node.left)
-                ans = max(ans, abs(node.val - left_max), abs(node.val - left_min))
-                max_v, min_v = max(max_v, left_max), min(min_v, left_min)
-            if node.right:
-                right_max, right_min = dfs(node.right)
-                ans = max(ans, abs(node.val - right_max), abs(node.val - right_min))
-                max_v, min_v = max(max_v, right_max), min(min_v, right_min)
-            return max_v, min_v
-        dfs(root)
-        return ans
-```
 
 ### [979. Distribute Coins in Binary Tree](https://leetcode.com/problems/distribute-coins-in-binary-tree/)
 
