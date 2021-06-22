@@ -72,64 +72,6 @@ class Solution:
         return True
 ```
 
-### [934. Shortest Bridge](https://leetcode.com/problems/shortest-bridge/)
-```python
-class Solution:
-    def shortestBridge(self, grid: List[List[int]]) -> int:
-        # Alg: Flood Fill
-        # Find all border nodes of ONE islend as flood, flood-fill starting from the
-        # borders until reach to another island. Different nums need to be used
-        # to mark different nodes:
-        # - 0 water
-        # - 1 target island
-        # - 2 flood
-        R, C = len(grid), len(grid[0])
-        
-        # Step 1: Find and flood-fill first island and capture the border of it to
-        # flood-fill others
-        # ------------------------------------------------------------------------
-        
-        # Get first land of first island
-        r, c = 0, 0
-        for i in range(R):
-            for j in range(C):
-                if grid[i][j] == 1:
-                    r, c = i, j
-                    break
-        # Create a queue to capture borders for step 2.
-        q = deque()
-        # Use dfs to scan first island and flood-fill it
-        def dfs(r, c):
-            grid[r][c] = 2
-            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
-                if 0 <= _r < R and 0 <= _c < C:
-                    if grid[_r][_c] == 1:
-                        dfs(_r, _c)
-                    elif grid[_r][_c] == 0 and (_r, _c) not in q:
-                        # Trick: use dfs() to capture borders
-                        q.append((r, c))
-        dfs(r, c)
-        
-        # Step 2: Flood-fill from borders of 1st island until reach other island
-        # using multi-source BFS
-        # ----------------------------------------------------------------------
-        steps = 0
-        while q:
-            L = len(q)
-            for _ in range(L):
-                r, c = q.pop()
-                for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
-                    if 0 <= _r < R and 0 <= _c < C:
-                        if grid[_r][_c] == 0:
-                            q.appendleft((_r, _c))
-                            # Flood-fill the water
-                            grid[_r][_c] = 2
-                        elif grid[_r][_c] == 1:
-                            return steps
-            steps += 1
-        return 0
-```
-
 ### [417. Pacific Atlantic Water Flow](https://leetcode.com/problems/pacific-atlantic-water-flow/)
 
 ```python
