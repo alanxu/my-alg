@@ -580,3 +580,71 @@ class Solution(object):
             
         return ans
 ```
+
+### [1563. Stone Game V](https://leetcode.com/problems/stone-game-v/)
+https://youtu.be/2_JkASlmxTA
+```python
+class Solution:
+    def stoneGameV(self, stoneValue: List[int]) -> int:
+        N = len(stoneValue)
+        dp = [[0] * N for _ in range(N)]
+        
+        for i in range(N - 1):
+            dp[i][i + 1] = max(stoneValue[i], stoneValue[i + 1])
+        
+        for l in range(3, N):
+            for i in range(0, N - l + 1):
+                print(i)
+                j = i + l - 1
+                for k in range(i, j):
+                    left_sum, right_sum = sum(stoneValue[i:k + 1]), sum(stoneValue[k + 1:j + 1])
+                    if left_sum > right_sum:
+                        dp[i][j] = max(dp[i][j], right_sum + dp[k + 1][j])
+                    elif left_sum < right_sum:
+                        dp[i][j] = max(dp[i][j], left_sum + dp[i][k])
+                    else:
+                        dp[i][j] = max(dp[i][j], left_sum + max(dp[k + 1][j], dp[i][k]))
+        print(dp)
+        return dp[0][-1]
+    
+    def stoneGameV(self, stoneValue: List[int]) -> int:
+        n = len(stoneValue)
+        acc = [0] + list(itertools.accumulate(stoneValue))
+
+        @functools.lru_cache(None)
+        def dfs(i, j):
+            if j == i:
+                return 0
+            ans = 0
+            for k in range(i, j):
+                s1, s2 = acc[k + 1] - acc[i], acc[j + 1] - acc[k + 1]
+                if s1 <= s2:
+                    ans = max(ans, dfs(i, k) + s1)
+                if s1 >= s2:
+                    ans = max(ans, dfs(k + 1, j) + s2)
+            return ans
+
+        return dfs(0, n - 1)
+    
+
+    def stoneGameV(self, stoneValue: List[int]) -> int:
+        n = len(stoneValue)
+        # Trick: [0] make prefix sum operations easier
+        acc = [0] + list(itertools.accumulate(stoneValue))
+
+        @functools.lru_cache(None)
+        def dfs(i, j):
+            # Trick: j is exclusive, make logic easier
+            if j - i == 1:
+                return 0
+            ans = 0
+            for k in range(i + 1, j):
+                s1, s2 = acc[k] - acc[i], acc[j] - acc[k]
+                if s1 <= s2:
+                    ans = max(ans, dfs(i, k) + s1)
+                if s1 >= s2:
+                    ans = max(ans, dfs(k, j) + s2)
+            return ans
+
+        return dfs(0, n)
+```

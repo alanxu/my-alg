@@ -1,71 +1,3 @@
-## MinMax
-
-### [1563. Stone Game V](https://leetcode.com/problems/stone-game-v/)
-https://youtu.be/2_JkASlmxTA
-```python
-class Solution:
-    def stoneGameV(self, stoneValue: List[int]) -> int:
-        N = len(stoneValue)
-        dp = [[0] * N for _ in range(N)]
-        
-        for i in range(N - 1):
-            dp[i][i + 1] = max(stoneValue[i], stoneValue[i + 1])
-        
-        for l in range(3, N):
-            for i in range(0, N - l + 1):
-                print(i)
-                j = i + l - 1
-                for k in range(i, j):
-                    left_sum, right_sum = sum(stoneValue[i:k + 1]), sum(stoneValue[k + 1:j + 1])
-                    if left_sum > right_sum:
-                        dp[i][j] = max(dp[i][j], right_sum + dp[k + 1][j])
-                    elif left_sum < right_sum:
-                        dp[i][j] = max(dp[i][j], left_sum + dp[i][k])
-                    else:
-                        dp[i][j] = max(dp[i][j], left_sum + max(dp[k + 1][j], dp[i][k]))
-        print(dp)
-        return dp[0][-1]
-    
-    def stoneGameV(self, stoneValue: List[int]) -> int:
-        n = len(stoneValue)
-        acc = [0] + list(itertools.accumulate(stoneValue))
-
-        @functools.lru_cache(None)
-        def dfs(i, j):
-            if j == i:
-                return 0
-            ans = 0
-            for k in range(i, j):
-                s1, s2 = acc[k + 1] - acc[i], acc[j + 1] - acc[k + 1]
-                if s1 <= s2:
-                    ans = max(ans, dfs(i, k) + s1)
-                if s1 >= s2:
-                    ans = max(ans, dfs(k + 1, j) + s2)
-            return ans
-
-        return dfs(0, n - 1)
-    
-
-        def stoneGameV(self, stoneValue: List[int]) -> int:
-            n = len(stoneValue)
-            acc = [0] + list(itertools.accumulate(stoneValue))
-
-            @functools.lru_cache(None)
-            def dfs(i, j):
-                if j - i == 1:
-                    return 0
-                ans = 0
-                for k in range(i + 1, j):
-                    s1, s2 = acc[k] - acc[i], acc[j] - acc[k]
-                    if s1 <= s2:
-                        ans = max(ans, dfs(i, k) + s1)
-                    if s1 >= s2:
-                        ans = max(ans, dfs(k, j) + s2)
-                return ans
-
-            return dfs(0, n)
-```
-
 
 ## Others
 
@@ -140,66 +72,62 @@ class Solution:
         return True
 ```
 
+### [934. Shortest Bridge](https://leetcode.com/problems/shortest-bridge/)
 ```python
 class Solution:
-    # Trick: Flood Fill
-    def shortestBridge(self, A: List[List[int]]) -> int:
-        directs = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-        rows, cols = len(A), len(A[0])
+    def shortestBridge(self, grid: List[List[int]]) -> int:
+        # Alg: Flood Fill
+        # Find all border nodes of ONE islend as flood, flood-fill starting from the
+        # borders until reach to another island. Different nums need to be used
+        # to mark different nodes:
+        # - 0 water
+        # - 1 target island
+        # - 2 flood
+        R, C = len(grid), len(grid[0])
         
-        def find_and_mark_one_island():
-            r, c = 0, 0
-            
-            # Find first point in one island as start point
-            for i in range(rows):
-                for j in range(cols):
-                    if A[i][j] == 1:
-                        r, c = i, j
-                        break
-            
-            # Traverse first island, mark it as 2 and collect the boarder in a queue
-            q = deque()
-            
-            def dfs(r, c):                
-
-                A[r][c] = 2
-                
-                for d in directs:
-                    _r, _c = r + d[0], c + d[1]
-                    if 0 <= _r < rows and 0 <= _c < cols:
-                        if A[_r][_c] == 0:
-                            if (r, c) not in q: 
-                                q.appendleft((r, c))
-                        elif A[_r][_c] != 2:
-                            dfs(_r, _c)
-            dfs(r, c)
-            return q
-            
-        def expand_island_1(boarders):
-            # Use multi-source BFS to expand the boarder 1 layer a time util reached to 1 which is island 2
-            q = boarders
-            
-            step = 0
-            
-            while q:
-                Len = len(q)
-                for _ in range(Len):
-                    r, c = q.pop()
-                    for d in directs:
-                        _r, _c = r + d[0], c + d[1]
-                        if 0 <= _r < rows and 0 <= _c < cols:
-                            if A[_r][_c] == 0:
-                                q.appendleft((_r, _c))
-                                A[_r][_c] = 2
-                            elif A[_r][_c] == 1:
-                                return step
-                                
-                step += 1
-
-        q = find_and_mark_one_island() 
-        step = expand_island_1(q)
+        # Step 1: Find and flood-fill first island and capture the border of it to
+        # flood-fill others
+        # ------------------------------------------------------------------------
         
-        return step
+        # Get first land of first island
+        r, c = 0, 0
+        for i in range(R):
+            for j in range(C):
+                if grid[i][j] == 1:
+                    r, c = i, j
+                    break
+        # Create a queue to capture borders for step 2.
+        q = deque()
+        # Use dfs to scan first island and flood-fill it
+        def dfs(r, c):
+            grid[r][c] = 2
+            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= _r < R and 0 <= _c < C:
+                    if grid[_r][_c] == 1:
+                        dfs(_r, _c)
+                    elif grid[_r][_c] == 0 and (_r, _c) not in q:
+                        # Trick: use dfs() to capture borders
+                        q.append((r, c))
+        dfs(r, c)
+        
+        # Step 2: Flood-fill from borders of 1st island until reach other island
+        # using multi-source BFS
+        # ----------------------------------------------------------------------
+        steps = 0
+        while q:
+            L = len(q)
+            for _ in range(L):
+                r, c = q.pop()
+                for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                    if 0 <= _r < R and 0 <= _c < C:
+                        if grid[_r][_c] == 0:
+                            q.appendleft((_r, _c))
+                            # Flood-fill the water
+                            grid[_r][_c] = 2
+                        elif grid[_r][_c] == 1:
+                            return steps
+            steps += 1
+        return 0
 ```
 
 ### [417. Pacific Atlantic Water Flow](https://leetcode.com/problems/pacific-atlantic-water-flow/)
