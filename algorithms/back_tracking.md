@@ -462,3 +462,67 @@ class Solution:
         return ans
 ```
 
+### [131. Palindrome Partitioning](https://leetcode.com/problems/palindrome-partitioning/)
+
+```python
+class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+        
+        def is_palin(i, j):
+            # Trick: Memory - Repeated Subproblem
+            if is_palin_memo[i][j] != -1:
+                return is_palin_memo[i][j]
+            
+            # Trick: No need to check '=', even if both i, j +/-1
+            #        Because you only need to check util (a)b(c) or (a)(b)
+            while i < j:
+                if s[i] != s[j]: 
+                    is_palin_memo[i][j] = False
+                    break
+                i, j = i + 1, j - 1
+            
+            if is_palin_memo[i][j] == -1:
+                is_palin_memo[i][j] = True
+            
+            return is_palin_memo[i][j]
+        
+        def is_palin2(i, j):
+            # Trick: Use python string slice to check palindom
+            return s[i:j + 1] == (s[j::-1] if i == 0 else s[j:i - 1:-1])
+        
+
+        # Trick: Backtracking
+        def backtrack(i=0, result=[]):
+            # First hanlde end condition
+            if i == len(s):
+                self.ans.append(result[:])
+            
+            for j in range(i, len(s)):
+                if is_palin(i, j):
+                    result.append(s[i: j + 1])
+                    backtrack(j + 1, result)
+                    result.pop()
+        self.ans = []
+        is_palin_memo = [[-1] * len(s) for _ in range(len(s))]
+        backtrack()
+        return self.ans
+
+    def partition(self, s: str) -> List[List[str]]:
+        N, ans = len(s), []
+        def is_parlin(s):
+            return s == s[::-1]
+        def backtrack(i, partitions):
+            if i == N:
+                # Trick: Copy full array
+                ans.append(partitions[:])
+                return
+            for j in range(i + 1, N + 1):
+                cur = s[i:j]
+                # print(cur)
+                if is_parlin(cur):
+                    partitions.append(cur)
+                    backtrack(j, partitions)
+                    partitions.pop()
+        backtrack(0, [])
+        return ans
+```

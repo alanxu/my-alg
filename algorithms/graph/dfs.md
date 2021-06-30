@@ -153,52 +153,28 @@ class Solution:
                 color += 1
                 
         return color
-```
 
-### [131. Palindrome Partitioning](https://leetcode.com/problems/palindrome-partitioning/)
-
-```python
-class Solution:
-    def partition(self, s: str) -> List[List[str]]:
+    def countComponents(self, n: int, edges: List[List[int]]) -> int:
+        # Intuition: No need coloring, iterate n nodes, dfs on each one
+        # when you meet a un-seen node, ans increase by 1,because the
+        # node is disconnected from components marked by prev dfs.
+        graph, seen = defaultdict(list), set()
+        for edge in edges:
+            graph[edge[0]].append(edge[1])
+            graph[edge[1]].append(edge[0])
         
-        def is_palin(i, j):
-            # Trick: Memory - Repeated Subproblem
-            if is_palin_memo[i][j] != -1:
-                return is_palin_memo[i][j]
-            
-            # Trick: No need to check '=', even if both i, j +/-1
-            #        Because you only need to check util (a)b(c) or (a)(b)
-            while i < j:
-                if s[i] != s[j]: 
-                    is_palin_memo[i][j] = False
-                    break
-                i, j = i + 1, j - 1
-            
-            if is_palin_memo[i][j] == -1:
-                is_palin_memo[i][j] = True
-            
-            return is_palin_memo[i][j]
+        def dfs(node):
+            seen.add(node)
+            for nei in graph[node]:
+                if nei not in seen:
+                    dfs(nei)
         
-        def is_palin2(i, j):
-            # Trick: Use python string slice to check palindom
-            return s[i:j + 1] == (s[j::-1] if i == 0 else s[j:i - 1:-1])
-        
-
-        # Trick: Backtracking
-        def backtrack(i=0, result=[]):
-            # First hanlde end condition
-            if i == len(s):
-                self.ans.append(result[:])
-            
-            for j in range(i, len(s)):
-                if is_palin(i, j):
-                    result.append(s[i: j + 1])
-                    backtrack(j + 1, result)
-                    result.pop()
-        self.ans = []
-        is_palin_memo = [[-1] * len(s) for _ in range(len(s))]
-        backtrack()
-        return self.ans
+        ans = 0
+        for i in range(n):
+            if i not in seen:
+                ans += 1
+                dfs(i)
+        return ans
 ```
 
 ### [430. Flatten a Multilevel Doubly Linked List](https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list/)

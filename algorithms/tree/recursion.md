@@ -151,6 +151,24 @@ class Solution:
             # There must be an ans.
             return root if left and right else left or right
         return find_lca(root, p, q)
+
+    def find_one(self, node, target):
+        if not node:
+            return False
+        if node.val == target.val:
+            return True
+        return self.find_one(node.left, target) or self.find_one(node.right, target)
+    
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if not root:
+            return None
+        left, right = self.lowestCommonAncestor(root.left, p, q), self.lowestCommonAncestor(root.right, p, q)
+        if left or right:
+            return left or right
+        elif self.find_one(root, p) and self.find_one(root, q):
+            return root
+        else:
+            return None
 ```
 
 ### [979. Distribute Coins in Binary Tree](https://leetcode.com/problems/distribute-coins-in-binary-tree/)
