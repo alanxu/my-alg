@@ -182,6 +182,8 @@ class Solution:
             if abs(arr[left] - x) > abs(arr[right] - x):
                 left += 1
             else:
+                # When left and right have same distance, chosse left
+                # |a - x| == |b - x| and a < b
                 right -= 1
         return arr[left:right+1]
     

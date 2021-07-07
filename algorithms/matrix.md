@@ -68,6 +68,11 @@ class Solution(object):
         return ans
 ```
 
+## Sorted Matrix
+
+### [378. Kth Smallest Element in a Sorted Matrix](https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/)
+
+
 ## Others
 
 ### [1329. Sort the Matrix Diagonally](https://leetcode.com/problems/sort-the-matrix-diagonally/)

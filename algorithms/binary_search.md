@@ -677,36 +677,47 @@ class Solution:
 ```python
 class Solution:
     def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
-        def count_less_equal(num):
-            smaller, larger = float('-inf'), float('inf')
-            count, n = 0, len(matrix)
-            row, col = n - 1, 0
-            
-            while row >= 0 and col <= n - 1:
-                if matrix[row][col] > num:
-                    larger = min(larger, matrix[row][col])
-                    row -= 1
+        # Time: O(N * log(Max - Min))
+        # Space: O(1)
+        N = len(matrix)
+        def count_less_equal(x):
+            '''
+            Given a number x, x doesn't have to exist in matrix. 
+            Returns count of numbers in matrix that less or equal
+            to x, and also the largest number in matrix <= x (smaller), and
+            smallest number in matrix > x (larger).
+            Starting from left-bottom, and moving until cannot move. Image,
+            this func can draw a line to divide the matrix into to parts, 
+            left-top part is nums <= x, and the other half are nums > x. 
+            '''
+            r, c = N - 1, 0
+            # Trick: For sorted matrix, start from left-bottom or right-top 
+            # so you can move to smaller or larger by moving r or c
+            count, smaller, larger = 0, -math.inf, math.inf
+            while r >= 0 and c < N:
+                if matrix[r][c] > x:
+                    larger = min(larger, matrix[r][c])
+                    r -= 1
                 else:
-                    count += row + 1
-                    smaller = max(smaller, matrix[row][col])
-                    col += 1
+                    count += r + 1
+                    smaller = max(smaller, matrix[r][c])
+                    c += 1
             return count, smaller, larger
         
-        n = len(matrix)
-        start, end = matrix[0][0], matrix[n - 1][n - 1]
-        
+        # Intuition: Binary search on nums b/w smallest and largest in matrix
+        # for each num (mid), it doesnot have to exist in matrix, find how many
+        # nums < mid and closet 2 nums around it (smaller and larger). If count == k
+        # the smaller is ans (smaller <= mid).
+        start, end = matrix[0][0], matrix[-1][-1]
         while start < end:
             mid = (start + end) // 2
             count, smaller, larger = count_less_equal(mid)
-            print(f'{count} - {smaller} - {larger}')
-            
             if count == k:
                 return smaller
             elif count > k:
                 end = smaller
             else:
                 start = larger
-                
         return start
 ```
 

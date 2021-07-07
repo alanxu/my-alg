@@ -628,6 +628,26 @@ class SparseVector:
 # ans = v1.dotProduct(v2)
 ```
 
+### [1338. Reduce Array Size to The Half](https://leetcode.com/problems/reduce-array-size-to-the-half/)
 
+```python
+class Solution:
+    def minSetSize(self, arr: List[int]) -> int:
+        N = len(arr)
+        counter = collections.Counter(arr)
+        arr = sorted(arr, key=lambda x: (-counter[x], x))
+        return len(set(arr[:(N + 1) // 2]))
+    
+    def minSetSize(self, arr: List[int]) -> int:
+        N = len(arr)
+        counter = collections.Counter(arr)
+        cur_len, ans = N, 0
+        for k, v in [(k, v ) for k, v in sorted(counter.items(), key=lambda item: (-item[1],item[0]))]:
+            cur_len -= v
+            ans += 1
+            if cur_len <= N // 2:
+                break
+        return ans
+```
 
 

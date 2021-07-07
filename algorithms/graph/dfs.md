@@ -206,18 +206,16 @@ class Solution:
 ```python
 class Solution:
     def numDistinctIslands(self, grid: List[List[int]]) -> int:
-        # Trick: One dfs can find all adjcent nodes, so if a node is seen
-        #        it means all its adjcent nodes are seen
-        # Trick: Use same dfs func, it make sure the order of each node in
-        #        'same' islands is same
+        # Intuition: Use lefttop point as anchor and use the relative distance pair to
+        # record a shape.
         
         rows, cols = len(grid), len(grid[0])
         seen = set()
         shapes = set()
         
         def scan(r, c, r0, c0):
+            # Trick: Check seen and set seen both at parent level
             if 0 <= r < rows and 0 <= c < cols and grid[r][c] and (r, c) not in seen:
-                # Trick: Normalize each node in shap based on (r0, c0)
                 shape.append((r - r0, c - c0))
                 seen.add((r, c))
                 for nei in [(r, c + 1), (r, c - 1), (r + 1, c), (r - 1, c)]:
@@ -277,6 +275,9 @@ class Solution:
 
         def dfs(r, c):
             if board[r][c] == 'M':
+                # The 'M' can be reached only when it is initially triggered by click, so it is
+                # always the first call rather than a recursive call. So we can simply return
+                # and this will terminate the game.
                 board[r][c] = 'X'
                 return
             else:
@@ -315,8 +316,7 @@ class Solution:
                             # board[_r][_c] == 'E' to check visited
                             if 0 <= _r < rows and 0 <= _c < cols and board[_r][_c] == 'E':
                                     q.appendleft((_r, _c))
-                                    # Trick: Mark as pending, so it wont be added again!!
-                                    board[_r][_c] = 'P' 
+                                    board[_r][_c] = 'P'
         
         bfs(*click)
         return board
@@ -325,12 +325,15 @@ class Solution:
 ### [797. All Paths From Source to Target](https://leetcode.com/problems/all-paths-from-source-to-target/)
 
 ```python
+# Fav
 class Solution:
     def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
-        # Trick: Backtracking
+        # Intuition: Backtracking
         #        If you put path.append() in front of end condition check, it will mess up.
         ans = []
         def backtrack(node=0, path=[]):
+            # Because path is top down, so path is always different, so backtrack cannot utilize
+            # caching, and pruning not always working, e.g. this case.
             
             if node == len(graph) - 1:
                 ans.append(path[:] + [node])
@@ -341,12 +344,11 @@ class Solution:
                 backtrack(nei, path)
             path.pop()
         
-        
         backtrack()
         return ans
     
-    def allPathsSourceTarget2(self, graph: List[List[int]]) -> List[List[int]]:
-        # Trick: Top down DP with memo - Faster
+    def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
+        # Intuition: Top down DP with memo - Faster
         target = len(graph) - 1
 
         # apply the memoization
@@ -396,7 +398,23 @@ class Solution:
                 
         return ans
                 
-            
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        ans = 0
+        def dfs(r, c):
+            self.area += 1
+            grid[r][c] = 0
+            for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                if 0 <= _r < rows and 0 <= _c < cols and grid[_r][_c] == 1:
+                    dfs(_r, _c)
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1:
+                    self.area = 0
+                    dfs(r, c)
+                    ans = max(ans, self.area)
+
+        return ans
 ```
 
 
