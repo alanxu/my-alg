@@ -426,4 +426,21 @@ class Solution:
                     dp[i][j] = dp[i + 1][j + 1] + 1
                     
         return max(max(row) for row in dp)
+
+    def findLength(self, nums1: List[int], nums2: List[int]) -> int:
+        M, N = len(nums1), len(nums2)
+        # dp[i][j] is max len of substr ending with i and j
+        # for nums1[0:i+1] and nums2[0:j+1]
+        # last
+        dp = [[0] * (N + 1) for _ in range(M + 1)]
+        ans = 0
+        for i in range(1, M + 1):
+            for j in range(1, N + 1):
+                ii, jj = i - 1, j - 1
+                if nums1[ii] == nums2[jj]:
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                else:
+                    dp[i][j] = 0
+                ans = max(ans, dp[i][j])
+        return ans
 ```

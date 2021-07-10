@@ -302,6 +302,32 @@ class Solution:
         return ' '.join(words)
 ```
 
+### [186. Reverse Words in a String II](https://leetcode.com/problems/reverse-words-in-a-string-ii/)
+
+```python
+class Solution:
+    def reverseWords(self, s: List[str]) -> None:
+        """
+        Do not return anything, modify s in-place instead.
+        """
+        N = len(s)
+        def reverse(left, right):
+            # Trick: Reverse a string in place
+            while left < right:
+                s[left], s[right] = s[right], s[left]
+                left, right = left + 1, right - 1
+        
+        def reverse_each_word():
+            left = 0
+            for right in range(N):
+                if right == N - 1 or s[right + 1] == ' ':
+                    reverse(left, right)
+                    left = right + 2
+        
+        reverse(0, N - 1)
+        reverse_each_word()
+```
+
 ### [763. Partition Labels](https://leetcode.com/problems/partition-labels/)
 
 ```python

@@ -380,6 +380,43 @@ class Solution:
 
 ### [39. Combination Sum](https://leetcode.com/problems/combination-sum/)
 
+### [40. Combination Sum II](https://leetcode.com/problems/combination-sum-ii/)
+
+```python
+class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        ans, N = [], len(candidates)
+        def backtrack(comb, target, start):
+            if target == 0:
+                # There is no duplicated comb, why?
+                # Trick: Use list() same as copy.copy()
+                ans.append(list(comb))
+                return
+            for cur in range(start, N):
+                x = candidates[cur]
+                # Trick: In backtracking, each recursive call will add one item to
+                # the comb. And always look forward. In the sorted array, if there
+                # are two same item, [... 3, 3, 4, ....], the first is picked as cur
+                # and remaining [3, 4, ...] is passed on to next call. In the cur call,
+                # if we still handle 2nd 3, we still add 3 to cur comb, and pass [4, ..]
+                # to next step, this will create 0 new comb compared with pick first 3.
+                # So we just skip all same element in cur step. Note it is cur step, the
+                # skiped items are still considered in next recursive call.
+                if cur > start and x == candidates[cur - 1]:
+                    continue
+                if x <= target:
+                    comb.append(x)
+                    backtrack(comb, target - x, cur + 1)
+                    comb.pop()
+                else:
+                    # Trick: Because the list are sorted, so if x > target, so are all after x
+                    break
+        # Trick: Sort list, so it can be optimized
+        candidates.sort()
+        backtrack([], target, 0)
+        return ans
+```
+
 ### [46. Permutations](https://leetcode.com/problems/permutations/)
 
 ```python
