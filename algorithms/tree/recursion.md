@@ -559,3 +559,46 @@ class Solution:
         dfs(root)
         return ans
 ```
+
+### [235. Lowest Common Ancestor of a Binary Search Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        parent_val = root.val
+        p_val = p.val
+        q_val = q.val
+        if p_val > parent_val and q_val > parent_val:
+            return self.lowestCommonAncestor(root.right, p, q)
+        elif p_val < parent_val and q_val < parent_val:
+            return self.lowestCommonAncestor(root.left, p, q)
+        else:
+            return root
+```
+
+### [814. Binary Tree Pruning](https://leetcode.com/problems/binary-tree-pruning/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def pruneTree(self, root: TreeNode) -> TreeNode:
+        if not root:
+            return None
+        root.left = self.pruneTree(root.left)
+        root.right = self.pruneTree(root.right)
+        if root.val == 0 and not root.left and not root.right:
+            return None
+        return root
+```

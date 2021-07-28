@@ -119,6 +119,61 @@ class Solution:
         return second
 ```
 
+## Reverse
+
+### [206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head: ListNode) -> ListNode:
+        cur, pre = head, None
+        while cur:
+            tmp = cur.next
+            cur.next = pre
+            pre = cur
+            cur = tmp
+        return pre
+```
+
+### [25. Reverse Nodes in k-Group]
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        if k < 2:
+            return head
+        
+        node = head
+        for _ in range(k):
+            if not node:
+                return head
+            node = node.next
+        
+        pre, cur = None, head
+        for _ in range(k):
+            temp = cur.next
+            cur.next = pre
+            pre = cur
+            cur = temp
+            
+        head.next = self.reverseKGroup(cur, k)
+        
+        # pre is end of original current group and
+        # head of new current group. cur is the head
+        # of next group
+        return pre
+```
+
 ## Others
 ### [61. Rotate List](https://leetcode.com/problems/rotate-list/)
 

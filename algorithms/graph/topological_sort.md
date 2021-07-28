@@ -266,7 +266,11 @@ class Solution:
                     # any order
                     break
             else:
+                # Trick: For/Else
+                # Else runs when for loop is not break
                 if len(second_w) < len(first_w):
+                    # If sec_w and fst_w match and fst_w is
+                    # longer, it is not correct
                     return ""
                 
         # 2. Collect nodes with indegree=0, using BFS

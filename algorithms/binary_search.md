@@ -543,31 +543,7 @@ class Solution:
 
 ## K Sum
 
-### [259. 3Sum Smaller](https://leetcode.com/problems/3sum-smaller/)
 
-```python
-class Solution:
-    def threeSumSmaller(self, nums: List[int], target: int) -> int:
-        nums.sort()
-        sum = 0
-        for i in range(len(nums)):
-            sum += self.twoSumSmaller(nums[i + 1:], target - nums[i])
-            
-        return sum
-            
-    def twoSumSmaller(self, nums, target):
-        lo, hi = 0, len(nums) - 1
-        sum = 0
-        
-        while lo < hi:
-            s = nums[lo] + nums[hi]
-            if s < target:
-                sum += hi - lo
-                lo += 1
-            else:
-                hi -= 1
-        return sum
-```
 
 ### [167. Two Sum II - Input array is sorted](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/)
 

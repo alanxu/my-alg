@@ -186,7 +186,7 @@ class Solution:
 from heapq import *
 
 class MedianFinder:
-
+    # Alg: Two heaps
     def __init__(self):
         """
         initialize your data structure here.
@@ -200,6 +200,7 @@ class MedianFinder:
             heappush(self.large, -heappop(self.small))
         
     def findMedian(self) -> float:
+        # Trick: heapq, top of heap is [0]
         if len(self.large) > len(self.small):
             return self.large[0]
         return (self.large[0] - self.small[0]) / 2.0

@@ -63,6 +63,54 @@ class Solution:
         return target - diff
 ```
 
+### [259. 3Sum Smaller](https://leetcode.com/problems/3sum-smaller/)
+
+```python
+class Solution:
+    def threeSumSmaller(self, nums: List[int], target: int) -> int:
+        nums.sort()
+        sum = 0
+        for i in range(len(nums)):
+            sum += self.twoSumSmaller(nums[i + 1:], target - nums[i])
+            
+        return sum
+            
+    def twoSumSmaller(self, nums, target):
+        lo, hi = 0, len(nums) - 1
+        sum = 0
+        
+        while lo < hi:
+            s = nums[lo] + nums[hi]
+            if s < target:
+                sum += hi - lo
+                lo += 1
+            else:
+                hi -= 1
+        return sum
+
+    def threeSumSmaller(self, nums: List[int], target: int) -> int:
+        # Inuition: Sort nums first. For each i, for each left after
+        # i, find the right so that 3sum < target, then i, left and [left + 1, right]
+        # firms the ans for i and left. Then keep changing i and left and find
+        # their right.
+        ans = 0
+        nums.sort()
+        for i in range(len(nums)):
+            left, right = i + 1, len(nums) - 1
+            while left < right:
+                s = nums[i] + nums[left] + nums[right]
+                if s < target:
+                    # Trick: Add a range not only 1 tuple
+                    ans += right - left
+                    # Is there duplication when increment left
+                    # and keep looping? No, all counted ans are
+                    # based on i and previous left
+                    left += 1
+                else:
+                    right -= 1
+        return ans
+```
+
 ## Read Write Pointers
 
 ### [443. String Compression](https://leetcode.com/problems/string-compression/)
@@ -142,6 +190,57 @@ class Solution(object):
                 
         return self.candyCrush(bd) if todo else bd
 ```
+
+## Shortest Distance
+
+### [821. Shortest Distance to a Character](https://leetcode.com/problems/shortest-distance-to-a-character/)
+
+```python
+class Solution:
+    def shortestToChar(self, s: str, c: str) -> List[int]:
+        c_index = -math.inf
+        ans = []
+        for i, x in enumerate(s):
+            if x == c:
+                c_index = i
+            ans.append(i - c_index)
+        
+        c_index = math.inf
+        for i in range(len(s) - 1, -1, -1):
+            if s[i] == c:
+                c_index = i
+            ans[i] = min(ans[i], c_index - i)
+        
+        return ans
+```
+
+
+### [838. Push Dominoes](https://leetcode.com/problems/push-dominoes/)
+
+```python
+class Solution:
+    def pushDominoes(self, d: str) -> str:
+        # Intuition: Whether be pushed or not, depend on the shortest 
+        # distance to 'L' and 'R'.
+        d = 'L' + d + 'R'
+        ans = ""
+        i = 0
+        for j in range(1, len(d)):
+            if d[j] == '.':
+                continue
+            if i:
+                ans += d[i]
+            middle = j - i - 1
+            if d[i] == d[j]:
+                ans += d[i] * middle
+            elif d[i] == 'L' and d[j] == 'R':
+                ans += '.' * middle
+            else:
+                ans += 'R' * (middle // 2) + '.' * (middle % 2) + 'L' * (middle // 2)
+            i = j
+        return ans
+```
+
 
 ## Others
 
@@ -432,3 +531,48 @@ class Solution:
         ans.append(''.join([last_line, ' ' * (maxWidth - len(last_line))]))
         return ans
 ```
+
+
+### [611. Valid Triangle Number](https://leetcode.com/problems/valid-triangle-number/)
+
+```python
+class Solution:
+    def triangleNumber(self, nums: List[int]) -> int:
+        # TLE, bcos it is O(N^3)
+        self.ans, self.N = 0, len(nums)
+        def is_valid(a, b, c):
+            return a + b > c and a + c > b and b + c > a
+        def backtrack(start, triangle):
+            if len(triangle) == 3:
+                self.ans += 1
+                return
+            for i in range(start, self.N):
+                x = nums[i]
+                if len(triangle) < 2 or sum(triangle) > x :
+                    backtrack(i + 1, triangle + [x])
+                else:
+                    break
+        nums.sort()
+        backtrack(0, [])
+        return self.ans
+    def triangleNumber(self, nums: List[int]) -> int:
+        nums.sort()
+        N, ans = len(nums), 0
+        # Choose 1st num i reversely [N - 1, 2], for each 'end'
+        # at the left of it, calculte valid 'start' that can
+        # form triange with i and end. If matched, all items
+        # [start, end) is valid with i and end. So for i and end,
+        # the num of cases are (end - start). If start is valid,
+        # [start, end) are valid. Sum up on all i and end.
+        for i in range(N - 1, 1, -1):
+            start, end = 0, i - 1
+            while start < end:
+                if nums[start] + nums[end] > nums[i]:
+                    ans += end - start
+                    end -= 1
+                else:
+                    start += 1
+        return ans
+```
+
+

@@ -650,4 +650,65 @@ class Solution:
         return ans
 ```
 
+### [384. Shuffle an Array](https://leetcode.com/problems/shuffle-an-array/)
 
+```python
+class Solution:
+
+    def __init__(self, nums: List[int]):
+        self.arr = nums
+
+    def reset(self) -> List[int]:
+        """
+        Resets the array to its original configuration and return it.
+        """
+        return self.arr
+
+    def shuffle(self) -> List[int]:
+        """
+        Returns a random shuffling of the array.
+        """
+        # Alg: Fisher-Yates algorithm
+        # Dived the arr into shuffled area and remaining area. Each
+        # step, pick a random num from remaining area and swap it with
+        # the next last num of shuffle area. If only one num left in
+        # remaining area, no need to move it. 
+        ans = list(self.arr)
+        for i in range(len(ans) - 1):
+            j = random.randint(i, len(ans) - 1)
+            ans[i], ans[j] = ans[j], ans[i]
+        return ans
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(nums)
+# param_1 = obj.reset()
+# param_2 = obj.shuffle()
+```
+
+
+### [915. Partition Array into Disjoint Intervals](https://leetcode.com/problems/partition-array-into-disjoint-intervals/)
+
+```python
+class Solution:
+    def partitionDisjoint(self, nums: List[int]) -> int:
+        N = len(nums)
+        # max_left[i] is the max in nums[0..i]
+        max_left = [None] * N
+        # min_right[i] is the min in nums[i..N - 1]
+        min_right = [None] * N
+        
+        m = nums[0]
+        for i in range(N):
+            m = max(m, nums[i])
+            max_left[i] = m
+            
+        m = nums[-1]
+        for i in range(N - 1, -1, -1):
+            m = min(m, nums[i])
+            min_right[i] = m
+            
+        for i in range(1, N):
+            # If i's min_right >= any max_left of prevous value
+            if min_right[i] >= max_left[i - 1]:
+                return i
+```

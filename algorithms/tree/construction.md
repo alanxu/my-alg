@@ -300,3 +300,25 @@ class Solution(object):
             root.right = self.buildTree(preorder, inorder[index+1:])
             return root
 ```
+
+### [108. Convert Sorted Array to Binary Search Tree](https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+        def build(left, right):
+            if left > right:
+                return None
+            mid = (left + right) // 2
+            root = TreeNode(nums[mid])
+            root.left = build(left, mid - 1)
+            root.right = build(mid + 1, right)
+            return root
+        return build(0, len(nums) - 1)
+```

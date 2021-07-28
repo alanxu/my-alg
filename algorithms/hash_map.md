@@ -1,6 +1,37 @@
 
 ## Two Sum
 
+### [1. Two Sum](https://leetcode.com/problems/two-sum/)
+
+```python
+class Solution:
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        # It requires returning index, so sorting
+        # will mess up index, need index map
+        # defaultdict(list) is to handle two same values
+        idx_map = defaultdict(list)
+        for i, x in enumerate(nums):
+            idx_map[x].append(i)
+
+        nums.sort()
+        left, right = 0, len(nums) - 1
+        while left < right:
+            s = nums[left] + nums[right]
+            if s == target:
+                return [idx_map[nums[left]].pop(), idx_map[nums[right]].pop()]
+            elif s < target:
+                left += 1
+            else:
+                right -= 1
+    
+    def twoSum(self, nums: List[int], target: int) -> List[int]:
+        mp = {}
+        for i, x in enumerate(nums):
+            if target - x in mp:
+                return [mp[target-x], i]
+            mp[x] = i
+```
+
 ###[1010. Pairs of Songs With Total Durations Divisible by 60](https://leetcode.com/problems/pairs-of-songs-with-total-durations-divisible-by-60/)
 
 ```python
@@ -203,4 +234,34 @@ class Solution:
                     return int(''.join(map(str, A)))
 
         return num
+```
+
+### [205. Isomorphic Strings](https://leetcode.com/problems/isomorphic-strings/)
+
+```python
+class Solution:
+    def isIsomorphic(self, s: str, t: str) -> bool:
+        # Intuition: Compare if the two words follow same pattern.
+        # No worries if same charactor in diff position in diff str.
+        # We just care the pattern.
+        # We sign id to each char in both str based on position. The
+        # id is the pos of the first occurance of a char
+        # paper: 01034
+        # title: 01034
+        # Simply compare counts of each char cannot work, cuz it doesn't
+        # compare position.
+        map_a, map_b = {}, {}
+        for (i, a), (j, b) in zip(enumerate(s), enumerate(t)):
+            if a in map_a and b in map_b:
+                # If both happens before, check the id this char are same
+                if map_a[a] != map_b[b]:
+                    return False
+            elif a not in map_a and b not in map_b:
+                # If both not happen before, set id
+                map_a[a], map_b[b] = i, j
+            else:
+                # If one happends one didn't happen, return False
+                return False
+            
+        return True
 ```

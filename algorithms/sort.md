@@ -58,3 +58,16 @@ class Solution:
         return '0' if ans[0] == '0' else ans
 ```
 
+### [791. Custom Sort String](https://leetcode.com/problems/custom-sort-string/)
+
+```python
+class Solution:
+    def customSortString(self, order: str, s: str) -> str:
+        order_mp = {}
+        for i, x in enumerate(order):
+            order_mp[x] = i
+        
+        s = list(s)
+        s.sort(key=lambda x: order_mp[x] if x in order_mp else 26 + ord(x))
+        return ''.join(s)
+```
