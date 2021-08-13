@@ -40,6 +40,40 @@ class Solution:
         return k_sum(nums, target, 4)
 ```
 
+
+### [15. 3Sum](https://leetcode.com/problems/3sum/)
+```python
+class Solution:
+    def threeSum(self, nums: List[int]) -> List[List[int]]:
+        N = len(nums)
+        nums.sort()
+        ans = []
+        for i, x in enumerate(nums):
+            left, right = i + 1, N - 1
+            # Has to run first same occurance and ignore later
+            if 0 < i and nums[i] == nums[i - 1]:
+                continue
+            while left < right:
+                s = nums[i] + nums[left] + nums[right]
+                if s == 0:
+                    ans.append([nums[i], nums[left], nums[right]])
+                    # Dont forget to move both pointers, cuz we need
+                    # to find all ans
+                    left += 1
+                    right -= 1
+                    # From 2nd level, skip same value after first one
+                    # You jsut need to skip left, cuz if left is new
+                    # the whole tuple is new
+                    while left < right and nums[left] == nums[left - 1]:
+                        left += 1
+                elif s < 0:
+                    left += 1
+                else:
+                    right -= 1
+        return ans
+```
+
+
 ### [3Sum Closest](https://leetcode.com/problems/3sum-closest/)
 ```python
 class Solution:

@@ -136,25 +136,28 @@ class Solution:
 
 ```python
 class Solution:
-    def knightProbability(self, N: int, K: int, r: int, c: int) -> float:
-        # Inuition: dp[k][r][c] means after k steps, the posibility of knight to be
-        # on point (r, c)
-        dp = [[[0] * N for _ in range(N)] for _ in range(K + 1)]
-        # Initial value: At step 0, posibility of (r, c) is 1
-        dp[0][r][c] = 1
+    def knightProbability(self, n: int, K: int, row: int, column: int) -> float:
+        """
+        Intuition: DP[k][r][c] is the possiblity of knight to be on (r, c) after k
+        move.
+        Use k as time machine, every cell has different possibiity in different time
+        layer identified by k.
+        """
+        dp = [[[0] * n for _ in range(n)] for _ in range(K + 1)]
+        dp[0][row][column] = 1
         for k in range(1, K + 1):
-            for r in range(N):
-                for c in range(N):
-                    for dr, dc in ((1, 2), (-1, 2), (1, -2), (-1, -2),
-                                  (2, 1), (-2, 1), (2, -1), (-2, -1)):
-                        _r, _c = r + dr, c + dc
-                        if 0 <= _r < N and 0 <= _c < N:
-                            # Update 8 possible locations for each location
-                            # at pre step, the possiblity is a accumulated value
-                            # if there are duplicated moves from diff locations
-                            # from pre step
-                            dp[k][_r][_c] += dp[k - 1][r][c] / 8.0
+            for r in range(n):
+                for c in range(n):
+                    for _r, _c in ((r + 2, c + 1), (r - 2, c + 1), (r + 2, c - 1), \
+                                   (r - 2, c - 1), (r + 1, c + 2), (r - 1, c + 2), \
+                                   (r + 1, c - 2), (r - 1, c - 2)):
+                        if 0 <= _r < n and 0 <= _c < n:
+                            # Think reversly, dp[k][r][c]'s value comes from its source
+                            # there are at most 8 sources, each valid source add possibilities
+                            # to current position. Note /8.0
+                            dp[k][r][c] += dp[k - 1][_r][_c] / 8.0
         
+        # Trick: Sum of grid
         return sum(map(sum, dp[-1]))
     
     def knightProbability1(self, N: int, K: int, r: int, c: int) -> float:

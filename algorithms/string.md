@@ -56,4 +56,13 @@ class Solution:
         return s[:-1] + 'b' if s[:-1] else ''
 ```
 
+### [9. Palindrome Number](https://leetcode.com/problems/palindrome-number/)
 
+```python
+class Solution:
+    def isPalindrome(self, x: int) -> bool:
+        if x < 0:
+            return False
+        x = str(x)
+        return x == x[::-1]
+```

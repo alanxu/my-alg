@@ -43,6 +43,15 @@ class Solution:
             ans += mp[k]
             mp[t % 60] += 1
         return ans + mp[0] * (mp[0] - 1) // 2
+
+    def numPairsDivisibleBy60(self, time: List[int]) -> int:
+        mp, ans = defaultdict(int), 0
+        for t in time:
+            # Trick: One more % 60 to fix time dividable by 60
+            target = (60 - t % 60) % 60
+            ans += mp[target]
+            mp[t % 60] += 1
+        return ans
 ```
 
 ### [15. 3Sum](https://leetcode.com/problems/3sum/)
@@ -264,4 +273,25 @@ class Solution:
                 return False
             
         return True
+```
+
+### [389. Find the Difference](https://leetcode.com/problems/find-the-difference/)
+
+```python
+class Solution:
+    def findTheDifference(self, s: str, t: str) -> str:
+        counter_s, counter_t = collections.Counter(s), collections.Counter(t)
+        for c in counter_t.keys():
+            if c not in counter_s or counter_s[c] < counter_t[c]:
+                return c
+```
+
+
+### [1331. Rank Transform of an Array](https://leetcode.com/problems/rank-transform-of-an-array/)
+
+```python
+class Solution:
+    def arrayRankTransform(self, arr: List[int]) -> List[int]:
+        idx = {x: i + 1 for i, x in enumerate(sorted(set(arr)))}
+        return [idx[i] for i in arr]
 ```

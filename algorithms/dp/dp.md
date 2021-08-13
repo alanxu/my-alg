@@ -648,3 +648,24 @@ class Solution:
 
         return dfs(0, n)
 ```
+
+
+### [877. Stone Game](https://leetcode.com/problems/stone-game/)
+
+```python
+class Solution:
+    def stoneGame(self, piles: List[int]) -> bool:
+        N = len(piles)
+        # Intuition: dp(i, j) is the max score Alice can get when remaining piles
+        # are [i, j], WHEN both side play optimally. 
+        @functools.lru_cache(None)
+        def dp(i, j):
+            if i > j:
+                return 0
+            side = (N - j + i - 1) // 2
+            if side == 1:
+                return max(piles[i] + dp(i + 1, j), piles[j] + dp(i, j - 1))
+            else:
+                return min(-piles[i] + dp(i + 1, j), -piles[j] + dp(i, j - 1))
+        return dp(0, N - 1)
+```

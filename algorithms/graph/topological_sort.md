@@ -180,6 +180,35 @@ class Solution:
         return topological_sorted_order[::-1] if is_possible else []
 ```
 
+```python
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        graph, indegree, counts = defaultdict(list), [0] * numCourses, 0
+        ans = []
+        
+        for a, b in prerequisites:
+            graph[b].append(a)
+            indegree[a] += 1
+            
+        q = collections.deque()
+        for i, x in enumerate(indegree):
+            if x == 0:
+                q.append(i)
+                counts += 1
+                ans.append(i)
+        
+        while q:
+            i = q.popleft()
+            for nei in graph[i]:
+                indegree[nei] -= 1
+                if indegree[nei] == 0:
+                    q.append(nei)
+                    counts += 1
+                    ans.append(nei)
+                    
+        return ans if counts == numCourses else []
+```
+
 ### [444. Sequence Reconstruction](https://leetcode.com/problems/sequence-reconstruction/)
 
 ```python

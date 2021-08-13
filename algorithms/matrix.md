@@ -150,3 +150,68 @@ class Solution:
                 
         return (x == 0 and y == 0) or idx != 0
 ```
+
+
+### [353. Design Snake Game](https://leetcode.com/problems/design-snake-game/)
+
+```python
+class SnakeGame:
+
+    def __init__(self, width: int, height: int, food: List[List[int]]):
+        """
+        Initialize your data structure here.
+        @param width - screen width
+        @param height - screen height 
+        @param food - A list of food positions
+        E.g food = [[1,1], [1,0]] means the first food is positioned at [1,1], the second is at [1,0].
+        """
+        self.snake = deque([(0, 0)])
+        self.cols, self.rows = width, height
+        self.food = list(reversed(food))
+        self.score = 0
+        self.dirs = {
+            'L': (0, -1),
+            'R': (0, 1),
+            'U': (-1, 0),
+            'D': (1, 0)
+        }
+        
+    def move(self, direction: str) -> int:
+        """
+        Moves the snake.
+        @param direction - 'U' = Up, 'L' = Left, 'R' = Right, 'D' = Down 
+        @return The game's score after the move. Return -1 if game over. 
+        Game over when snake crosses the screen boundary or bites its body.
+        """
+        
+        # Calc new location
+        r, c = self.snake[0][0] + self.dirs[direction][0], self.snake[0][1] + self.dirs[direction][1]
+        
+        # Check new location not exceed border
+        if 0 > r or r >= self.rows or 0 > c or c >= self.cols:
+            return -1
+        
+        
+        if not self.food or [r, c] != self.food[-1]:
+            # If it is normal empty cell, move snake by removing tail
+            self.snake.pop()
+        else:
+            # If it is food, head move to new location, tail remains,
+            # score increment
+            self.food.pop()
+            self.score += 1
+        
+        # Check occupy snake body
+        if (r, c) in self.snake:
+            return -1
+        
+        # Add new pos after check occupy
+        self.snake.appendleft((r, c))
+        
+        return self.score
+
+
+# Your SnakeGame object will be instantiated and called as such:
+# obj = SnakeGame(width, height, food)
+# param_1 = obj.move(direction)
+```

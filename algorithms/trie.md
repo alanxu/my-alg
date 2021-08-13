@@ -146,3 +146,58 @@ class WordDictionary:
 # param_2 = obj.search(word)
 ```
 
+### [212. Word Search II](https://leetcode.com/problems/word-search-ii/)
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = collections.defaultdict(TrieNode)
+        self.is_word = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+        
+    def insert(self, word):
+        node = self.root
+        for w in word:
+            node = node.children[w]
+        node.is_word = True
+    
+    def search(self, word):
+        node = self.root
+        for w in word:
+            node = node.children.get(w)
+            if not node:
+                return False
+        return node.is_word
+        
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        
+        def dfs(r, c, path, node):
+            if node.is_word:
+                ans.append(path)
+                node.is_word = False
+            if r < 0 or r == rows or c < 0 or c == cols:
+                return
+            w = board[r][c]
+            node = node.children.get(w)
+            if not node:
+                return
+            board[r][c] = '#'
+            dfs(r + 1, c, path + w, node)
+            dfs(r - 1, c, path + w, node)
+            dfs(r, c + 1, path + w, node)
+            dfs(r, c - 1, path + w, node)
+            board[r][c] = w
+        
+        ans, rows, cols = [], len(board), len(board[0])
+        trie = Trie()
+        for word in words:
+            trie.insert(word)
+        for r in range(rows):
+            for c in range(cols):
+                dfs(r, c, "", trie.root)
+        return ans
+```

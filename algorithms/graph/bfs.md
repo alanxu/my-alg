@@ -756,3 +756,39 @@ class Solution:
             
         return 0
 ```
+
+## Flood Fill
+
+### [1162. As Far from Land as Possible](https://leetcode.com/problems/as-far-from-land-as-possible/)
+
+```python
+class Solution:
+    def maxDistance(self, grid: List[List[int]]) -> int:
+        """
+        Intuition: Flood fill and Multi-source BFS
+        
+        Manhattan distance: the distance between two cells (x0, y0) and (x1, y1) is |x0 - x1| + |y0 - y1|.
+        It means distance is vertical + horizental
+        """
+        rows, cols = len(grid), len(grid[0])
+        q = collections.deque()
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c]:
+                    q.append((r, c))
+        
+        if len(q) == rows * cols or len(q) == 0:
+            return -1
+        
+        level = 0
+        while q:
+            l = len(q)
+            for i in range(l):
+                r, c = q.popleft()
+                for _r, _c in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):
+                    if 0 <= _r < rows and 0 <= _c < cols and grid[_r][_c] == 0:
+                        grid[_r][_c] = 1
+                        q.append((_r, _c))
+            level += 1
+        return level - 1
+```

@@ -527,6 +527,52 @@ def canIWin(self, maxChoosableInteger: int, desiredTotal: int) -> bool:
 
 ### [200. Number of Islands](https://leetcode.com/problems/number-of-islands/)
 
+### [827. Making A Large Island](https://leetcode.com/problems/making-a-large-island/)
+
+```python
+class Solution:
+    def largestIsland(self, grid: List[List[int]]) -> int:
+        # Intuition: Similar as 200, use DFS to mark each island with unique index.
+        # Traverse all 0's, find 0 connect to most island and has max size.
+        # Corner case: No 1 or no 0
+        rows, cols = len(grid), len(grid[0])
+        sizes = defaultdict(int)
+        def dfs(r, c, idx):
+            grid[r][c] = idx
+            sizes[idx] += 1
+            for _r, _c in ((r, c + 1), (r, c - 1), (r + 1, c), (r - 1, c)):
+                if 0 <= _r < rows and 0 <= _c < cols and grid[_r][_c] == 1:
+                    dfs(_r, _c, idx)
+        
+        idx = 2
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 1:
+                    dfs(r, c, idx)
+                    idx += 1
+        
+        if not sizes:
+            return 1
+        
+        max_size = rows * cols
+        if sum(sizes.values()) in (max_size, max_size - 1):
+            return max_size
+        
+        ans = max(sizes.values())
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == 0:
+                    islands = set()
+                    for _r, _c in ((r, c + 1), (r, c - 1), (r + 1, c), (r - 1, c)):
+                        if 0 <= _r < rows and 0 <= _c < cols:
+                            islands.add(grid[_r][_c])
+                    size = 0
+                    for island in islands:
+                        size += sizes[island]
+                    ans = max(ans, size + 1)
+        return ans
+```
+
 ### [785. Is Graph Bipartite?](https://leetcode.com/problems/is-graph-bipartite/)
 
 ```python

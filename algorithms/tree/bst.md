@@ -238,3 +238,41 @@ class Solution:
 
 ### [449. Serialize and Deserialize BST](https://leetcode.com/problems/serialize-and-deserialize-bst/)
 ### [173. Binary Search Tree Iterator](https://leetcode.com/problems/binary-search-tree-iterator/)
+
+### [783. Minimum Distance Between BST Nodes](https://leetcode.com/problems/minimum-distance-between-bst-nodes/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    """
+            90
+        69
+    49      89
+        52
+    """
+    def minDiffInBST(self, root: Optional[TreeNode]) -> int:
+        """
+        Intuition: Shortest distance only exists between adjacent
+        nodes. 
+        """
+        self.ans = math.inf
+        self.prev = -math.inf
+        def dfs(root):
+            if not root:
+                return
+            
+            dfs(root.left)
+            
+            self.ans = min(self.ans, root.val - self.prev)
+            self.prev = root.val
+            
+            dfs(root.right)
+
+        dfs(root)
+        return self.ans
+```

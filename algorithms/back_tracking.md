@@ -563,3 +563,31 @@ class Solution:
         backtrack(0, [])
         return ans
 ```
+
+
+### [90. Subsets II](https://leetcode.com/problems/subsets-ii/)
+
+```python
+class Solution:
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        # Time: Worst case, n distinct num, the recursive call will
+        # invoke for each senario, there are n^2 senerios (for each
+        # num, select or not select)
+        # Space: We always use one list to track current comb, so
+        #
+        ans = []
+        nums.sort()
+        def backtrack(comb, remaining):
+            # if not remaining:
+            ans.append(list(comb))
+            for i, x in enumerate(remaining):
+                # Trick: Avoid duplicate comb by ignoring following
+                # same values
+                if i > 0 and remaining[i] == remaining[i - 1]:
+                    continue
+                comb.append(x)
+                backtrack(comb, remaining[i + 1:])
+                comb.pop()
+        backtrack([], nums)
+        return ans
+```

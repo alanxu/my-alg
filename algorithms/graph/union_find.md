@@ -27,6 +27,32 @@ class Solution:
         
         # Trick: Still need to check the parent
         return sum([1 for i, x in enumerate(uf) if i == x])
+
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+        N = len(isConnected)
+        
+        parents = [i for i in range(N)]
+        ranks = [0] * N
+        
+        def find(i):
+            if parents[i] != i:
+                parents[i] = find(parents[i])
+            return parents[i]
+        def union(i, j):
+            rooti, rootj = find(i), find(j)
+            if rooti == rootj:
+                return
+            if ranks[rooti] < ranks[rootj]:
+                rooti, rootj = rootj, rooti
+            parents[rootj] = rooti
+            ranks[rooti] += ranks[rootj]
+        
+        for i, conn in enumerate(isConnected):
+            for j, connected in enumerate(conn):
+                if connected:
+                    union(i, j)
+                    
+        return len(set([find(i) for i in range(N)]))
 ```
 
 ### [684. Redundant Connection](https://leetcode.com/problems/redundant-connection/)
@@ -611,4 +637,43 @@ class Solution:
                 return False
             
         return True
+```
+
+
+### [1135. Connecting Cities With Minimum Cost](https://leetcode.com/problems/connecting-cities-with-minimum-cost/)
+
+```python
+class Solution:
+    def minimumCost(self, N: int, connections: List[List[int]]) -> int:
+        """
+        Alg: Kruskal's algo. Find min cost of minimum spanning subtree.
+             Initial the disjoint set with each city. Order connections
+             by cost. Use lower cost connections to union the city, check
+             if the cities for a connection is already connected, if so,
+             ignore that connection, else use it.
+        """
+        parents, rank = [i for i in range(N + 1)], [0] * (N + 1)
+        def find(i):
+            if parents[i] != i:
+                parents[i] = find(parents[i])
+            return parents[i]
+        def union(i, j):
+            rooti, rootj = find(i), find(j)
+            if rooti == rootj:
+                return False
+            if rank[rooti] < rank[rootj]:
+                rooti, rootj = rootj, rooti
+            parents[rootj] = rooti
+            rank[rooti] += rank[rootj]
+            return True
+        
+        connections.sort(key=lambda x: x[2])
+        
+        ans = 0
+        for a, b, cost in connections:
+            if union(a, b):
+                ans += cost
+        
+        root = find(N)
+        return ans if all(root == find(i) for i in range(1, N + 1)) else -1
 ```

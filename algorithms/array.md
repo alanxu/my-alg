@@ -23,6 +23,18 @@ class Solution:
                 merged += [it]
                 
         return merged
+
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+        intervals.sort()
+        ans = []
+        for a, b in intervals:
+            if ans and ans[-1][1] >= a:
+                _a, _b = ans.pop()
+                ans.append([min(_a, a), max(_b, b)])
+            else:
+                ans.append([a, b])
+        return ans
+                
 ```
 
 ### [57. Insert Interval](https://leetcode.com/problems/insert-interval/)
@@ -711,4 +723,46 @@ class Solution:
             # If i's min_right >= any max_left of prevous value
             if min_right[i] >= max_left[i - 1]:
                 return i
+```
+
+
+### [26. Remove Duplicates from Sorted Array](https://leetcode.com/problems/remove-duplicates-from-sorted-array/)
+
+```python
+class Solution:
+    def removeDuplicates(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        read = write = 1
+        while read < len(nums) and write <= read:
+            if nums[read] != nums[write - 1]:
+                nums[write] = nums[read]
+                write += 1
+            read += 1
+        return write
+```
+
+### [1573. Number of Ways to Split a String](https://leetcode.com/problems/number-of-ways-to-split-a-string/)
+
+```python
+class Solution:
+    def numWays(self, s: str) -> int:
+        n, arr = len(s), map(int, [c for c in s])
+        ones = sum(arr)
+        if ones % 3 != 0:
+            return 0
+        if ones == 0:
+            return ((n - 1) * (n - 2) // 2 ) % (10**9+7)
+        
+        idx = []
+        for i, c in enumerate(s):
+            if c == '1':
+                idx.append(i)
+        
+        ones_per_partition = ones // 3
+        
+        zeros1 = idx[ones_per_partition] - idx[ones_per_partition - 1]
+        zeros2 = idx[2 * ones_per_partition] - idx[2 * ones_per_partition - 1]
+        
+        return (zeros1) * (zeros2) % (10**9+7)
 ```

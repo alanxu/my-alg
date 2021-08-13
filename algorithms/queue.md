@@ -4,34 +4,42 @@
 
 ```python
 class Solution:
+    """
+    Input: nums = [1,3,1,2,0,5], k = 3
+    
+    [1]
+    [3]
+    [3, 1]
+    [3, 2]
+    [2, 0]
+    [5]
+    """
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
-        from collections import deque
-        dq = deque()
-        
-        def clean_queue(i):
-            # If the (i - k)th element is still in queue, it is the max so far, or it has been
-            # poped, new element only come from the right
-            if dq and dq[0] == i - k:
-                dq.popleft()
-                
-            while dq and nums[dq[-1]] < nums[i]:
-                dq.pop()
-
+        # Intuition: Monotonic queue and pop on both ends
+        # Maintain a monotonic decreasing queue, bigger numer will pop
+        # smaller ones in the queue, smaller number will append to queue.
+        # The max will always in q[0]. One thing is we have to popout the
+        # expired max (if q[0] is expired)
+        q = deque()
         ans = []
-        
-        for i in range(len(nums)):
-            # Before add each num, remove the edge element and remove all element < nums[i]
-            # This will maintain a queue with decending order and keep nums[0] as biggest one
-            # Index is pushed to queue
-            clean_queue(i)
+        for i, x in enumerate(nums):
+            # Pop smaller elements with the lastes x
+            while q and nums[q[-1]] <= nums[i]:
+                q.pop()
             
-            # Append current element index
-            dq.append(i)
+            # Expire out-of-window max if there is any
+            # If there are some old value exist in q, it must be
+            # the max
+            while q and q[0] < i - k + 1:
+                q.popleft()
+                
+            # Enqueue x after clean up the queue
+            # Trick: Use index not value
+            q.append(i)
             
-            # Needs to wait for first k elements
+            # If the window is complete, record the running max
             if i >= k - 1:
-                ans.append(nums[dq[0]])
-            
+                ans.append(nums[q[0]])
         return ans
 ```
 
@@ -74,5 +82,61 @@ class Solution:
         # If use heap, add (+/-value, index)
         # https://leetcode.com/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/discuss/609771/JavaC%2B%2BPython-Deques-O(N)
 ```
+
+## Two Queues
+
+### [1670. Design Front Middle Back Queue](https://leetcode.com/problems/design-front-middle-back-queue/)
+```python
+class FrontMiddleBackQueue:
+    
+
+    def __init__(self):
+        self.A, self.B = collections.deque(), collections.deque()
+
+    def pushFront(self, val: int) -> None:
+        self.A.appendleft(val)
+        self.balance()
+
+    def pushMiddle(self, val: int) -> None:
+        if len(self.A) > len(self.B):
+            self.B.appendleft(self.A.pop())
+        self.A.append(val)
+
+    def pushBack(self, val: int) -> None:
+        self.B.append(val)
+        self.balance()
+
+    def popFront(self) -> int:
+        val = self.A.popleft() if self.A else -1
+        self.balance()
+        return val
+
+    def popMiddle(self) -> int:
+        val = (self.A or [-1]).pop()
+        self.balance()
+        return val
+
+    def popBack(self) -> int:
+        val = (self.B or self.A or [-1]).pop()
+        self.balance()
+        return val
+    
+    def balance(self) -> None:
+        if len(self.A) > len(self.B) + 1:
+            self.B.appendleft(self.A.pop())
+        if len(self.A) < len(self.B):
+            self.A.append(self.B.popleft())
+
+# Your FrontMiddleBackQueue object will be instantiated and called as such:
+# obj = FrontMiddleBackQueue()
+# obj.pushFront(val)
+# obj.pushMiddle(val)
+# obj.pushBack(val)
+# param_4 = obj.popFront()
+# param_5 = obj.popMiddle()
+# param_6 = obj.popBack()
+```
+
+
 
 ## Others

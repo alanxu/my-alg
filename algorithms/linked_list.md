@@ -98,6 +98,28 @@ class Solution(object):
 
 ## Recursion
 
+### [21. Merge Two Sorted Lists](https://leetcode.com/problems/merge-two-sorted-lists/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+        if not l1:
+            return l2
+        elif not l2:
+            return l1
+        elif l1.val < l2.val:
+            l1.next = self.mergeTwoLists(l1.next, l2)
+            return l1
+        else:
+            l2.next = self.mergeTwoLists(l1, l2.next)
+            return l2
+```
+
 ### [24. Swap Nodes in Pairs](https://leetcode.com/problems/swap-nodes-in-pairs/)
 
 ```python
@@ -429,19 +451,19 @@ class Node:
 class Solution:
     def __init__(self):
         self.visited = {}
+
     def copyRandomList(self, head: 'Node') -> 'Node':
         if not head:
             return None
-        
+        # Trick: Reference of object as key of hashmap
         if head in self.visited:
             return self.visited[head]
-        
-        n = head
-        n_ = Node(n.val, None, None)
-        self.visited[n] = n_
-        n_.next = self.copyRandomList(n.next)
-        n_.random = self.copyRandomList(n.random)
-        return n_
+        _node = Node(head.val)
+        # This has to be before recursive call!
+        self.visited[head] = _node
+        _node.next = self.copyRandomList(head.next)
+        _node.random = self.copyRandomList(head.random)
+        return _node
 ```
 
 ### [146. LRU Cache](https://leetcode.com/problems/lru-cache/)

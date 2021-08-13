@@ -757,3 +757,28 @@ class Solution:
         
         return sum(ans)
 ```
+
+### [1710. Maximum Units on a Truck](https://leetcode.com/problems/maximum-units-on-a-truck/)
+
+```python
+class Solution:
+    def maximumUnits(self, boxTypes: List[List[int]], truckSize: int) -> int:
+        boxTypes.sort(key=lambda box: -box[1])
+        ans = 0
+        for b, u in boxTypes:
+            if truckSize <= 0:
+                break
+            ans += min(truckSize, b) * u
+            truckSize -= b
+        return ans
+```
+
+### [169. Majority Element](https://leetcode.com/problems/majority-element/)
+
+```python
+class Solution:
+    def majorityElement(self, nums):
+        counts = collections.Counter(nums)
+        # Trick: Sort the key of dict by value
+        return max(counts.keys(), key=counts.get)
+```
