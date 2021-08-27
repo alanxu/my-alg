@@ -165,6 +165,30 @@ class Solution(object):
                 v = stack.pop()
                 stack[-1] += max(2 * v, 1)
         return stack.pop()
+
+    def scoreOfParentheses(self, s: str) -> int:
+        """
+        Intuition: cur to hold total score of
+        cur level. If there are multi balanced
+        pairs, cur is the sum of that level until
+        x. Every '(' will add one level, so push
+        and reet cur to 0. On ')', go up one level
+        add cur level to upper level. Every level
+        has one value in stack
+        """
+        stack = []
+        cur = 0
+        for x in s:
+            if x == '(':
+                stack.append(cur)
+                cur = 0
+            else:
+                if cur == 0:
+                    cur = 1
+                else:
+                    cur *= 2
+                cur += stack.pop()
+        return cur
 ```
 
 ### [1190. Reverse Substrings Between Each Pair of Parentheses](https://leetcode.com/problems/reverse-substrings-between-each-pair-of-parentheses/)

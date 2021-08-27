@@ -194,6 +194,59 @@ class Solution:
 
 ```
 
+### [659. Split Array into Consecutive Subsequences](https://leetcode.com/problems/split-array-into-consecutive-subsequences/)
+
+```python
+class Solution:
+    def isPossible(self, nums: List[int]) -> bool:
+        # Intuition: Greedy
+        # https://youtu.be/5GZ2NCtloW0
+        # Drop the num one by one into consecutive seq
+        # starting from begining. For cur num x, 
+        
+        # First, check if it can be dropped at the end of an
+        # existing valid seq, if can do so, always do
+        # it this way, cuz if there is x cannot be head
+        # of a new seq, it should be appended; if x can
+        # be the head of new seq, it is no harm to append
+        # that new seq to old one; if there are multi x,
+        # append cur one then worry about next x.
+        
+        # Second, x cannot be append to existing seq, it has
+        # to be head of new seq. Check if x can be head of
+        # new seq by checking if x + 1 and x + 2 exist. If
+        # not valid, return False; if True, drop x, x + 1,
+        # and x + 2. Here we drop nums after cur x, later on
+        # we should remember not to duplicate drop them.
+        
+        # Use counts to track remaining nums to be dropped,
+        # and ends for num of seqs ending with num y.
+        counts = Counter(nums)
+        ends = Counter()
+        for x in nums:
+            if counts[x] == 0:
+                # If the cur num x already droped (in case 2), continue
+                continue
+            elif ends[x - 1]:
+                # If x can be appended, append it
+                counts[x] -= 1
+                ends[x - 1] -= 1
+                ends[x] += 1
+            elif counts[x + 1] and counts[x + 2]:
+                # If x cannot be appended, but can be head,
+                # drop all x, x + 1, x + 2. x + 2 is the end
+                # of the new seq
+                counts[x + 1] -= 1
+                counts[x + 2] -= 1
+                counts[x] -= 1
+                ends[x + 2] += 1
+            else:
+                # If both conditions cannot meet, return False
+                return False
+        return True
+```
+
+
 ## Others
 
 ### [316. Remove Duplicate Letters](https://leetcode.com/problems/remove-duplicate-letters/)
@@ -652,6 +705,12 @@ class Solution:
         # right.
         # So the answer is either len(tasks) when tasks are crowed, or the interval
         # is not full with same lengh at right.
+        
+        # We try to fill idel in below with rest of tasks
+        # A B C _ _ A B C _ _ A B C _ _ A B C
+        # There are two possiblities: 
+        # 1. Not all idel can be filled - ans: (max_count - 1) * (n + 1) + max_count_tasks
+        # 2. The rest of tasks fill all idel and might/might not crowed some space - len(tasks)
         counts = Counter(tasks)
         freqs, max_count = Counter(counts.values()), max(counts.values())
         max_count_tasks = freqs[max_count]
@@ -685,57 +744,7 @@ class Solution:
         return start if total_tank >= 0 else -1
 ```
 
-### [659. Split Array into Consecutive Subsequences](https://leetcode.com/problems/split-array-into-consecutive-subsequences/)
 
-```python
-class Solution:
-    def isPossible(self, nums: List[int]) -> bool:
-        # Intuition: Greedy
-        # https://youtu.be/5GZ2NCtloW0
-        # Drop the num one by one into consecutive seq
-        # starting from begining. For cur num x, 
-        
-        # First, check if it can be dropped at the end of an
-        # existing valid seq, if can do so, always do
-        # it this way, cuz if there is x cannot be head
-        # of a new seq, it should be appended; if x can
-        # be the head of new seq, it is no harm to append
-        # that new seq to old one; if there are multi x,
-        # append cur one then worry about next x.
-        
-        # Second, x cannot be append to existing seq, it has
-        # to be head of new seq. Check if x can be head of
-        # new seq by checking if x + 1 and x + 2 exist. If
-        # not valid, return False; if True, drop x, x + 1,
-        # and x + 2. Here we drop nums after cur x, later on
-        # we should remember not to duplicate drop them.
-        
-        # Use counts to track remaining nums to be dropped,
-        # and ends for num of seqs ending with num y.
-        counts = Counter(nums)
-        ends = Counter()
-        for x in nums:
-            if counts[x] == 0:
-                # If the cur num x already droped (in case 2), continue
-                continue
-            elif ends[x - 1]:
-                # If x can be appended, append it
-                counts[x] -= 1
-                ends[x - 1] -= 1
-                ends[x] += 1
-            elif counts[x + 1] and counts[x + 2]:
-                # If x cannot be appended, but can be head,
-                # drop all x, x + 1, x + 2. x + 2 is the end
-                # of the new seq
-                counts[x + 1] -= 1
-                counts[x + 2] -= 1
-                counts[x] -= 1
-                ends[x + 2] += 1
-            else:
-                # If both conditions cannot meet, return False
-                return False
-        return True
-```
 
 ### [135. Candy](https://leetcode.com/problems/candy/)
 

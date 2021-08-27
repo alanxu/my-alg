@@ -677,3 +677,49 @@ class Solution:
         root = find(N)
         return ans if all(root == find(i) for i in range(1, N + 1)) else -1
 ```
+
+
+### [1970. Last Day Where You Can Still Cross](https://leetcode.com/problems/last-day-where-you-can-still-cross/)
+
+```python
+class Solution:
+    def latestDayToCross(self, row: int, col: int, cells: List[List[int]]) -> int:
+        # Intuition: Don't care lands that always there, land covered by water
+        # can connect two sides. So just replay reversely. Started from all water
+        # then add land back from last day. After adding land for a day, check if
+        # both side is connected.
+        parents, ranks = [i for i in range(row * col + 2)], [0] * (row * col + 2)
+        def find(i):
+            if parents[i] != i:
+                parents[i] = find(parents[i])
+            return parents[i]
+        def union(i, j):
+            rooti, rootj = find(i), find(j)
+            if rooti == rootj:
+                return
+            if ranks[rooti] < ranks[rootj]:
+                rooti, rootj = rootj, rooti
+            parents[rootj] = rooti
+            ranks[rooti] += ranks[rootj]
+            
+        def index(r, c):
+            return r * col + c + 1
+            
+        grid = [[1] * col for _ in range(row)]
+        cells = [(x-1, y-1) for x, y in cells]
+        for i, (r, c) in reversed(list(enumerate(cells))):
+            grid[r][c] = 0
+            idx = index(r, c)
+            for _r, _c in (r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1):
+                if 0 <= _r < row and 0 <= _c < col and grid[_r][_c] == 0:
+                    union(idx, index(_r, _c))
+                    # break
+            # Trick: Add two dummy node on each side so we don't find each
+            # node on both side
+            if r == 0:
+                union(0, idx)
+            elif r == row - 1:
+                union(row * col + 1, idx)
+            if find(0) == find(row * col + 1):
+                return i
+```

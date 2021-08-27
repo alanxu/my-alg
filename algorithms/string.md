@@ -66,3 +66,5 @@ class Solution:
         x = str(x)
         return x == x[::-1]
 ```
+
+### [68. Text Justification](https://leetcode.com/problems/text-justification/)

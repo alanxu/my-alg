@@ -41,7 +41,7 @@ class Solution:
 ## Rolling Hash
 ### [187. Repeated DNA Sequences](https://leetcode.com/problems/repeated-dna-sequences/)
 ### [459. Repeated Substring Pattern](https://leetcode.com/problems/repeated-substring-pattern/)
-
+### [796. Rotate String](https://leetcode.com/problems/rotate-string/)
 
 ### [438. Find All Anagrams in a String](https://leetcode.com/problems/find-all-anagrams-in-a-string/)
 

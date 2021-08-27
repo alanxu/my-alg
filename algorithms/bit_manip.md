@@ -25,6 +25,10 @@ In 2's complements, max positive only first is 0
 x | 1
 set 1 in smallest bit of x
 
+
+Check if n is power of 2: n & (n - 1) == 0
+
+
 ```python
 def is_odd(n):
     return n & 1 != 0

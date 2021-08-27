@@ -420,21 +420,32 @@ class Solution:
 ### [46. Permutations](https://leetcode.com/problems/permutations/)
 
 ```python
+#Fav
 class Solution:
     def permute(self, nums: List[int]) -> List[List[int]]:
-        output = []
-        l = len(nums)
-        def backtrack(first = 0):
-            if first == l:
-                output.append(nums[:])
-                
-            for i in range(first, l):
+        """
+        Intuition: Modify the array in-place to generate all
+        permutations. The tree is defined by two positions:
+        first and i
+        first is swaped with each i in [first:N-1], if first
+        swaped with first, it means remain initial order.
+        When first reach to end, it produce one permuation.
+        
+        Think in another way, for nums with first as first,
+        swap first with each num after it, then repeat same
+        logic for nums starting first + 1.
+        
+        """
+        ans, N = [], len(nums)
+        def backtrack(first):
+            if first == N:
+                ans.append(list(nums))
+            for i in range(first, N):
                 nums[first], nums[i] = nums[i], nums[first]
                 backtrack(first + 1)
                 nums[first], nums[i] = nums[i], nums[first]
-                
-        backtrack()
-        return output
+        backtrack(0)
+        return ans
 ```
 
 ### [78. Subsets](https://leetcode.com/problems/subsets/)

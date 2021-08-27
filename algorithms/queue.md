@@ -83,6 +83,31 @@ class Solution:
         # https://leetcode.com/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/discuss/609771/JavaC%2B%2BPython-Deques-O(N)
 ```
 
+### [862. Shortest Subarray with Sum at Least K](https://leetcode.com/problems/shortest-subarray-with-sum-at-least-k/)
+
+```python
+class Solution:
+    def shortestSubarray(self, nums: List[int], k: int) -> int:
+        """
+        Intuition: Calculate prefix sums, then find two index where
+        their prefix sum difference >= k.
+        """
+        prefixes = [0]
+        for x in nums:
+            prefixes.append(prefixes[-1] + x)
+        
+        q, ans = deque(), math.inf
+        
+        for i, p in enumerate(prefixes):
+            while q and prefixes[i] - prefixes[q[0]] >= k:
+                ans = min(ans, i - q.popleft())
+            while q and prefixes[i] <= prefixes[q[-1]]:
+                q.pop()
+            q.append(i)
+        
+        return ans if ans < math.inf else -1
+```
+
 ## Two Queues
 
 ### [1670. Design Front Middle Back Queue](https://leetcode.com/problems/design-front-middle-back-queue/)

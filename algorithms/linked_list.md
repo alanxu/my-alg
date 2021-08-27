@@ -160,6 +160,18 @@ class Solution:
             pre = cur
             cur = tmp
         return pre
+    
+    # Fav
+    def reverseList(self, head: ListNode) -> ListNode:
+        if not head or not head.next:
+            return head
+        new_head = self.reverseList(head.next)
+        # Trick: Old check already hold reference to new
+        # tail. 
+        head.next.next = head
+        # Make cur head to cur tail by clear head.next
+        head.next = None
+        return new_head
 ```
 
 ### [25. Reverse Nodes in k-Group]

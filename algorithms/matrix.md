@@ -215,3 +215,65 @@ class SnakeGame:
 # obj = SnakeGame(width, height, food)
 # param_1 = obj.move(direction)
 ```
+
+
+### [1515. Best Position for a Service Centre](https://leetcode.com/problems/best-position-for-a-service-centre/)
+
+```python
+# Fav
+class Solution:    
+    def getMinDistSum(self, positions: List[List[int]]) -> float:
+        # Alg: Geometric median - Binary Search
+        # https://youtu.be/8IX9j5WLLD4
+        fn = lambda x, y: sum(sqrt((x-xx)**2 + (y-yy)**2) for xx, yy in positions)
+        #centroid as starting point
+        x = sum(x for x, _ in positions)/len(positions)
+        y = sum(y for _, y in positions)/len(positions)
+        
+        ans = fn(x, y)
+        span = 100
+        
+        while span > 1e-6:
+            zoom = True
+            for dx, dy in (1, 0), (-1, 0), (0, 1), (0, -1):
+                # Trick: Search matrix with dynamic granularity
+                _x, _y = x + dx * span, y + dy * span
+                d = fn(_x, _y)
+                if d < ans:
+                    ans = d
+                    x, y = _x, _y
+                    zoom = False
+                    break
+            if zoom: span /= 2
+        return ans
+    
+```
+
+### [289. Game of Life](https://leetcode.com/problems/game-of-life/)
+
+```python
+class Solution:
+    def gameOfLife(self, board: List[List[int]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+        rows, cols = len(board), len(board[0])
+        for r in range(rows):
+            for c in range(cols):
+                lives = 0
+                for _r, _c in (r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1), \
+                (r + 1, c - 1), (r - 1, c + 1), (r + 1, c + 1), (r - 1, c - 1):
+                    if 0 <= _r < rows and 0 <= _c < cols and board[_r][_c] in (1, -1):
+                        lives += 1
+                if board[r][c] == 1 and (lives < 2 or lives > 3):
+                    board[r][c] = -1
+                if board[r][c] == 0 and lives == 3:
+                    board[r][c] = 2
+        
+        for r in range(rows):
+            for c in range(cols):  
+                if board[r][c] > 0:
+                    board[r][c] = 1
+                else:
+                    board[r][c] = 0
+```

@@ -74,6 +74,27 @@ class Solution:
         return len(rooms)
 ```
 
+### [759. Employee Free Time](https://leetcode.com/problems/employee-free-time/)
+```python
+"""
+# Definition for an Interval.
+class Interval:
+    def __init__(self, start: int = None, end: int = None):
+        self.start = start
+        self.end = end
+"""
+
+class Solution:
+    def employeeFreeTime(self, schedule: '[[Interval]]') -> '[Interval]':
+        intervals = sorted([i for s in schedule for i in s], key=lambda i: i.start)
+        ans, end = [], intervals[0].end
+        for i in intervals:
+            if i.start > end:
+                ans.append(Interval(end, i.start))
+            end = max(end, i.end)
+        return ans
+```
+
 ## Subarray sum
 
 ### [363. Max Sum of Rectangle No Larger Than K](https://leetcode.com/problems/max-sum-of-rectangle-no-larger-than-k/)
@@ -766,3 +787,27 @@ class Solution:
         
         return (zeros1) * (zeros2) % (10**9+7)
 ```
+
+### [415. Add Strings](https://leetcode.com/problems/add-strings/)
+
+```python
+class Solution:
+    def addStrings(self, num1: str, num2: str) -> str:
+        L1, L2 = len(num1), len(num2)
+        i1, i2 = L1 -1, L2 - 1
+        ans = []
+        carry = 0
+        while i1 >= 0 or i2 >= 0:
+            x1 = ord(num1[i1]) - ord('0') if i1 >= 0 else 0
+            x2 = ord(num2[i2]) - ord('0') if i2 >= 0 else 0
+            s = x1 + x2 + carry
+            val = s % 10
+            carry = s // 10
+            ans.append(val)
+            i1 -= 1
+            i2 -= 1
+        if carry:
+            ans.append(carry)
+        return ''.join(map(str, reversed(ans)))
+```
+

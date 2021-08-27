@@ -1,3 +1,112 @@
+## LCA
+
+### [236. Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        def find_lca(root, p, q):
+            # Find lca of p or q, return None if no result find
+            if not root or root == p or root == q:
+                return root
+            # Find lca for p or q on root's left and right sub tree
+            left = find_lca(root.left, p, q)
+            right = find_lca(root.right, p, q)
+            
+            # If left and right both non-None, p and q are on different side of root,
+            # then root is ans;
+            # Otherwise, both p and q must be on left or right;
+            # There must be an ans.
+            return root if left and right else left or right
+        return find_lca(root, p, q)
+
+    def find_one(self, node, target):
+        if not node:
+            return False
+        if node.val == target.val:
+            return True
+        return self.find_one(node.left, target) or self.find_one(node.right, target)
+    
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        if not root:
+            return None
+        left, right = self.lowestCommonAncestor(root.left, p, q), self.lowestCommonAncestor(root.right, p, q)
+        if left or right:
+            return left or right
+        elif self.find_one(root, p) and self.find_one(root, q):
+            return root
+        else:
+            return None
+```
+
+### [235. Lowest Common Ancestor of a Binary Search Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        parent_val = root.val
+        p_val = p.val
+        q_val = q.val
+        if p_val > parent_val and q_val > parent_val:
+            return self.lowestCommonAncestor(root.right, p, q)
+        elif p_val < parent_val and q_val < parent_val:
+            return self.lowestCommonAncestor(root.left, p, q)
+        else:
+            return root
+```
+
+### [1644. Lowest Common Ancestor of a Binary Tree II](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-ii/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+        # Intuition: Use DFS/BFS to build dict of parents of each nodes
+        # then use linear search to find all ancestor of p, 
+        # then use linear search to find the ancestor of q which in p.
+        
+        parents = {root.val:None}
+        stack = [root]
+        while stack:
+            node = stack.pop(0)
+            if node.left:
+                parents[node.left.val] = node
+                stack.append(node.left)
+            if node.right:
+                parents[node.right.val] = node
+                stack.append(node.right)
+        ancestors = set()
+        if p.val not in parents or q.val not in parents: return None
+        while p:
+            ancestors.add(p.val)
+            p = parents[p.val]
+        while q and q.val not in ancestors:
+            q = parents[q.val]
+        return q
+```
+
+
+
 ## Recursion
 
 
@@ -125,51 +234,7 @@ class Solution:
         return ans
 ```
 
-### [236. Lowest Common Ancestor of a Binary Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/)
 
-```python
-# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, x):
-#         self.val = x
-#         self.left = None
-#         self.right = None
-
-class Solution:
-    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-        def find_lca(root, p, q):
-            # Find lca of p or q, return None if no result find
-            if not root or root == p or root == q:
-                return root
-            # Find lca for p or q on root's left and right sub tree
-            left = find_lca(root.left, p, q)
-            right = find_lca(root.right, p, q)
-            
-            # If left and right both non-None, p and q are on different side of root,
-            # then root is ans;
-            # Otherwise, both p and q must be on left or right;
-            # There must be an ans.
-            return root if left and right else left or right
-        return find_lca(root, p, q)
-
-    def find_one(self, node, target):
-        if not node:
-            return False
-        if node.val == target.val:
-            return True
-        return self.find_one(node.left, target) or self.find_one(node.right, target)
-    
-    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-        if not root:
-            return None
-        left, right = self.lowestCommonAncestor(root.left, p, q), self.lowestCommonAncestor(root.right, p, q)
-        if left or right:
-            return left or right
-        elif self.find_one(root, p) and self.find_one(root, q):
-            return root
-        else:
-            return None
-```
 
 ### [979. Distribute Coins in Binary Tree](https://leetcode.com/problems/distribute-coins-in-binary-tree/)
 
@@ -240,6 +305,9 @@ class Solution:
                 # root and there is chance to cover it later on upper level.
                 # This is a greedy approach, cuz second last level always marked. Whether mark
                 # the root depends on structure of tree.
+                #
+                # Why bottom up? Because in Binary Tree path, #children >= #parent, so from
+                # bottom up, we have opptunity to put camera on parent which is more optimal
                 
                 if not par and node not in covered or node.left not in covered or node.right not in covered:
                     self.ans += 1
@@ -560,28 +628,7 @@ class Solution:
         return ans
 ```
 
-### [235. Lowest Common Ancestor of a Binary Search Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/)
 
-```python
-# Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, x):
-#         self.val = x
-#         self.left = None
-#         self.right = None
-
-class Solution:
-    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-        parent_val = root.val
-        p_val = p.val
-        q_val = q.val
-        if p_val > parent_val and q_val > parent_val:
-            return self.lowestCommonAncestor(root.right, p, q)
-        elif p_val < parent_val and q_val < parent_val:
-            return self.lowestCommonAncestor(root.left, p, q)
-        else:
-            return root
-```
 
 ### [814. Binary Tree Pruning](https://leetcode.com/problems/binary-tree-pruning/)
 

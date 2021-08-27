@@ -127,6 +127,41 @@ class Solution:
                 queue.append((node.right, column + 1))
                         
         return [columnTable[x] for x in sorted(columnTable.keys())]
+
+    def verticalOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
+        # Intuition: Both bfs and dfs can traverse the tree and remain
+        # order of 'row's.
+        # If track traverse node by columns as key, we can figure out 
+        # col order by sorting the key of the column table.
+        # Or if we know min/max col value, we don't need to sort. We know
+        # col values are concecutive because each node is related to each
+        # other.
+        
+        # Trick: List sort remain original order if key of 2 items are same
+        if not root:
+            return []
+        
+        column_table = defaultdict(list)
+        min_column, max_column = math.inf, -math.inf
+        def bfs(root):
+            nonlocal min_column, max_column
+            q = deque([(root, 0, 0)])
+            while q:
+                node, r, c = q.popleft()
+                column_table[c].append(node.val)
+                min_column = min(min_column, c)
+                max_column = max(max_column, c)
+                if node.left:
+                    q.append((node.left, r + 1, c - 1))
+                if node.right:
+                    q.append((node.right, r + 1, c + 1))
+        
+            
+        bfs(root)
+        ans = []
+        for col in range(min_column, max_column + 1):
+            ans.append(column_table[col])
+        return ans
 ```
 
 
@@ -168,4 +203,91 @@ class Solution:
                 ret[column] = [value]
 
         return ret.values()
+
+    def verticalTraversal(self, root: Optional[TreeNode]) -> List[List[int]]:
+        if not root:
+            return []
+        
+        column_table = defaultdict(list)
+        min_column, max_column = math.inf, -math.inf
+        def bfs(root):
+            nonlocal min_column, max_column
+            q = deque([(root, 0, 0)])
+            while q:
+                node, r, c = q.popleft()
+                column_table[c].append((r, node.val))
+                min_column = min(min_column, c)
+                max_column = max(max_column, c)
+                if node.left:
+                    q.append((node.left, r + 1, c - 1))
+                if node.right:
+                    q.append((node.right, r + 1, c + 1))
+        
+            
+        bfs(root)
+        ans = []
+        for col in range(min_column, max_column + 1):
+            ans.append([x[1] for x in sorted(column_table[col])])
+        return ans
+```
+
+### [545. Boundary of Binary Tree](https://leetcode.com/problems/boundary-of-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+# Fav
+class Solution(object):
+    def boundaryOfBinaryTree(self, root):
+        # https://youtu.be/F76LIKzluKE
+        ans = [root.val]
+        def dfs_leftmost(node):
+            if not node or not node.left and not node.right:
+                return
+            # Trick: Pre order print path in order
+            ans.append(node.val)
+            if node.left:
+                dfs_leftmost(node.left)
+            elif node.right:
+                dfs_leftmost(node.right)
+        
+        def dfs_leaves(node):
+            if not node:
+                return
+
+            dfs_leaves(node.left)
+            
+            # Exclude root for edge case [1]
+            # Pre/In/Post orders are all ok, as long as left is
+            # processed before right
+            if node != root and not node.left and not node.right:
+                ans.append(node.val)
+            
+            dfs_leaves(node.right)
+
+        def dfs_rightmost(node):
+            if not node or not node.left and not node.right:
+                return
+            if node.right:
+                dfs_rightmost(node.right)
+            elif node.left:
+                dfs_rightmost(node.left)
+            # Trick: Post order print path in reversed order
+            ans.append(node.val)
+        
+        if not root:
+            return []
+        
+        # Trick: Exlcude root because it is always first and
+        # avoid duplicates
+        dfs_leftmost(root.left)
+        dfs_leaves(root)
+        dfs_rightmost(root.right)
+        
+        return ans
 ```

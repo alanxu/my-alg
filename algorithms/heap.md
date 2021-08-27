@@ -267,3 +267,37 @@ class Solution:
                 heapq.heappop(heap)
         return [[x, y ]for (dst, x, y) in heap]
 ```
+
+
+### [703. Kth Largest Element in a Stream](https://leetcode.com/problems/kth-largest-element-in-a-stream/)
+
+```python
+class KthLargest:
+    """
+    Intuition: Keep k-largest num, needs to use mini heap, so we can
+    easily pop smaller one.
+    
+    Trick: heapq.heapreplace vs heapq.heappushpop: replace pop first, but
+    pushpop push first
+    """
+    def __init__(self, k: int, nums: List[int]):
+        self.k = k
+        self.heap = nums
+        heapq.heapify(self.heap)
+        while len(self.heap) > k:
+            heapq.heappop(self.heap)
+
+    def add(self, val: int) -> int:
+        if len(self.heap) < self.k:
+            heapq.heappush(self.heap, val)
+        else:
+            heapq.heappushpop(self.heap, val)
+        return self.heap[0]
+
+
+# Your KthLargest object will be instantiated and called as such:
+# obj = KthLargest(k, nums)
+# param_1 = obj.add(val)
+```
+
+
