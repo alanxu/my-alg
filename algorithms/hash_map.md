@@ -75,6 +75,24 @@ class Solution:
         return res
 ```
 
+### [1099. Two Sum Less Than K](https://leetcode.com/problems/two-sum-less-than-k/)
+
+```python
+class Solution:
+    def twoSumLessThanK(self, nums: List[int], k: int) -> int:
+        pres = []
+        ans = -1
+        for x in nums:
+            target = k - x
+            if pres:
+                i = bisect.bisect_left(pres, target) - 1
+                if i >= 0:
+                    ans = max(ans, pres[i] + x)
+
+            bisect.insort_left(pres, x)
+            
+        return ans
+```
 
 ## Max Size Subarray Sum Equals K
 

@@ -67,4 +67,51 @@ class Solution:
         return x == x[::-1]
 ```
 
+### [680. Valid Palindrome II](https://leetcode.com/problems/valid-palindrome-ii/)
+
+```python
+class Solution:
+    def validPalindrome(self, s: str) -> bool:
+        """
+        Intuition: Two pointer to compare left and right and
+        move both left/right toward centrer.
+        When s[l] != s[r], try to skip l or r, and
+        check the remaining substr.
+        The alg is generic by supporting multiple deletes.
+        Use recursion to handle that.
+        """
+        def validate(left, right, deletes):
+            if deletes == 0:
+                _s = s[left:right+1]
+                return _s == _s[::-1]
+            l, r = left, right
+            # If len(s) is even, compare every pair, if odd,
+            # mid is not compared and no need to compare
+            while l < r:
+                if s[l] != s[r]:
+                    return validate(l, r - 1, deletes - 1) or\
+                        validate(l + 1, r, deletes - 1)
+                l += 1
+                r -= 1
+            return True
+        return validate(0, len(s) - 1, 1)
+```
+
 ### [68. Text Justification](https://leetcode.com/problems/text-justification/)
+
+### [921. Minimum Add to Make Parentheses Valid](https://leetcode.com/problems/minimum-add-to-make-parentheses-valid/)
+
+```python
+class Solution:
+    def minAddToMakeValid(self, s: str) -> int:
+        ans = bal = 0
+        for x in s:
+            if x == '(':
+                bal += 1
+            else:
+                bal -= 1
+            if bal == -1:
+                ans += 1
+                bal += 1
+        return ans + bal
+```

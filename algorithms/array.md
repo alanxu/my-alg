@@ -159,6 +159,25 @@ class Solution:
             ans += mp[cur_sum - k]
             mp[cur_sum] += 1
         return ans
+    def subarraySum(self, nums: List[int], k: int) -> int:
+        # Trick: Calculate prefix sum
+        pre_sums = [0]
+        for x in nums:
+            pre_sums.append(pre_sums[-1] + x)
+
+        # mp[0] = 1 to handle corner case where the sub array
+        # starting from first
+        mp, ans = defaultdict(int), 0
+        mp[0] = 1
+        
+        # Not include first 0 in pre_sums, it
+        # will mess up
+        for x in pre_sums[1:]:
+            target = x - k
+            if target in mp:
+                ans += mp[target]
+            mp[x] += 1
+        return ans
 ```
 
 ### [1074. Number of Submatrices That Sum to Target](https://leetcode.com/problems/number-of-submatrices-that-sum-to-target/)
@@ -275,6 +294,23 @@ class Solution:
             else:
                 mp[sum] = i
             
+        return False
+
+    def checkSubarraySum(self, nums: List[int], k: int) -> bool:
+        pre_sums = [0]
+        for x in nums:
+            pre_sums.append(x + pre_sums[-1])
+            
+        mp = {0:-1}
+        for i, x in enumerate(pre_sums[1:]):
+            # Mod are same b/w two presums
+            target = x % k
+            if target in mp:
+                if i - mp[target] > 1:
+                    return True
+            else:
+                # Record target only when target not exist
+                mp[target] = i
         return False
 ```
 
@@ -634,32 +670,6 @@ class SnapshotArray(object):
 
 ### [1570. Dot Product of Two Sparse Vectors](https://leetcode.com/problems/dot-product-of-two-sparse-vectors/)
 
-```python
-class SparseVector:
-    def __init__(self, nums):
-        """
-        :type nums: List[int]
-        """
-        self.nums = nums
-        
-
-    # Return the dotProduct of two sparse vectors
-    def dotProduct(self, vec):
-        """
-        :type vec: 'SparseVector'
-        :rtype: int
-        """
-        ans = 0
-        for i in range(len(self.nums)):
-            ans += self.nums[i] * vec.nums[i]
-        return ans
-        
-
-# Your SparseVector object will be instantiated and called as such:
-# v1 = SparseVector(nums1)
-# v2 = SparseVector(nums2)
-# ans = v1.dotProduct(v2)
-```
 
 ### [1338. Reduce Array Size to The Half](https://leetcode.com/problems/reduce-array-size-to-the-half/)
 
@@ -811,3 +821,47 @@ class Solution:
         return ''.join(map(str, reversed(ans)))
 ```
 
+### [169. Majority Element](https://leetcode.com/problems/majority-element/)
+
+```python
+class Solution:
+    def majorityElement(self, nums):
+        counts = collections.Counter(nums)
+        # Trick: Sort the key of dict by value
+        return max(counts.keys(), key=counts.get)
+    
+    def majorityElement(self, nums):
+        # Alg: Boyer-Moore Voting Algorithm
+        count = 0
+        candidate = None
+
+        for num in nums:
+            if count == 0:
+                candidate = num
+            count += (1 if num == candidate else -1)
+
+        return candidate
+```
+
+### [953. Verifying an Alien Dictionary](https://leetcode.com/problems/verifying-an-alien-dictionary/)
+
+```python
+class Solution:
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        pos = {v:i for i, v in enumerate(order)}
+        
+        for i in range(len(words) - 1):
+            for j in range(len(words[i])):
+                # First check case ['apple', 'app']
+                # It is here because previous chars matches
+                if j >= len(words[i + 1]):
+                    return False
+                
+                # Check order
+                if words[i][j] != words[i + 1][j]:
+                    if pos[words[i][j]] > pos[words[i + 1][j]]:
+                        return False
+                    # If first small than second, no need compare following
+                    break
+        return True
+```

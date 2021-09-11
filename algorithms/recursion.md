@@ -45,8 +45,12 @@ class Solution:
 
 ```python
 class Solution:
-    def fourSumCount(self, A: List[int], B: List[int], C: List[int], D: List[int]) -> int:
+    def fourSumCount(self, nums1: List[int], nums2: List[int], nums3: List[int], nums4: List[int]) -> int:
         """
+        Alg: Recursion
+        Use recursion to generate combination of nums in different lists. Do it at the last
+        recursion (tree leaves).
+        
         Intuition: Divide lists into 2 parts. Calc sum of all combinations of nums in each list
         in each part. For first part, same all sum as key and its counts. For sums in second part,
         check how many combinations with -sum. Add up to final ans.
@@ -57,28 +61,25 @@ class Solution:
         Time:  O(n^(k//2))
         Space: O(n^(k//2))
         """
-        lists, L = [A, B, C, D], 4
+        L, nums = 4, [nums1, nums2, nums3, nums4]
         mp = defaultdict(int)
-        ans = 0
+        self.ans = 0
         
-        # Trick: Use recursion to calc sum of each combination of multi lists
-        def process_first_grp(i=0, _sum=0):
+        def process_first_grp(i, _sum):
             if i == L // 2:
                 mp[_sum] += 1
-            else:
-                for num in lists[i]:
-                    process_first_grp(i + 1, _sum + num)
+                return
+            for x in nums[i]:
+                process_first_grp(i + 1, _sum + x)
         
-        def process_second_grp(i=L // 2, _sum=0):
+        def process_second_grp(i, _sum):
             if i == L:
-                return mp[-_sum]
-            else:
-                count = 0
-                for num in lists[i]:
-                    count += process_second_grp(i + 1, _sum + num)
-                return count
-        
-        
-        process_first_grp()
-        return process_second_grp()
+                self.ans += mp[-_sum]
+                return
+            for x in nums[i]:
+                process_second_grp(i + 1, _sum + x)
+                
+        process_first_grp(0, 0)
+        process_second_grp(L // 2, 0)
+        return self.ans
 ```

@@ -450,3 +450,28 @@ class Solution:
             digits[-1] += 1
         return digits
 ```
+
+
+### [67. Add Binary](https://leetcode.com/problems/add-binary/)
+
+```python
+class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        i, j = len(a) - 1, len(b) - 1
+        carry = 0
+        ans = ''
+        while i >= 0 or j >= 0:
+            _sum = carry
+            if i >= 0:
+                _sum += int(a[i])
+                i -= 1
+            if j >= 0:
+                _sum += int(b[j])
+                j -= 1
+            
+            carry, v = divmod(_sum, 2)
+            ans = str(v) + ans
+        return ans if not carry else str(carry) + ans
+```
+
+

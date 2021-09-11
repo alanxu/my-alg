@@ -658,6 +658,19 @@ class Solution:
 ```
 
 
+### [1762. Buildings With an Ocean View](https://leetcode.com/problems/buildings-with-an-ocean-view/)
+
+```python
+class Solution:
+    def findBuildings(self, heights: List[int]) -> List[int]:
+        stack = []
+        for i, x in enumerate(heights):
+            while stack and heights[stack[-1]] <= x:
+                stack.pop()
+            stack.append(i)
+        return stack
+```
+
 ## Others
 
 
@@ -820,38 +833,41 @@ class Solution:
 
 ```python
 class Solution:
-    def calculate(self, s: str):
-        
-        def update(op, v):
-            if op == "+": stack.append(v)
-            if op == "-": stack.append(-v)
-            if op == "*": stack.append(stack.pop() * v)
-            if op == "/": stack.append(int(stack.pop() / v))
-
-        num, sign = 0, '+'
+    def calculate(self, s: str) -> int:
         stack = []
-        idx = 0
+        # num and sign are before the current x, each x in '+-*/'
+        # will trigger num and sign before them to be processed. 
+        num, sign = 0, '+'
         
-        while idx < len(s):
-            c = s[idx]
+        def update(v, op):
+            if op == '+': stack.append(v)
+            elif op == '-': stack.append(-v)
+            elif op == '*': stack.append(stack.pop() * v)
+            elif op == '/': stack.append(int(stack.pop() / v))
+        
+        i = 0
+        while i < len(s):
+            x = s[i]
+            if x.isdigit():
+                num = num * 10 + int(x)
+            elif x in '+-*/':
+                update(num, sign)
+                num, sign = 0, x
+            elif x == '(':
+                # On '(', use recursion call to collect num as if it
+                # is digits
+                num, j = self.calculate(s[i + 1:])
+                i += j
+            elif x == ')':
+                # On ')', return from current recursion, and return
+                # the number of chars processed, +1 because we return
+                # counts not 0-based index.
+                update(num, sign)
+                return sum(stack), i + 1
+            i += 1
             
-            if c.isdigit():
-                num = num * 10 + int(c)
-            elif c in '+-*/':
-                update(sign, num)
-                num, sign = 0, c
-            elif c == '(':
-                num, j = self.calculate(s[idx + 1:])
-                idx += j
-            elif c == ')':
-                update(sign, num)
-                print(stack)
-                return sum(stack), idx + 1
-                
-            idx += 1
-
-        update(sign, num)
-
+        update(num, sign)
+        
         return sum(stack)
 ```
 

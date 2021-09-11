@@ -792,3 +792,57 @@ class Solution:
             level += 1
         return level - 1
 ```
+
+
+## Others
+
+### [301. Remove Invalid Parentheses](https://leetcode.com/problems/remove-invalid-parentheses/)
+
+```python
+class Solution:
+    def removeInvalidParentheses(self, s: str) -> List[str]:
+        """
+        We are required to return the minimum number of invalid parentheses to remove.
+
+        Let's model the problem as a graph,
+
+        node: all possible string by removing parenthesis (The start node is `s`)
+        edge (from u to v): by removing a parentheses of u
+        As a result, the problem becomes to get the shortest distance from s to a valid node (assuming at level l) in 
+        the first place; then get all valid nodes within level l.
+
+        Shortest-path problem is natural to BFS.
+        
+        https://youtu.be/NWAseBzZj-c
+        """
+        q = deque([s])
+        seen, ans = set(), []
+        
+        def is_valid(s):
+            count = 0
+            for x in s:
+                if x == '(':
+                    count += 1
+                elif x == ')':
+                    count -= 1
+                if count < 0:
+                    return False
+            return count == 0
+        
+        while q:
+            l = len(q)
+            for _ in range(l):
+                s = q.popleft()
+                if is_valid(s):
+                    ans.append(s)
+            
+                if not ans:
+                    for i in range(len(s)):
+                        if s[i] in '()':
+                            nei = s[:i] + s[i + 1:]
+                            if nei not in seen:
+                                q.append(nei)
+                                seen.add(nei)
+                            
+        return ans
+```

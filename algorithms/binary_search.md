@@ -610,34 +610,6 @@ class Solution:
 ```
 ### [1428. Leftmost Column with at Least a One](https://leetcode.com/problems/leftmost-column-with-at-least-a-one/)
 
-```python
-# """
-# This is BinaryMatrix's API interface.
-# You should not implement it, or speculate about its implementation
-# """
-#class BinaryMatrix(object):
-#    def get(self, row: int, col: int) -> int:
-#    def dimensions(self) -> list[]:
-
-class Solution:
-    def leftMostColumnWithOne(self, binaryMatrix: 'BinaryMatrix') -> int:
-        
-        rows, cols = binaryMatrix.dimensions()
-        
-        # Set pointers to the top-right corner.
-        current_row = 0
-        current_col = cols - 1
-        
-        # Repeat the search until it goes off the grid.
-        while current_row < rows and current_col >= 0:
-            if binaryMatrix.get(current_row, current_col) == 0:
-                current_row += 1
-            else:
-                current_col -= 1
-        
-        # If we never left the last column, it must have been all 0's.
-        return current_col + 1 if current_col != cols - 1 else -1
-```
 
 ## Others
 
@@ -922,4 +894,30 @@ class Solution:
             else:
                 r = m
         return l
+```
+
+
+### [1539. Kth Missing Positive Number](https://leetcode.com/problems/kth-missing-positive-number/)
+
+```python
+class Solution:
+    def findKthPositive(self, arr: List[int], k: int) -> int:
+        
+        lo, hi = 0, len(arr) - 1
+        while lo <= hi:
+            mid = lo + (hi - lo) // 2
+            # Alg: Binary Search Close-close, on the target condition, left increments.
+            # Finally, hi pointing to the result, lo = hi + 1
+            if arr[mid] - mid - 1 < k:
+                lo += 1
+            else:
+                hi -= 1
+        
+        # At the end of the loop, left = right + 1,
+        # and the kth missing is in-between arr[right] and arr[left].
+        # The number of integers missing before arr[right] is
+        # arr[right] - right - 1 -->
+        # the number to return is
+        # arr[right] + k - (arr[right] - right - 1) = k + left
+        return lo + k
 ```

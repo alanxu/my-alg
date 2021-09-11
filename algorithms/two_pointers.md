@@ -609,4 +609,79 @@ class Solution:
         return ans
 ```
 
+### [1570. Dot Product of Two Sparse Vectors](https://leetcode.com/problems/dot-product-of-two-sparse-vectors/)
+
+```python
+class SparseVector:
+    def __init__(self, nums: List[int]):
+        self.pairs = []
+        for index, value in enumerate(nums):
+            if value != 0:
+                self.pairs.append([index, value])
+
+    def dotProduct(self, vec: 'SparseVector') -> int:
+        result = 0
+        p, q = 0, 0
+
+        while p < len(self.pairs) and q < len(vec.pairs):
+            if self.pairs[p][0] == vec.pairs[q][0]:
+                result += self.pairs[p][1] * vec.pairs[q][1]
+                p += 1
+                q += 1
+            elif self.pairs[p][0] < vec.pairs[q][0]:
+                p += 1
+            else:
+                q += 1
+
+        return result
+
+# Your SparseVector object will be instantiated and called as such:
+# v1 = SparseVector(nums1)
+# v2 = SparseVector(nums2)
+# ans = v1.dotProduct(v2)
+```
+
+
+### [408. Valid Word Abbreviation](https://leetcode.com/problems/valid-word-abbreviation/)
+
+```python
+class Solution:
+    def validWordAbbreviation(self, word, abbr):
+        return bool(re.match(re.sub('([1-9]\d*)', r'.{\1}', abbr) + '$', word))
+
+    def validWordAbbreviation(self, word: str, abbr: str) -> bool:
+        # Intuition: Two pointers
+        
+        Lw, La = len(word), len(abbr)
+        
+        # Corner case: word is shorter than abbr: 'a' '12'
+        if Lw < La: return False
+        
+        i = j = 0
+        while i < Lw and j < La:
+            # Corner case: the num start with 0: 'ab' '02'
+            if abbr[j] == '0':
+                return False
+            
+            # Every loop, j is start of a num or charactor, we make
+            # sure j is complete num, and forward both i and j.
+            n = 0
+            while j < La and abbr[j].isdigit():
+                n = n * 10 + int(abbr[j])
+                j += 1
+            i += n
+            
+            # After forwards the nums, and i/j still not reach to end,
+            # compare the chars
+            if i < Lw and j < La:
+                if word[i] != abbr[j]:
+                    return False
+                # Don't forget move both pointers
+                i += 1
+                j += 1
+        
+        # If reach here, check if i, j both exactly after last index
+        # Corner case: 'a' '2'
+        return i ==Lw and j == La
+```
 

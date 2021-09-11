@@ -46,6 +46,9 @@ class Solution:
             return None
 ```
 
+### [1650. Lowest Common Ancestor of a Binary Tree III](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iii/)
+
+
 ### [235. Lowest Common Ancestor of a Binary Search Tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/)
 
 ```python
@@ -190,6 +193,30 @@ class Solution:
         max_one_child(root)
         return self.max_path_sum
 ```
+
+### [543. Diameter of Binary Tree](https://leetcode.com/problems/diameter-of-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+        ans = 0
+        def depth(node):
+            if not node:
+                return 0
+            nonlocal ans
+            depth_left, depth_right = depth(node.left), depth(node.right)
+            ans = max(ans, depth_left + 1 + depth_right)
+            return 1 + max(depth_left, depth_right)
+        depth(root)
+        return ans - 1
+```
+
 
 ### [1026. Maximum Difference Between Node and Ancestor](https://leetcode.com/problems/maximum-difference-between-node-and-ancestor/)
 
@@ -648,4 +675,31 @@ class Solution:
         if root.val == 0 and not root.left and not root.right:
             return None
         return root
+```
+
+
+### [938. Range Sum of BST](https://leetcode.com/problems/range-sum-of-bst/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+        ans = 0
+        def dfs(node):
+            nonlocal ans
+            if not node:
+                return
+            if low <= node.val <= high:
+                ans += node.val
+            if node.val > low:
+                dfs(node.left)
+            if node.val < high:
+                dfs(node.right)
+        dfs(root)
+        return ans
 ```

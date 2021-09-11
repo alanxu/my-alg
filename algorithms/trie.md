@@ -145,6 +145,44 @@ class WordDictionary:
 # obj.addWord(word)
 # param_2 = obj.search(word)
 ```
+```python
+class TrieNode:
+    def __init__(self):
+        self.next = defaultdict(TrieNode)
+        self.is_end = False
+
+class WordDictionary:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.trie = TrieNode()
+
+    def addWord(self, word: str) -> None:
+        cur = self.trie
+        for x in word:
+            cur = cur.next[x]
+        cur.is_end = True
+
+    def search(self, word: str) -> bool:
+        # print(word)
+        def _search(word, node):
+            if not word:
+                return node.is_end
+            if word[0] == ".":
+                for n in node.next.values():
+                    if _search(word[1:], n):
+                        return True
+                return False
+            else:
+                node = node.next.get(word[0])
+                if not node:
+                    return 
+                return _search(word[1:], node)
+        
+        return _search(word, self.trie)
+```
 
 ### [212. Word Search II](https://leetcode.com/problems/word-search-ii/)
 

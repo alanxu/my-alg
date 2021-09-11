@@ -204,6 +204,24 @@ class Solution:
                 if node.right:
                     q.append(node.right)
         return rightside
+    
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+        """
+        Intuition: Use DFS, visite right first, track height of the
+        cur node, the first node of height h is the right-most one,
+        so only add to ans when no node on h.
+        Have to traverse all nodes, because right most sub tree might
+        have lower height than left sub tree.
+        """
+        self.ans = {}
+        def dfs(node, h=0):
+            if not node:
+                return
+            if h not in self.ans: self.ans[h] = node.val
+            dfs(node.right, h + 1)
+            dfs(node.left, h + 1)
+        dfs(root)
+        return [self.ans[k] for k in sorted(self.ans.keys())]
 ```
 
 

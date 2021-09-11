@@ -543,3 +543,73 @@ class LRUCache:
 # param_1 = obj.get(key)
 # obj.put(key,value)
 ```
+
+
+### [445. Add Two Numbers II](https://leetcode.com/problems/add-two-numbers-ii/)
+
+### [1650. Lowest Common Ancestor of a Binary Tree III](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iii/)
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+        self.parent = None
+"""
+class Solution:
+    def lowestCommonAncestor(self, p: 'Node', q: 'Node') -> 'Node':
+        p1, p2 = p, q
+        while p1 != p2:
+            p1 = p1.parent if p1.parent else q
+            p2 = p2.parent if p2.parent else p
+        return p1
+    
+    
+    def lowestCommonAncestor(self, p: 'Node', q: 'Node') -> 'Node':
+        p_parents = set()
+        while p:
+            p_parents.add(p.val)
+            p = p.parent
+        
+        while q:
+            if q.val in p_parents:
+                return q
+            q = q.parent
+```
+
+### [708. Insert into a Sorted Circular Linked List](https://leetcode.com/problems/insert-into-a-sorted-circular-linked-list/)
+
+```python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val=None, next=None):
+        self.val = val
+        self.next = next
+"""
+
+class Solution:
+    def insert(self, head: 'Node', insertVal: int) -> 'Node':
+        if not head:
+            head = Node(insertVal)
+            head.next = head
+            return head
+        
+        prev, cur = head, head.next
+        
+        while True:
+            if prev.val <= insertVal <= cur.val or \
+                prev.val > cur.val and (insertVal > prev.val or insertVal < cur.val):
+                    prev.next = Node(insertVal, cur)
+                    return head
+            
+            prev, cur = cur, cur.next
+            if prev == head:
+                break
+                
+        prev.next = Node(insertVal, cur)
+        return head
+```

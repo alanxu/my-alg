@@ -152,6 +152,34 @@ class Solution:
             # To handle case there is no '()' behide root
             return root if root else TreeNode(''.join(root_val))
         return build()
+    def str2tree(self, s: str) -> Optional[TreeNode]:
+        if not s:
+            return None
+        def dfs(start):
+            i = start
+            num, sign = 0, 1
+            node = None
+            while i < len(s):
+                x = s[i]
+                if x in '()':
+                    if not node:
+                        node = TreeNode(num * sign)
+                        # num, sign = 0, 1
+                    if x == '(':
+                        if not node.left:
+                            node.left, i = dfs(i + 1)
+                        else:
+                            node.right, i = dfs(i + 1)
+                    elif x == ')':
+                        return node, i + 1
+                else:
+                    if x == '-':
+                        sign = -1
+                    elif x.isdigit():
+                        num = num * 10 + int(x)
+                    i = i + 1
+            return node if node else TreeNode(num * sign)
+        return dfs(0)
 ```
 
 ### [606. Construct String from Binary Tree](https://leetcode.com/problems/construct-string-from-binary-tree/)
