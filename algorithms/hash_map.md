@@ -85,16 +85,50 @@ class Solution:
         for x in nums:
             target = k - x
             if pres:
+                # bisect.bisect() returns index of smallest num >= target
                 i = bisect.bisect_left(pres, target) - 1
+                # If i == -1, means there is no previous nums less than
+                # target, that is no sum less than k
                 if i >= 0:
                     ans = max(ans, pres[i] + x)
-
             bisect.insort_left(pres, x)
-            
         return ans
 ```
 
+### [1679. Max Number of K-Sum Pairs](https://leetcode.com/problems/max-number-of-k-sum-pairs/)
+
+```python
+class Solution:
+    def maxOperations(self, nums: List[int], k: int) -> int:
+        mp = defaultdict(int)
+        ans = 0
+        for i, x in enumerate(nums):
+            target = k - x
+            if mp[target] > 0:
+                mp[target] -= 1
+                ans += 1
+            else:
+                mp[x] += 1
+        return ans
+```
+
+
 ## Max Size Subarray Sum Equals K
+
+```
+525.Contiguous-Array (M)
+930.Binary-Subarrays-With-Sum (M)
+1442.Count-Triplets-That-Can-Form-Two-Arrays-of-Equal-XOR (H-)
+1524.Number-of-Sub-arrays-With-Odd-Sum (M)
+974.Subarray-Sums-Divisible-by-K (M)
+1590.Make-Sum-Divisible-by-P (M+)
+1658.Minimum-Operations-to-Reduce-X-to-Zero (M)
+1371.Find-the-Longest-Substring-Containing-Vowels-in-Even-Counts (H-)
+1542.Find-Longest-Awesome-Substring (H-)
+1915.Number-of-Wonderful-Substrings (M+)
+1983.Widest-Pair-of-Indices-With-Equal-Range-Sum (M+)
+2025.Maximum-Number-of-Ways-to-Partition-an-Array (H)
+```
 
 ### [325. Maximum Size Subarray Sum Equals k](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/)
 
@@ -144,6 +178,67 @@ class Solution:
         return (N - ans) if ans else -1
 ```
 
+### [1542. Find Longest Awesome Substring](https://leetcode.com/problems/find-longest-awesome-substring/)
+
+```python
+class Solution:
+    def longestAwesome(self, s: str) -> int:
+        """
+        Intuition: Hashmap + Prefix + Bitmask
+        For each char in s, calc running state of even/odd using
+        a mask. The mask indicates each char is of odd or even number.
+        Use a hashmap pos to save the ending index of state. For a
+        current running state at i, if same state exists with ending at j,
+        it means [i,j] has odd num of every chars. Since we allow 1 even,
+        so we update current mask state with 1 even char for every char,
+        in this case [i, j] is with one more that char, cuz that char become
+        diff b/w [i, j].
+        Track the max ans for each case for each char.
+        """
+        # 1 << 10 == 2 ** 10 == 1024
+        pos = [math.inf] * 1024
+        pos[0] = -1
+        
+        mask = 0
+        ans = 0
+        
+        for i, x in enumerate(s):
+            idx = ord(x) - ord('0')
+            mask ^= 1 << idx
+            ans = max(ans, i - pos[mask])
+            for j in range(10):
+                look = mask ^ (1 << j)
+                ans = max(ans, i - pos[look])
+                
+            pos[mask] = min(pos[mask], i)
+            
+        return ans
+```
+
+### [1915. Number of Wonderful Substrings](https://leetcode.com/problems/number-of-wonderful-substrings/)
+
+```python
+class Solution:
+    def wonderfulSubstrings(self, word: str) -> int:
+        counts = [0] * (1 << 10)
+        counts[0] = 1
+        mask = 0
+        ans = 0
+        
+        for x in word:
+            idx = ord(x) - ord('a')
+            mask ^= 1 << idx
+            ans += counts[mask]
+            
+            for i in range(10):
+                look = mask ^ (1 << i)
+                ans += counts[look]
+                
+            counts[mask] += 1
+        
+        return ans
+```
+
 ## Others
 
 ### [454. 4Sum II](https://leetcode.com/problems/4sum-ii/)
@@ -175,6 +270,37 @@ class Solution:
         process_first_grp()
         return process_second_group()
 ```
+
+### [1429. First Unique Number](https://leetcode.com/problems/first-unique-number/)
+
+```python
+class FirstUnique:
+
+    def __init__(self, nums: List[int]):
+        self.q = deque()
+        self.mp = {}
+        for x in nums:
+            self.add(x)
+
+    def showFirstUnique(self) -> int:
+        while self.q and self.mp[self.q[0]]:
+            self.q.popleft()
+        return self.q[0] if self.q else -1
+
+    def add(self, value: int) -> None:
+        if value not in self.mp:
+            self.mp[value] = False
+            self.q.append(value)
+        else:
+            self.mp[value] = True
+
+
+# Your FirstUnique object will be instantiated and called as such:
+# obj = FirstUnique(nums)
+# param_1 = obj.showFirstUnique()
+# obj.add(value)
+```
+
 
 ### [1604. Alert Using Same Key-Card Three or More Times in a One Hour Period](https://leetcode.com/problems/alert-using-same-key-card-three-or-more-times-in-a-one-hour-period/)
 
@@ -227,6 +353,25 @@ class Solution:
             dp[u].append(w)
         count = sum([collections.Counter(set(itertools.combinations(dp[u], 3))) for u in dp], collections.Counter())
         return list(min(count, key=lambda k: (-count[k], k)))
+```
+```python
+class Solution:
+    def mostVisitedPattern(self, username: List[str], timestamp: List[int], website: List[str]) -> List[str]:
+        by_user_mp, by_pattern_map = defaultdict(list), defaultdict(int)
+        for t, u, w in sorted(zip(timestamp, username, website)):
+            by_user_mp[u].append(w)
+        
+        ans, max_score = None, -math.inf
+        for k, v in by_user_mp.items():
+            # Deduplicate same pattern for same user
+            for pattern in set(itertools.combinations(v, 3)):
+                by_pattern_map[pattern] += 1
+                if max_score < by_pattern_map[pattern] or \
+                max_score == by_pattern_map[pattern] and (not ans or pattern < ans):
+                    max_score = by_pattern_map[pattern]
+                    ans = pattern
+
+        return ans
 ```
 
 ### [670. Maximum Swap](https://leetcode.com/problems/maximum-swap/)

@@ -209,6 +209,38 @@ class Solution:
         return ans if counts == numCourses else []
 ```
 
+```python
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+        """
+        Topological Sorting doesn't need remember visited, because it use indegree to
+        determin if the node needs to be enqueue and if node has multiple ancestor, it
+        should be check multiple times so the indegree is correct
+        """
+        graph, indegree = defaultdict(list), [0] * numCourses
+        counts = 0
+        for v, u in prerequisites:
+            graph[u].append(v)
+            indegree[v] += 1
+        
+        q = deque()
+        for k, v in enumerate(indegree):
+            if not v:
+                q.append(k)
+        
+        ans = []
+        while q:
+            x = q.popleft()
+            counts += 1
+            ans.append(x)
+            for nei in graph[x]:
+                indegree[nei] -= 1
+                if indegree[nei] == 0:
+                    q.append(nei)
+                    
+        return ans if counts == numCourses else []
+```
+
 ### [444. Sequence Reconstruction](https://leetcode.com/problems/sequence-reconstruction/)
 
 ```python

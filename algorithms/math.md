@@ -114,6 +114,91 @@ class Solution(object):
             result = result.replace('  ', ' ')
 
         return result.strip()
+
+    def numberToWords(self, num: int) -> str:
+        to19 = "One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen "\
+                "Fifteen Sixteen Seventeen Eighteen Nineteen".split()
+        tens = "Twenty Thirty Forty Fifty Sixty Seventy Eighty Ninety".split()
+        
+        def words(n):
+            if n < 20:
+                return to19[n  - 1: n]
+            if n < 100:
+                return [tens[n // 10 - 2]] + words(n % 10)
+            if n < 1000:
+                return [to19[n // 100 - 1]] + ['Hundred'] + words(n % 100)
+            for p, w in enumerate(('Thousand', 'Million', 'Billion'), 1):
+                if n < 1000 ** (p + 1):
+                    return words(n // 1000 ** p) + [w] + words(n % 1000 ** p)
+        
+        return ' '.join(words(num)) or 'Zero'
+
+    def numberToWords(self, num: int) -> str:
+        to19 = "One Two Three Four Five Six Seven Eight Nine Ten Eleven Twelve Thirteen Fourteen "\
+                "Fifteen Sixteen Seventeen Eighteen Nineteen".split()
+        tens = "Twenty Thirty Forty Fifty Sixty Seventy Eighty Ninety".split()
+        
+        def words(n):
+            if n < 20:
+                return to19[n - 1:n]
+            if n < 100:
+                return [tens[n // 10 - 2]] + words(n % 10)
+            if n < 1000:
+                return [to19[n // 100 - 1], 'Hundred'] + words(n % 100)
+            if n < 1000 ** 2:
+                return words(n // 1000) + ['Thousand'] + words(n % 1000)
+            if n < 1000 ** 3:
+                return words(n // 1000 ** 2) + ['Million'] + words(n % 1000 ** 2)
+            if n < 1000 ** 4:
+                return words(n // 1000 ** 3) + ['Billion'] + words(n % 1000 ** 3)
+            
+        return ' '.join(words(num)) or 'Zero'
+```
+
+## Add Numbers
+### [67. Add Binary](https://leetcode.com/problems/add-binary/)
+
+```python
+class Solution:
+    def addBinary(self, a: str, b: str) -> str:
+        i, j = len(a) - 1, len(b) - 1
+        carry = 0
+        ans = ''
+        while i >= 0 or j >= 0:
+            _sum = carry
+            if i >= 0:
+                _sum += int(a[i])
+                i -= 1
+            if j >= 0:
+                _sum += int(b[j])
+                j -= 1
+            
+            carry, v = divmod(_sum, 2)
+            ans = str(v) + ans
+        return ans if not carry else str(carry) + ans
+```
+
+### [415. Add Strings](https://leetcode.com/problems/add-strings/)
+
+```python
+class Solution:
+    def addStrings(self, num1: str, num2: str) -> str:
+        L1, L2 = len(num1), len(num2)
+        i1, i2 = L1 -1, L2 - 1
+        ans = []
+        carry = 0
+        while i1 >= 0 or i2 >= 0:
+            x1 = ord(num1[i1]) - ord('0') if i1 >= 0 else 0
+            x2 = ord(num2[i2]) - ord('0') if i2 >= 0 else 0
+            s = x1 + x2 + carry
+            val = s % 10
+            carry = s // 10
+            ans.append(val)
+            i1 -= 1
+            i2 -= 1
+        if carry:
+            ans.append(carry)
+        return ''.join(map(str, reversed(ans)))
 ```
 
 ## Others
@@ -371,61 +456,6 @@ class Solution:
 
 ### [445. Add Two Numbers II](https://leetcode.com/problems/add-two-numbers-ii/)
 
-```python
-# Definition for singly-linked list.
-# class ListNode:
-#     def __init__(self, val=0, next=None):
-#         self.val = val
-#         self.next = next
-class Solution:
-    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
-        n1, n2 = 0, 0
-        cur1, cur2 = l1, l2
-        
-        while cur1:
-            n1 += 1
-            cur1 = cur1.next
-        while cur2:
-            n2 += 1
-            cur2 = cur2.next
-            
-        cur1, cur2 = l1, l2
-        head = None
-        while n1 > 0 and n2 > 0:
-            val = 0
-            if n1 >= n2:
-                val += cur1.val
-                cur1 = cur1.next
-                n1 -= 1
-            if n1 < n2:
-                val += cur2.val
-                cur2 = cur2.next
-                n2 -= 1
-                
-            cur = ListNode(val)
-            cur.next = head
-            head = cur
-            
-        cur, head = head, None
-        carry = 0
-        while cur:
-            val = (cur.val + carry) % 10
-            carry = (cur.val + carry) // 10 
-            
-            node = ListNode(val)
-            node.next = head
-            head = node
-            
-            cur = cur.next
-            
-        if carry:
-            node = ListNode(carry)
-            node.next = head
-            head = node
-            
-        return head
-```
-
 ### [66. Plus One](https://leetcode.com/problems/plus-one/)
 
 ```python
@@ -449,29 +479,6 @@ class Solution:
         else:
             digits[-1] += 1
         return digits
-```
-
-
-### [67. Add Binary](https://leetcode.com/problems/add-binary/)
-
-```python
-class Solution:
-    def addBinary(self, a: str, b: str) -> str:
-        i, j = len(a) - 1, len(b) - 1
-        carry = 0
-        ans = ''
-        while i >= 0 or j >= 0:
-            _sum = carry
-            if i >= 0:
-                _sum += int(a[i])
-                i -= 1
-            if j >= 0:
-                _sum += int(b[j])
-                j -= 1
-            
-            carry, v = divmod(_sum, 2)
-            ans = str(v) + ans
-        return ans if not carry else str(carry) + ans
 ```
 
 

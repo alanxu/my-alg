@@ -487,6 +487,62 @@ class Solution:
         return ret
 ```
 
+```python
+# Fav
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        rows, cols = len(board), len(board[0])
+        
+        def backtrack(r, c, start):
+            if board[r][c] == word[start]:
+                if start == len(word) - 1: 
+                    return True
+            else:
+                return False
+
+            board[r][c] = '#'
+            
+            for _r, _c in (r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1):
+                if 0 <= _r < rows and 0 <= _c < cols:
+                    if backtrack(_r, _c, start + 1):
+                        return True
+            
+            board[r][c] = word[start]
+            return False
+        
+        for r in range(rows):
+            for c in range(cols):
+                if backtrack(r, c, 0):
+                    return True
+        return False
+```
+
+```python
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        rows, cols = len(board), len(board[0])
+        def backtrack(r, c, i):
+            # If use i == len(word) as termination, it will have issue with
+            # corner case [['a']]
+            if i == len(word) - 1:
+                return board[r][c] == word[i]
+            if board[r][c] == word[i]:
+                board[r][c] = '*'
+                for _r, _c in (r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1):
+                    if 0 <= _r < rows and 0 <= _c < cols and board[_r][_c] != '*':
+                        if backtrack(_r, _c, i + 1):
+                            return True
+                board[r][c] = word[i]
+            return False
+        
+        for r in range(rows):
+            for c in range(cols):
+                if backtrack(r, c, 0):
+                    return True
+        
+        return False
+```
+
 ### [93. Restore IP Addresses](https://leetcode.com/problems/restore-ip-addresses/)
 
 ```python
@@ -602,3 +658,5 @@ class Solution:
         backtrack([], nums)
         return ans
 ```
+
+### [282. Expression Add Operators](https://leetcode.com/problems/expression-add-operators/)

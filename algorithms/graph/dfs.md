@@ -697,3 +697,28 @@ class Solution:
 ```
 
 ### [778. Swim in Rising Water](https://leetcode.com/problems/swim-in-rising-water/)
+
+
+### [329. Longest Increasing Path in a Matrix](https://leetcode.com/problems/longest-increasing-path-in-a-matrix/)
+
+```python
+class Solution:
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+        # No need to use seen dict, cause it look for bigger number
+        rows, cols = len(matrix), len(matrix[0])
+
+        @functools.lru_cache(None)
+        def dfs(r, c):
+            ans = 1
+            for _r, _c in (r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1):
+                if 0 <= _r < rows and 0 <= _c < cols and matrix[_r][_c] > matrix[r][c]:
+                    ans = max(ans, dfs(_r, _c) + 1)
+            return ans
+        
+        ans = 0
+        for r in range(rows):
+            for c in range(cols):
+                ans = max(ans, dfs(r, c))
+        
+        return ans
+```

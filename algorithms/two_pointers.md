@@ -685,3 +685,46 @@ class Solution:
         return i ==Lw and j == La
 ```
 
+
+### [1537. Get the Maximum Score](https://leetcode.com/problems/get-the-maximum-score/)
+
+```python
+class Solution:
+    def maxSum(self, A: List[int], B: List[int]) -> int:
+        # https://youtu.be/vUp9AazggFY
+        i, j, m, n = 0, 0, len(A), len(B)
+        a = b = 0
+        
+        while i < m or j < n:
+            if i < m and (j == n or A[i] < B[j]):
+                a += A[i]
+                i += 1
+            elif j < n and (i == m or A[i] > B[j]):
+                b += B[j]
+                j += 1
+            else:
+                a = b = max(a, b) + A[i]
+                i += 1
+                j += 1
+        
+        return max(a, b) % (10 ** 9 + 7)
+```
+
+
+### [977. Squares of a Sorted Array](https://leetcode.com/problems/squares-of-a-sorted-array/)
+
+```python
+class Solution:
+    def sortedSquares(self, nums: List[int]) -> List[int]:
+        left, right = 0, len(nums) - 1
+        ans = []
+        while left <= right:
+            left_v, right_v = nums[left], nums[right]
+            if abs(left_v) > abs(right_v):
+                ans.append(left_v ** 2)
+                left += 1
+            else:
+                ans.append(right_v ** 2)
+                right -= 1
+        return ans[::-1]
+```

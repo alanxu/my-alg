@@ -846,3 +846,32 @@ class Solution:
                             
         return ans
 ```
+
+
+### [1730. Shortest Path to Get Food](https://leetcode.com/problems/shortest-path-to-get-food/)
+
+```python
+class Solution:
+    def getFood(self, grid: List[List[str]]) -> int:
+        rows, cols = len(grid), len(grid[0])
+        r = c = 0
+        for _r in range(rows):
+            for _c in range(cols):
+                if grid[_r][_c] == "*":
+                    r, c = _r, _c
+                    break
+                    
+        q = deque([(r, c, 0)])
+        grid[r][c] = '-'
+        while q:
+            r, c, step = q.popleft()
+            
+            for _r, _c in (r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1):
+                if 0 <= _r < rows and 0 <= _c < cols:
+                    if grid[_r][_c] == 'O':
+                        grid[_r][_c] = '-'
+                        q.append((_r, _c, step + 1))
+                    elif grid[_r][_c] == '#':
+                        return step + 1
+        return -1
+```

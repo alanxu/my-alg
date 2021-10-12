@@ -44,6 +44,19 @@ Two pointer technique is quite similar but we usually compare the value at the t
 
 Two pointers can also have variations like fast-slow pointer.
 
+
+1358. Number of Substrings Containing All Three Characters
+1248. Count Number of Nice Subarrays
+1234. Replace the Substring for Balanced String
+1004. Max Consecutive Ones III
+930. Binary Subarrays With Sum
+992. Subarrays with K Different Integers
+904. Fruit Into Baskets
+862. Shortest Subarray with Sum at Least K
+209. Minimum Size Subarray Sum
+
+
+
 ## Type 1
 
 ### [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)
@@ -222,6 +235,41 @@ class Solution:
         return ans
 ```
 
+
+### [992. Subarrays with K Different Integers](https://leetcode.com/problems/subarrays-with-k-different-integers/)
+
+```python
+class Solution:
+    def subarraysWithKDistinct(self, nums: List[int], k: int) -> int:
+        # Intuition: Sliding Window
+        # It is difficult to use condition of exactly k to control
+        # when left move, so we do at_most_k, and the ans is difference
+        # of at_most_k(k) - at_most_k(k - 1)
+        # https://leetcode.com/problems/longest-substring-with-at-most-two-distinct-characters/
+        # https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/
+        #
+        def at_most_k(nums, k):
+            left, ans = 0, 0
+            counter = collections.Counter()
+            for right in range(len(nums)):
+                if counter[nums[right]] == 0:
+                    k -= 1
+                counter[nums[right]] += 1
+                
+                while k < 0:
+                    counter[nums[left]] -= 1
+                    if counter[nums[left]] == 0:
+                        k += 1
+                    left += 1
+                
+                # Ans added all possibilities with subarray end with right
+                ans += right - left + 1
+                
+            return ans
+        
+        return at_most_k(nums, k) - at_most_k(nums, k - 1)
+```
+
 ## Type 2
 
 ### [30. Substring with Concatenation of All Words](https://leetcode.com/problems/substring-with-concatenation-of-all-words/)
@@ -354,41 +402,31 @@ class Solution:
 ```python
 class Solution:
     def minWindow(self, s: str, t: str) -> str:
-        # Variables needed to check the validity of a window
-        t_dict = Counter(t)
-        w_dict = {}
-        required = len(t_dict)
-        formed = 0
-        
-        # ans tuple of the form (window length, left, right)
-        ans = float('inf'), None, None
-        
-        # Pointers of the window, starting from 0, moving to same direction
-        l = r = 0
-        
-        while r < len(s):
+        # Intuition: Sliding Window
+        # Move left when condition match
+        counter, target = Counter(), Counter(t)
+        formed, required = 0, len(target)
+
+        left, ans = 0, (math.inf, -1, -1)
+
+        for right in range(len(s)):
+            x = s[right]
+            counter[x] += 1
+            # Trick: Change formed only when values are
+            # same
+            if counter[x] == target[x]:
+                formed += 1
             
-            # Update window status according to new right
-            c = s[r]
-            if c in t_dict:
-                w_dict[c] = w_dict.get(c, 0) + 1
-                if w_dict[c] == t_dict[c]:
-                    formed += 1
-                    
-            while l <= r and formed == required:
-                # When formed == required, record the min window first
-                if r - l + 1 < ans[0]:
-                    ans = (r - l + 1, l, r)
-                    
-                # Move the left to the position that the window not valid again
-                c = s[l]
-                if c in t_dict:
-                    w_dict[c] -= 1
-                    if w_dict[c] < t_dict[c]:
-                        formed -= 1
-                l += 1
-            r += 1
-        return "" if ans[0] == float("inf") else s[ans[1] : ans[2] + 1]
+            # left <= right for cases t is single char
+            while formed == required and left <= right :
+                if right - left + 1 < ans[0]:
+                    ans = (right - left + 1, left, right)
+                if target[s[left]] == counter[s[left]]:
+                    formed -= 1
+                counter[s[left]] -= 1
+                left += 1
+                
+        return s[ans[1]:ans[2] + 1]
 ```
 
 

@@ -66,7 +66,7 @@ class Solution:
         return hare
 ```
 
-## Cycle Detection
+## Tarjan Algorithm and Cycle Detection
 
 ### [1059. All Paths from Source Lead to Destination](https://leetcode.com/problems/all-paths-from-source-lead-to-destination/)
 

@@ -146,6 +146,21 @@ class Solution:
         return max(dp)
 ```
 
+### [674. Longest Continuous Increasing Subsequence](https://leetcode.com/problems/longest-continuous-increasing-subsequence/)
+
+```python
+class Solution:
+    def findLengthOfLCIS(self, nums: List[int]) -> int:
+        local_max = global_max = 1
+        for i in range(1, len(nums)):
+            if nums[i] > nums[i - 1]:
+                local_max += 1
+                global_max = max(global_max, local_max)
+            else:
+                local_max = 1
+        return global_max
+```
+
 ### [1191. K-Concatenation Maximum Sum](https://leetcode.com/problems/k-concatenation-maximum-sum/)
 
 

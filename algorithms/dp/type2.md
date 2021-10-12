@@ -216,6 +216,32 @@ class Solution:
                 ans.append(w)
         return ans
 ```
+```python
+class Solution:
+    def findAllConcatenatedWordsInADict(self, words: List[str]) -> List[str]:
+        word_set = set(words)
+        @functools.lru_cache()
+        def dfs(word, partial=False):
+            # Termination condision is word itself in list and it is not
+            # the top level word
+            if partial and word in word_set:
+                return True
+            
+            # Get substring not the entire word (last char is skipped)
+            # this will not check the word itself.
+            for i in range(1, len(word)):
+                if word[:i] in word_set and dfs(word[i:], True):
+                    return True
+
+            return False
+        
+        ans = []
+        for w in words:
+            if dfs(w):
+                ans.append(w)
+        
+        return ans
+```
 
 ### [140. Word Break II](https://leetcode.com/problems/word-break-ii/)
 

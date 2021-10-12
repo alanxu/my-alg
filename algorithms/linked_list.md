@@ -279,6 +279,11 @@ class Solution:
 ### [143. Reorder List](https://leetcode.com/problems/reorder-list/)
 
 ```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
 # Fav
 class Solution:
     def reorderList(self, head: ListNode) -> None:
@@ -286,7 +291,8 @@ class Solution:
             return 
         
         # find the middle of linked list [Problem 876]
-        # in 1->2->3->4->5->6 find 4 
+        # in 1->2->3->4->5->6 find 4
+        # in 1->2->3->4->5 find 3
         slow = fast = head
         while fast and fast.next:
             slow = slow.next
@@ -301,6 +307,8 @@ class Solution:
 
         # merge two sorted linked lists [Problem 21]
         # merge 1->2->3->4 and 6->5->4 into 1->6->2->5->3->4
+        # The 3->4 in first list will retained no matter odd or even
+        # number of nodes
         first, second = head, prev
         while second.next:
             first.next, first = second, first.next
@@ -481,61 +489,60 @@ class Solution:
 ### [146. LRU Cache](https://leetcode.com/problems/lru-cache/)
 
 ```python
-class LinkedListNode:
-    def __init__(self, key=None, val=-1):
+class Node:
+    def __init__(self, key=None, value=None):
         self.key = key
-        self.val = val
+        self.val = value
         self.prev = None
-        self.next = None
+        self.nxt = None
+
 
 class LRUCache:
+
     def __init__(self, capacity: int):
-        self.size = 0
         self.capacity = capacity
         self.cache = {}
-        self.head, self.tail = LinkedListNode(), LinkedListNode()
-        self.head.next, self.tail.prev = self.tail, self.head
-    
-    def _add_node(self, node):
-        node.prev = self.head
-        node.next = self.head.next
-        self.head.next.prev = node
-        self.head.next = node
+        self.head, self.tail = Node(), Node()
+        self.head.nxt, self.tail.prev = self.tail, self.head
 
-    def _remove_node(self, node):
-        node.prev.next = node.next
-        node.next.prev = node.prev
-    
+    def _add_item(self, node):
+        node.prev = self.head
+        node.nxt  = self.head.nxt
+        self.head.nxt.prev = node
+        self.head.nxt = node
+        
+    def _remove_item(self, node):
+        node.prev.nxt = node.nxt
+        node.nxt.prev = node.prev
+        
     def _move_to_head(self, node):
-        self._remove_node(node)
-        self._add_node(node)
+        self._remove_item(node)
+        self._add_item(node)
         
     def _pop_tail(self):
         node = self.tail.prev
-        self._remove_node(node)
+        self._remove_item(node)
         return node
 
     def get(self, key: int) -> int:
         node = self.cache.get(key)
-        if not node:
-            return -1
-        self._move_to_head(node)
-        return node.val
+        if node:
+            self._move_to_head(node)
+            return node.val
+        return -1
 
     def put(self, key: int, value: int) -> None:
         node = self.cache.get(key)
-        if not node:
-            node = LinkedListNode(key, value)
-            self.cache[key] = node
-            self._add_node(node)
-            self.size += 1
-            if self.size > self.capacity:
-                node = self._pop_tail()
-                del self.cache[node.key]
-                self.size -= 1
-        else:
+        if node:
             node.val = value
             self._move_to_head(node)
+        else:
+            if len(self.cache) == self.capacity:
+                node = self._pop_tail()
+                del self.cache[node.key]
+            node = Node(key, value)
+            self.cache[key] = node
+            self._add_item(node)
 
 
 # Your LRUCache object will be instantiated and called as such:
@@ -544,8 +551,219 @@ class LRUCache:
 # obj.put(key,value)
 ```
 
+### [460. LFU Cache](https://leetcode.com/problems/lfu-cache/)
+
+```python
+class Node:
+    def __init__(self, key=None, val=None):
+        self.key = key
+        self.val = val
+        self.prev = self.next = None
+        self.freq = 1
+        
+class DLinkedList:
+    def __init__(self):
+        self._sentinel = Node()
+        self._sentinel.next = self._sentinel.prev = self._sentinel
+        self._size = 0
+        
+    def __len__(self):
+        return self._size
+    
+    def append(self, node):
+        node.next = self._sentinel.next
+        node.prev = self._sentinel
+        node.next.prev = node
+        self._sentinel.next = node
+        self._size += 1
+        
+    def pop(self, node=None):
+        if self._size == 0:
+            return
+        
+        if not node:
+            node = self._sentinel.prev
+            
+        node.next.prev = node.prev
+        node.prev.next = node.next
+        self._size -= 1
+        return node
+        
+class LFUCache:
+
+    def __init__(self, capacity: int):
+        self._capacity = capacity
+        self._size = 0
+        self._cache = {}
+        self._freq = defaultdict(DLinkedList)
+        self._minfreq = 0
+        
+    def _update(self, node):
+        freq = node.freq
+        self._freq[freq].pop(node)
+        if self._minfreq == freq and not self._freq[freq]:
+            self._minfreq += 1
+        
+        node.freq += 1
+        freq = node.freq
+        self._freq[freq].append(node)
+
+    def get(self, key: int) -> int:
+        if key not in self._cache:
+            return -1
+        node = self._cache[key]
+
+        self._update(node)
+        return node.val
+        
+    def put(self, key: int, value: int) -> None:
+        if self._capacity == 0:
+            return
+        if key in self._cache:
+            node = self._cache[key]
+            node.val = value
+            self._update(node)
+        else:
+            if self._size == self._capacity:
+                node = self._freq[self._minfreq].pop()
+                del self._cache[node.key]
+                self._size -= 1
+                
+            node = Node(key, value)
+            self._cache[key] = node
+            self._freq[1].append(node)
+            self._minfreq = 1
+            self._size += 1
+
+
+# Your LFUCache object will be instantiated and called as such:
+# obj = LFUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)
+```
+
 
 ### [445. Add Two Numbers II](https://leetcode.com/problems/add-two-numbers-ii/)
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+        n1, n2 = 0, 0
+        cur1, cur2 = l1, l2
+        
+        while cur1:
+            n1 += 1
+            cur1 = cur1.next
+        while cur2:
+            n2 += 1
+            cur2 = cur2.next
+            
+        cur1, cur2 = l1, l2
+        head = None
+        while n1 > 0 and n2 > 0:
+            val = 0
+            if n1 >= n2:
+                val += cur1.val
+                cur1 = cur1.next
+                n1 -= 1
+            if n1 < n2:
+                val += cur2.val
+                cur2 = cur2.next
+                n2 -= 1
+                
+            cur = ListNode(val)
+            cur.next = head
+            head = cur
+            
+        cur, head = head, None
+        carry = 0
+        while cur:
+            val = (cur.val + carry) % 10
+            carry = (cur.val + carry) // 10 
+            
+            node = ListNode(val)
+            node.next = head
+            head = node
+            
+            cur = cur.next
+            
+        if carry:
+            node = ListNode(carry)
+            node.next = head
+            head = node
+            
+        return head
+```
+
+```python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        n1 = n2 = 0
+        
+        head = l1
+        while head:
+            n1 += 1
+            head = head.next
+        
+        head = l2
+        while head:
+            n2 += 1
+            head = head.next
+            
+        head = None
+        cur1, cur2 = l1, l2
+        while n1 or n2:
+            if n1 > n2:
+                node = ListNode(cur1.val)
+                node.next = head
+                head = node
+                n1 -= 1
+                cur1 = cur1.next
+            elif n1 < n2:
+                node = ListNode(cur2.val)
+                node.next = head
+                head = node
+                n2 -= 1
+                cur2 = cur2.next
+            else:
+                node = ListNode(cur1.val + cur2.val)
+                node.next = head
+                head = node
+                n1 -= 1
+                n2 -= 1
+                cur1 = cur1.next
+                cur2 = cur2.next
+        
+        head, cur = None, head
+        carry = 0
+        while cur:
+            v = cur.val + carry
+            val = v % 10
+            carry = v // 10
+            cur.val = val
+            
+            tmp = cur.next
+            cur.next = head
+            head = cur
+            cur = tmp
+            
+        if carry:
+            node = ListNode(carry)
+            node.next = head
+            head = node
+        
+        return head
+```
 
 ### [1650. Lowest Common Ancestor of a Binary Tree III](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iii/)
 

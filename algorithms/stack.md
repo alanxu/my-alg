@@ -871,6 +871,49 @@ class Solution:
         return sum(stack)
 ```
 
+### [282. Expression Add Operators](https://leetcode.com/problems/expression-add-operators/)
+
+```python
+# Fav
+class Solution:    
+    def addOperators(self, num: str, target: int) -> List[str]:
+        """
+        Intuition: 'All possibilities' indicate backtracking.
+        The difficulty is how to track the cur total value of the path.
+        Similar to 'Basic Calculator I/II/III', we need a stack, all
+        values seperated with '+-' are in stack, for '*/', we need to
+        pop a value from stack top and push the product back to stack.
+        """
+        ans = []
+        def backtrack(i, total, pre, path):
+            '''
+            i: starting index of this recursive call
+            total: cur value of cur path
+            pre: the value at stack top (it could be a substr of num or a product)
+            path: cur path
+            '''
+            if i == len(num) and total == target:
+                # If we have a match
+                ans.append(path)
+                return
+            
+            for j in range(i + 1, len(num) + 1):
+                x = int(num[i:j])
+                if j == i + 1 or num[i] != '0':
+                    if pre is None:
+                        # For first value
+                        backtrack(j, x, x, path + str(x))
+                    else:
+                        # Try all +/-/*, for '*', needs to pop the pre from stack and 
+                        # push back the product, new pre is pre * x
+                        backtrack(j, total + x, x, f'{path}+{x}')
+                        backtrack(j, total - x, -x, f'{path}-{x}')
+                        backtrack(j, total - pre + pre * x, pre * x, f'{path}*{x}')
+                        
+        backtrack(0, 0, None, '')
+        return ans
+```
+
 ### [394. Decode String](https://leetcode.com/problems/decode-string/)
 
 ```python

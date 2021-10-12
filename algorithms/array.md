@@ -74,6 +74,32 @@ class Solution:
         return len(rooms)
 ```
 
+### [732. My Calendar III](https://leetcode.com/problems/my-calendar-iii/)
+
+```python
+class MyCalendarThree:
+
+    def __init__(self):
+        self.counter = collections.Counter()
+        
+
+    def book(self, start: int, end: int) -> int:
+        self.counter[start] += 1
+        self.counter[end] -= 1
+        
+        active = ans = 0
+        for x in sorted(self.counter):
+            active += self.counter[x]
+            ans = max(ans, active)
+
+        return ans
+
+
+# Your MyCalendarThree object will be instantiated and called as such:
+# obj = MyCalendarThree()
+# param_1 = obj.book(start,end)
+```
+
 ### [759. Employee Free Time](https://leetcode.com/problems/employee-free-time/)
 ```python
 """
@@ -798,28 +824,6 @@ class Solution:
         return (zeros1) * (zeros2) % (10**9+7)
 ```
 
-### [415. Add Strings](https://leetcode.com/problems/add-strings/)
-
-```python
-class Solution:
-    def addStrings(self, num1: str, num2: str) -> str:
-        L1, L2 = len(num1), len(num2)
-        i1, i2 = L1 -1, L2 - 1
-        ans = []
-        carry = 0
-        while i1 >= 0 or i2 >= 0:
-            x1 = ord(num1[i1]) - ord('0') if i1 >= 0 else 0
-            x2 = ord(num2[i2]) - ord('0') if i2 >= 0 else 0
-            s = x1 + x2 + carry
-            val = s % 10
-            carry = s // 10
-            ans.append(val)
-            i1 -= 1
-            i2 -= 1
-        if carry:
-            ans.append(carry)
-        return ''.join(map(str, reversed(ans)))
-```
 
 ### [169. Majority Element](https://leetcode.com/problems/majority-element/)
 
@@ -864,4 +868,142 @@ class Solution:
                     # If first small than second, no need compare following
                     break
         return True
+```
+
+
+### [380. Insert Delete GetRandom O(1)](https://leetcode.com/problems/insert-delete-getrandom-o1/)
+
+```python
+class RandomizedSet:
+
+    def __init__(self):
+        """
+        Initialize your data structure here.
+        """
+        self.dict = {}
+        self.list = []
+        
+
+    def insert(self, val: int) -> bool:
+        """
+        Inserts a value to the set. Returns true if the set did not already contain the specified element.
+        """
+        if val in self.dict:
+            return False
+        self.dict[val] = len(self.list)
+        self.list.append(val)
+        return True
+
+    
+    def remove(self, val: int) -> bool:
+        """
+        Removes a value from the set. Returns true if the set contained the specified element.
+        """
+        if val in self.dict:
+            last_element = self.list[-1]
+            idx = self.dict[val]
+            self.list[idx] = last_element
+            self.dict[last_element] = idx
+            self.list.pop()
+            del self.dict[val]
+            return True
+        return False
+
+    def getRandom(self) -> int:
+        """
+        Get a random element from the set.
+        """
+        import random
+        return random.choice(self.list)
+
+
+# Your RandomizedSet object will be instantiated and called as such:
+# obj = RandomizedSet()
+# param_1 = obj.insert(val)
+# param_2 = obj.remove(val)
+# param_3 = obj.getRandom()
+```
+
+### [1465. Maximum Area of a Piece of Cake After Horizontal and Vertical Cuts](https://leetcode.com/problems/maximum-area-of-a-piece-of-cake-after-horizontal-and-vertical-cuts/)
+
+```python
+class Solution:
+    def maxArea(self, h: int, w: int, horizontalCuts: List[int], verticalCuts: List[int]) -> int:
+        horizontalCuts.sort()
+        verticalCuts.sort()
+        horizontalCuts = [0] + horizontalCuts + [h]
+        verticalCuts = [0] + verticalCuts + [w]
+        max_width = max_height = -math.inf
+        for i in range(1, len(horizontalCuts)):
+            max_height = max(max_height, horizontalCuts[i] - horizontalCuts[i - 1])
+                
+        for i in range(1, len(verticalCuts)):
+            max_width = max(max_width, verticalCuts[i] - verticalCuts[i - 1])
+                
+        return max_width * max_height % (10 ** 9 + 7)
+```
+
+### [1460. Make Two Arrays Equal by Reversing Sub-arrays](https://leetcode.com/problems/make-two-arrays-equal-by-reversing-sub-arrays/)
+
+```python
+class Solution:
+    def canBeEqual(self, target: List[int], arr: List[int]) -> bool:
+        return Counter(target) == Counter(arr)
+```
+
+### [828. Count Unique Characters of All Substrings of a Given String](https://leetcode.com/problems/count-unique-characters-of-all-substrings-of-a-given-string/)
+
+```python
+class Solution:
+    def uniqueLetterString(self, s: str) -> int:
+        # https://leetcode.com/problems/count-unique-characters-of-all-substrings-of-
+        # a-given-string/discuss/128952/C%2B%2BJavaPython-One-pass-O(N)
+        
+        # -1 is default value of last 2 indexes of a char
+        index = {c: (-1, -1) for c in string.ascii_uppercase}
+        
+        ans = 0
+        for i, c in enumerate(s):
+            k, j = index[c]
+            ans += (i - j) * (j - k)
+            index[c] = j, i
+        
+        # Process cases b/w last char and end of str
+        for c in index:
+            k, j = index[c]
+            ans += (len(s) - j) * (j - k)
+            
+        return ans
+```
+
+
+### [696. Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/)
+
+```python
+class Solution:
+    def countBinarySubstrings(self, s: str) -> int:
+        '''
+        https://leetcode.com/problems/count-binary-substrings/discuss/108625/JavaC%2B%2BPython-Easy-and-Concise-with-Explanation
+        '''
+        a = list(map(len, s.replace('01', '0 1').replace('10', '1 0').split()))
+        return sum(min(l1, l2) for l1, l2 in zip(a[:-1], a[1:]))
+```
+
+
+### [370. Range Addition](https://leetcode.com/problems/range-addition/)
+
+```python
+class Solution:
+    def getModifiedArray(self, length: int, updates: List[List[int]]) -> List[int]:
+        ans = [0] * (length + 1)
+        for u in updates:
+            s, e, x = u
+            ans[s] += x
+            ans[e + 1] -= x
+        
+        for i in range(1, length):
+            ans[i] += ans[i - 1]
+        
+        ans.pop()
+        return ans
 ```

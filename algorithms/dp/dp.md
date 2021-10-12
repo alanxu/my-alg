@@ -669,3 +669,33 @@ class Solution:
                 return min(-piles[i] + dp(i + 1, j), -piles[j] + dp(i, j - 1))
         return dp(0, N - 1)
 ```
+
+### [926. Flip String to Monotone Increasing](https://leetcode.com/problems/flip-string-to-monotone-increasing/)
+
+```python
+class Solution:
+    def minFlipsMonoIncr(self, s: str) -> int:
+        """
+        Intuition:
+        Solution 1: Greedy
+        Use prefix to know hwo many 1's b/w any 2 elements,
+        for each elements, supose it is begining of 1's, the flips is
+        1's at its left plus 0's at its right
+        
+        Solution 2: DP
+        dp is the ans for cur pos i. 
+        If i is 1, dp[i] = dp[i - 1]
+        If i is 0, dp[i] = min(flip i to 1, flip all 1's before i to 0)
+        """
+        
+        dp = 0
+        cur_ones, ones = 0, Counter(s)[1]
+        
+        for x in s:
+            if x == '1':
+                cur_ones += 1
+            else:
+                dp = min(dp + 1, cur_ones)
+                
+        return dp
+```

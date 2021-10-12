@@ -301,3 +301,26 @@ class KthLargest:
 ```
 
 
+### [1492. The kth Factor of n](https://leetcode.com/problems/the-kth-factor-of-n/)
+
+```python
+class Solution:
+    def kthFactor(self, n: int, k: int) -> int:
+        heap = []
+        
+        def update(x):
+            if not heap or len(heap) < k:
+                heapq.heappush(heap, -x)
+            elif -heap[0] > x:
+                heapq.heappushpop(heap, -x)
+        
+        for x in range(1, int(math.sqrt(n)) + 1):
+            y, m = divmod(n, x)
+            if not m:
+                update(x)
+                
+                if y != x:
+                    update(y)
+        
+        return -1 if len(heap) < k else -heap[0]
+```

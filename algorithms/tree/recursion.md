@@ -703,3 +703,55 @@ class Solution:
         dfs(root)
         return ans
 ```
+
+
+### [1120. Maximum Average Subtree](https://leetcode.com/problems/maximum-average-subtree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maximumAverageSubtree(self, root: Optional[TreeNode]) -> float:
+        self.ans = -math.inf
+        def dfs(root):
+            if not root:
+                return 0, 0
+            n, s = 1, root.val
+            left_n, left_s = dfs(root.left)
+            right_n, right_s = dfs(root.right)
+            n = 1 + left_n + right_n
+            s = root.val + left_s + right_s
+            
+            self.ans = max(self.ans, s / n)
+            
+            return n, s
+        dfs(root)
+        return self.ans
+```
+
+
+### [226. Invert Binary Tree](https://leetcode.com/problems/invert-binary-tree/)
+
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if not root:
+            return
+        root.left, root.right = root.right, root.left
+        self.invertTree(root.left)
+        self.invertTree(root.right)
+        return root
+```
+
+
+###

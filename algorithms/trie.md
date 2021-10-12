@@ -239,3 +239,107 @@ class Solution:
                 dfs(r, c, "", trie.root)
         return ans
 ```
+
+
+### [642. Design Search Autocomplete System](https://leetcode.com/problems/design-search-autocomplete-system/)
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.is_end = False
+        self.data = None
+        self.rank = 0
+    
+class AutocompleteSystem:
+
+    def __init__(self, sentences: List[str], times: List[int]):
+        self.trie = TrieNode()
+        self.keywords = ""
+        for i, s in enumerate(sentences):
+            self.add(s, times[i])
+
+    def add(self, sentence, hot):
+        cur = self.trie
+        for c in sentence:
+            cur = cur.children[c]
+        cur.is_end = True
+        cur.data = sentence
+        cur.rank -= hot
+    
+    def dfs(self, node):
+        ans = []
+        if node:
+            if node.is_end:
+                ans.append((node.rank, node.data))
+            for nxt in node.children.values():
+                ans.extend(self.dfs(nxt))
+        return ans
+    
+    def search(self, sentence):
+        cur = self.trie
+        for c in sentence:
+            cur = cur.children[c]
+        return self.dfs(cur)
+        
+    def input(self, c: str) -> List[str]:
+        if c == '#':
+            self.add(self.keywords, 1)
+            self.keywords = ""
+        else:
+            self.keywords += c
+            result = self.search(self.keywords)
+            return [x[1] for x in sorted(result)[:3]]
+
+# Your AutocompleteSystem object will be instantiated and called as such:
+# obj = AutocompleteSystem(sentences, times)
+# param_1 = obj.input(c)
+```
+
+### [1268. Search Suggestions System](https://leetcode.com/problems/search-suggestions-system/)
+
+```python
+class TrieNode:
+    def __init__(self):
+        self.children = defaultdict(TrieNode)
+        self.is_word = False
+        self.data = None
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+    def insert(self, word):
+        cur = self.root
+        for w in word:
+            cur = cur.children[w]
+
+        cur.is_word = True
+        cur.data = word
+        
+    def search(self, word):
+        cur = self.root
+        for w in word:
+            cur = cur.children[w]
+        return self.dfs(cur)
+            
+    def dfs(self, node):
+        ans = []
+        if node:
+            if node.is_word:
+                ans.append(node.data)
+            for child in node.children.values():
+                ans.extend(self.dfs(child))
+        return ans
+        
+class Solution:
+    def suggestedProducts(self, products: List[str], searchWord: str) -> List[List[str]]:
+        trie = Trie()
+        for p in sorted(products):
+            trie.insert(p)
+        
+        ans = []
+        for i in range(1, len(searchWord) + 1):
+            ans.append(trie.search(searchWord[:i])[:3])
+        
+        return ans
+```
