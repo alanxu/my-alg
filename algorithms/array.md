@@ -868,6 +868,27 @@ class Solution:
                     # If first small than second, no need compare following
                     break
         return True
+    
+    def isAlienSorted(self, words: List[str], order: str) -> bool:
+        pos = {v:i for i, v in enumerate(order)}
+        
+        # No matter how many words, compare adjacent 2
+        for a, b in zip(words, words[1:]):
+            # Use a's len so we just needs to check b's len
+            for i in range(len(a)):
+                # a not finish, but b finish, and we are here because
+                # the order before are same, so this is incorrect
+                if i >= len(b):
+                    return False
+                
+                # if a[i] > b[i], invalid, return False
+                # if a[i] < b[i], no need to check following, return True
+                # if a[i] = b[i], needs to continue check next char
+                if pos[a[i]] > pos[b[i]]:
+                    return False
+                elif pos[a[i]] < pos[b[i]]:
+                    break
+        return True
 ```
 
 
@@ -1006,4 +1027,69 @@ class Solution:
         
         ans.pop()
         return ans
+```
+
+### [31. Next Permutation](https://leetcode.com/problems/next-permutation/)
+
+```python
+class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        
+        https://youtu.be/K-QCteGM-Bk
+        
+        [1,5,8,4,7,6,5,3,1]
+        """
+        # Start from last, Find first decending num idx k (num[k] = 4) 
+        i = j = len(nums) - 1
+        while i > 0 and nums[i - 1] >= nums[i]:
+            i -= 1
+        # i is the first peak starting from last, i - 1 is
+        # our target
+        k = i - 1
+        
+        # If the whole list is decensing, just reverse it
+        if i == 0:
+            nums.reverse()
+            return
+        
+        # Start from last, find first num greater than nums[k]
+        while j > 0 and nums[k] >= nums[j]:
+            j -= 1
+        # Swap k and j, so num[k] is replaced with the minimum
+        # value greater than itself, and after that, num[k+1:]
+        # firms a decending seq, we just have to reverse it
+        # so it is minimum after num[k]
+        nums[k], nums[j] = nums[j], nums[k]
+        
+        l, r = k + 1, len(nums) - 1
+        while l < r:
+            nums[l], nums[r] = nums[r], nums[l]
+            l += 1
+            r -= 1
+        
+        return nums
+```
+
+
+### [791. Custom Sort String](https://leetcode.com/problems/custom-sort-string/)
+
+```python
+class Solution:
+    def customSortString(self, order: str, s: str) -> str:
+        order = {v: i for i, v in enumerate(order)}
+        return ''.join(sorted(s, key=lambda c: order.get(c, math.inf)))
+    
+    def customSortString(self, order: str, s: str) -> str:
+        counts = Counter(s)
+        ans = []
+        for x in order:
+            if counts[x] > 0:
+                ans.append(x * counts[x])
+                counts[x] = 0
+        for x in counts:
+            if counts[x] > 0:
+                ans.append(x * counts[x])
+        return ''.join(ans)
 ```

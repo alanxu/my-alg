@@ -115,3 +115,36 @@ class Solution:
                 bal += 1
         return ans + bal
 ```
+
+### [1963. Minimum Number of Swaps to Make the String Balanced](https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced/)
+
+```python
+class Solution:
+    def minSwaps(self, s: str) -> int:
+        stack, counts = [], 0
+        for x in s:
+            if x == '[':
+                stack.append(x)
+            else:
+                if not stack:
+                    counts += 1
+                else:
+                    stack.pop()
+
+        return (counts + 1) // 2
+    
+    def minSwaps(self, s: str) -> int:
+        stack_size = counts = 0
+        for x in s:
+            if x == '[':
+                stack_size += 1
+            else:
+                if not stack_size:
+                    counts += 1
+                else:
+                    stack_size -= 1
+        
+        return (counts + 1) // 2
+```
+
+

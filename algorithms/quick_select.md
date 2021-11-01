@@ -40,6 +40,37 @@ class Solution:
             
         return select(0, len(nums) - 1, len(nums) - k)
 ```
+```python
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        return sorted(nums, reverse=True)[k - 1]
+    
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        def quick_select(nums, start, end, k):
+            if start == end:
+                return nums[k - 1]
+            l, r = start, end
+            mid = l + (r - l) // 2
+            pivot = nums[mid]
+            
+            while l <= r:
+                while l <= r and nums[l] > pivot:
+                    l += 1
+                while l <= r and nums[r] < pivot:
+                    r -= 1
+                if l <= r:
+                    nums[l], nums[r] = nums[r], nums[l]
+                    l += 1
+                    r -= 1
+            
+            if r >= k - 1:
+                return quick_select(nums, start, r, k)
+            if l <= k - 1:
+                return quick_select(nums, l, end, k)
+            return nums[r + 1]
+                
+        return quick_select(nums, 0, len(nums) - 1, k)
+```
 
 ### [280. Wiggle Sort](https://leetcode.com/problems/wiggle-sort/)
 

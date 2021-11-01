@@ -56,7 +56,8 @@ Two pointers can also have variations like fast-slow pointer.
 209. Minimum Size Subarray Sum
 
 
-
+Some of the problems cannot be resolved by sliding window even if they looks can.
+https://leetcode.com/problems/subarray-sum-equals-k/
 ## Type 1
 
 ### [3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/)

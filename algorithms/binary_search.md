@@ -611,6 +611,71 @@ class Solution:
 ### [1428. Leftmost Column with at Least a One](https://leetcode.com/problems/leftmost-column-with-at-least-a-one/)
 
 
+## Min Capacity
+### [1011. Capacity To Ship Packages Within D Days](https://leetcode.com/problems/capacity-to-ship-packages-within-d-days/)
+```python
+class Solution:
+    def shipWithinDays(self, weights: List[int], days: int) -> int:
+        lo, hi = max(weights), sum(weights)
+        while lo < hi:
+            mid = lo + (hi - lo) // 2
+            w, d = 0, 1
+            for x in weights:
+                if w + x > mid:
+                    d += 1
+                    w = x
+                else:
+                    w += x
+            if d <= days:
+                hi = mid
+            else:
+                lo = mid + 1
+        return lo
+```
+
+### [1891. Cutting Ribbons](https://leetcode.com/problems/cutting-ribbons/)
+
+```python
+class Solution:
+    def maxLength(self, ribbons: List[int], k: int) -> int:
+        """
+        Intuition: Binary Search Type II
+        
+        Alg: Binary Search Type II
+        Split the search space into two parts, one part has the target, the other part
+        doesn't, there are a clear condition on determine the valid part (in the valid
+        part, not all the items are valid, it is possible all valid or only one at the
+        boarder is valid).
+        Hi and Lo points, one has to mid +/- 1, one has to move to mid. The one mid +/-1
+        should be used to exlucde the invalid part, and the one =mid is used to mark the
+        closest target.
+        Depends on which one is =mid, the way to calculate mid differs.
+        mid = hi - (hi - lo) // 2
+        mid = lo + (hi - lo) // 2
+        
+        https://medium.com/swlh/binary-search-find-upper-and-lower-bound-3f07867d81fb
+        """
+        if sum(ribbons) < k:
+            return 0
+        
+        lo, hi = 1, max(ribbons)
+        
+        while lo < hi:
+            mid = hi - (hi - lo) // 2
+            
+            n = 0
+            for r in ribbons:
+                n += r // mid
+                
+            if n >= k:
+                lo = mid
+            else:
+                hi = mid - 1
+                
+        return hi
+```
+
+
 ## Others
 
 410. Split Array Largest Sum
@@ -921,3 +986,5 @@ class Solution:
         # arr[right] + k - (arr[right] - right - 1) = k + left
         return lo + k
 ```
+
+

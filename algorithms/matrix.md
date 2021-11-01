@@ -309,3 +309,57 @@ class Solution:
         # If we never left the last column, it must have been all 0's.
         return current_col + 1 if current_col != cols - 1 else -1
 ```
+
+
+
+### [766. Toeplitz Matrix](https://leetcode.com/problems/toeplitz-matrix/)
+
+```python
+class Solution:
+    def isToeplitzMatrix(self, matrix: List[List[int]]) -> bool:
+        rows, cols = len(matrix), len(matrix[0])
+        def check(r, c, val):
+            if matrix[r][c] != val:
+                return False
+            _r, _c = r + 1, c + 1
+            if 0 <= _r < rows and 0 <= _c < cols:
+                return check(_r, _c, val)
+            else:
+                return True
+            
+        for r in range(rows):
+            if not check(r, 0, matrix[r][0]):
+                return False
+            
+        for c in range(1, cols):
+            if not check(0, c, matrix[0][c]):
+                return False
+            
+        return True
+```
+
+
+### [498. Diagonal Traverse](https://leetcode.com/problems/diagonal-traverse/)
+
+```python
+class Solution:
+    def findDiagonalOrder(self, mat: List[List[int]]) -> List[int]:
+        """
+        Intuition: If mat[r1][c1] and mat[r2][c2] are in same diagnal,
+        r1 + c1 == r2 + c2.
+        Reverse a diagnal by the idx of the diagnal
+        """
+        rows, cols = len(mat), len(mat[0])
+        mp = defaultdict(list)
+        for r in range(rows):
+            for c in range(cols):
+                mp[r + c].append(mat[r][c])
+        
+        ans = []
+        for i in range(rows + cols):
+            if i % 2:
+                ans.extend(mp[i])
+            else:
+                ans.extend(reversed(mp[i]))
+        return ans
+```

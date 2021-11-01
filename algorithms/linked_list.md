@@ -808,26 +808,28 @@ class Node:
         self.val = val
         self.next = next
 """
-
 class Solution:
     def insert(self, head: 'Node', insertVal: int) -> 'Node':
         if not head:
-            head = Node(insertVal)
-            head.next = head
-            return head
+            node = Node(insertVal)
+            node.next = node
+            return node
         
-        prev, cur = head, head.next
-        
+        pre, cur = head, head.next
         while True:
-            if prev.val <= insertVal <= cur.val or \
-                prev.val > cur.val and (insertVal > prev.val or insertVal < cur.val):
-                    prev.next = Node(insertVal, cur)
-                    return head
+            if pre.val <= insertVal <= cur.val or\
+                pre.val > cur.val and (insertVal > pre.val or insertVal < cur.val):
+                node = Node(insertVal, cur)
+                pre.next = node
+                return head
             
-            prev, cur = cur, cur.next
-            if prev == head:
+            pre, cur = cur, cur.next
+            
+            if pre == head:
                 break
-                
-        prev.next = Node(insertVal, cur)
+        
+        # For corner case [1]
+        pre.next = Node(insertVal, cur)
+        
         return head
 ```

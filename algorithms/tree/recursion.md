@@ -194,6 +194,30 @@ class Solution:
         return self.max_path_sum
 ```
 
+### [129. Sum Root to Leaf Numbers](https://leetcode.com/problems/sum-root-to-leaf-numbers/)
+```python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def sumNumbers(self, root: Optional[TreeNode]) -> int:
+        self.ans = 0
+        def dfs(node, s=0):
+            if not node:
+                return
+            v = s * 10 + node.val
+            if not node.left and not node.right:
+                self.ans += v
+            else:
+                dfs(node.left, v)
+                dfs(node.right, v)
+        dfs(root)
+        return self.ans
+```
+
 ### [543. Diameter of Binary Tree](https://leetcode.com/problems/diameter-of-binary-tree/)
 
 ```python

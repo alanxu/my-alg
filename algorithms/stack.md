@@ -671,6 +671,35 @@ class Solution:
         return stack
 ```
 
+### [1944. Number of Visible People in a Queue](https://leetcode.com/problems/number-of-visible-people-in-a-queue/)
+
+```python
+class Solution:
+    def canSeePersonsCount(self, heights: List[int]) -> List[int]:
+        """
+        Intuition: Mono Decrease Stack
+        For each h, if it higher than (or equal to) stack[-1] j, 
+        then j cannot see any person right of h, so j should be 
+        poped, the ans for j has already be calc by any h lower 
+        than j but higher than any btw [j,i]. 
+        When append i, we increase stack[-1], because i is lower
+        than it and higher than any btw i and stack top.
+        """
+        N = len(heights)
+        stack, ans = [], [0] * N
+        for i, h in enumerate(heights):
+            while stack and heights[stack[-1]] <= h:
+                j = stack.pop()
+                ans[j] += 1
+            if stack:
+                ans[stack[-1]] += 1
+            stack.append(i)
+
+        return ans
+```
+
+
+
 ## Others
 
 
