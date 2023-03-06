@@ -7,20 +7,20 @@ class Solution:
         def my_pow(x, n):
             if n == 0:
                 return 1.0
-            
+
             half = my_pow(x, n//2)
-            
+
             ans = half * half
-            
+
             if n%2 == 1:
                 ans = ans * x
-                
+
             return ans
-        
+
         if n < 0:
             n = -n
             x = 1/x
-            
+
         return my_pow(x, n)
 ```
 
@@ -37,7 +37,7 @@ class Solution:
     def diffWaysToCompute(self, input: str) -> List[int]:
         # Trick: Divide and Conquer
         #    Another resursion method, difference with others is it do own
-        #    operation after the sub problem call. It depends on where is 
+        #    operation after the sub problem call. It depends on where is
         #    the complexity, then use resursion to get rid of it.
         ans = []
         for i in range(len(input)):
@@ -60,16 +60,16 @@ class Solution:
 ```python
 class Solution:
     def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
-        
+
         def dist(i):
             return points[i][0] ** 2 + points[i][1] ** 2
-        
+
         # https://www.youtube.com/watch?v=G9VcMTSZ1Lo&t=18s
         def partition(i, j):
             oi = i
             pivot = dist(i)
             i += 1
-            
+
             while True:
                 # Find the leftmost value that > pivot
                 while i < j and dist(i) < pivot:
@@ -81,14 +81,14 @@ class Solution:
                 if i >= j: break
                 # If pointers not meet, swap
                 points[i], points[j] = points[j], points[i]
-                
+
             # j is currently the last value < pivot
             points[oi], points[j] = points[j], points[oi]
-            
+
             # After final swap, j become mid
             return j
 
-    
+
         def sort(i, j, K):
             if i >= j: return
 
@@ -104,3 +104,48 @@ class Solution:
         return points[:K]
 ```
 
+
+### [315. Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/)
+
+### [327. Count of Range Sum](https://leetcode.com/problems/count-of-range-sum/)
+```python
+class Solution:
+    def countRangeSum(self, nums: List[int], lower: int, upper: int) -> int:
+        prefix_sum = [0]
+        for x in nums:
+            prefix_sum.append(prefix_sum[-1] + x)
+
+        def mergeSort(l, r):
+            # Sort prefix_sum of index [l:r] and count the num of pairs [i:j] where
+            # lower <= prefix_sum[j] - prefix_sum[i] <= upper
+
+            # we are acting or prefix sum, l == r means single sum not single element
+            # in this case single element means [0:i]
+            if l == r:
+                return 0
+
+            # devide and conquer, first select the mid index
+            mid = l + (r - l)//2
+
+            # count the value returned by each half
+            cnt = mergeSort(l, mid) + mergeSort(mid + 1, r)
+
+            # then need to count the value across 2 halves where i in 1sr half, j in
+            # 2nd half
+            j = jj = mid + 1
+            for i in range(l, mid+1):
+                while j <= r and prefix_sum[j] - prefix_sum[i] < lower: j += 1
+                while jj <= r and prefix_sum[jj] - prefix_sum[i] <= upper: jj += 1
+                # we know that the values are sorted in each half, so jj - j is the count
+                cnt += jj - j
+
+            # Need to merge the two halves, there might be better way, so the outter call
+            # can correctly count the cross half value
+            prefix_sum[l:r+1] = sorted(prefix_sum[l:r+1])
+            return cnt
+
+        # We perform in whole prefix_sum with first value 0, because we are looking for [i:j] i < j,
+        # where [0:j] represent a single num in nums.
+        return mergeSort(0, len(prefix_sum) - 1)
+
+```
