@@ -149,3 +149,57 @@ class Solution:
         return mergeSort(0, len(prefix_sum) - 1)
 
 ```
+
+
+### [315. Count of Smaller Numbers After Self](https://leetcode.com/problems/count-of-smaller-numbers-after-self/)
+
+```python
+class Solution:
+    def countSmaller(self, nums: List[int]) -> List[int]:
+        # Trick: Divid and Conquer
+        # enum maitains original list order initially, mergeSort divid
+        # the enum in 2 half, each half's order will be changed, but
+        # the before-after relation of different half is not changed.
+        # after mergeSort call to 2 half, each half is ordered and half 1
+        # are all before half 2. Based on this, we can further calculate
+        # num in half1 bigger than num in half2, not the opposite, because of
+        # order of 2 half are fixed.
+
+        res = [0] * len(nums)
+        enum = list(enumerate(nums))
+
+        def mergeSort(l, r):
+            if l >= r:
+                return
+
+            mid = l + (r - l) // 2
+
+            mergeSort(0, mid)
+            mergeSort(mid + 1, r)
+
+            # Use i, j pointing begining of half 1 and half 2
+            i, j = l, mid + 1
+            # inverse_count not only count for current i, it is accumulated num
+            # of inverse from i = l
+            inverse_count = 0
+            while i <= mid and j <= r:
+                if enum[i][1] <= enum[j][1]:
+                    res[enum[i][0]] += inverse_count
+                    i += 1
+                else:
+                    inverse_count += 1
+                    j += 1
+
+            # There might be bigger nums in half 1 bigger than all in half 1
+            # whole num of half2 should be cunted to that num and onward in half1
+            while i <= mid:
+                res[enum[i][0]] += r - mid
+                i += 1
+
+            # Sort the whole segment in this recursion for use in outter call
+            enum[l:r+1] = sorted(enum[l:r+1], key=lambda e:e[1])
+
+        mergeSort(0, len(nums) - 1)
+        return res
+
+```
