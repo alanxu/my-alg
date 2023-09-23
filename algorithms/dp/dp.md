@@ -21,7 +21,7 @@ class Ugly:
         for i in range(1, 1690):
             ugly = min(nums[i2] * 2, nums[i3] * 3, nums[i5] * 5)
             nums.append(ugly)
-            
+
             if ugly == nums[i2] * 2:
                 i2 += 1
             if ugly == nums[i3] * 3:
@@ -43,26 +43,26 @@ class Solution:
     def maxCoins(self, nums: List[int]) -> int:
         nums = [1] + nums + [1]
         n = len(nums)
-        
-        # dp[i][j] is the max coins if adding baloons back to 
+
+        # dp[i][j] is the max coins if adding baloons back to
         # between i and j, i and j are not included. The location of baloons
         # added to btw i,j is decided by nums. Spaces btw i,j is currently
         # empty.
         dp = [[0] * n for _ in range(n)]
-        
+
         # The current n is after reframe, so n - 1 is the dummy right node,
         # we want to calculate left: 0 ~ n-2, because left has to be less than right
-        # right should be left + 2 ~ n - 1, because the purpose of left/right is to 
+        # right should be left + 2 ~ n - 1, because the purpose of left/right is to
         # define walls for real baloon location to add baloons.
         # When left is n - 2, no right avaialbe, and no realy baloon locations, so
-        # the 2nd loop won't run. 
+        # the 2nd loop won't run.
         # To calculate max coin btw left/right exclusive, interate lef+1~right-1,
         # and calculate if put baloon there, and plus max coin of fill the two sub
         # section.
         for left in range(n - 2, -1, -1):
             for right in range(left + 2, n):
                 dp[left][right] = max(nums[left] * nums[i] * nums[right] + dp[left][i] + dp[i][right] for i in range(left+1, right))
-                
+
         return dp[0][n - 1]
 ```
 
@@ -134,7 +134,7 @@ class Solution:
                            dp(r1 + 1, c1, c2),
                            dp(r1, c1 + 1, c2))
                 return ans
-            
+
         return max(0, dp(0, 0, 0))
 ```
 
@@ -158,7 +158,7 @@ class Solution:
             # current day
             if d >= N:
                 return 0
-            
+
             d1, d7, d30 = d + 1, N, N
             for i in range(d, N - 1):
                 if days[i] - days[d] <= 6 and days[i + 1] - days[d] > 6:
@@ -167,9 +167,9 @@ class Solution:
                     d30 = i + 1
                     break
             return min(costs[0] + dp(d1), costs[1] + dp(d7), costs[2] + dp(d30))
-            
+
         return dp(0)
-    
+
     def mincostTickets(self, days: List[int], costs: List[int]) -> int:
         # Trick: Use hashset for lookup
         days = {*days}
@@ -202,11 +202,11 @@ class Solution:
             min_h = min(state)
             if min_h == n:
                 return 0
-            
+
             # Find leftmost lowest empty area as start point
             state = list(state)
             start = state.index(min_h)
-            
+
             # Starting from start, try all possibilities to cover using growing
             # size of tile until the height is different than start.
             # Get the min ans for the remaining area when covered using one size,
@@ -225,12 +225,12 @@ class Solution:
                     state[start:end + 1] = [height] * side
                     ans = min(ans, dp(tuple(state)))
             return ans + 1
-        
+
         # Trick: Make sure n > m
         # This is not required for this problem
         if m > n:
             m, n = n, m
-        
+
         # Trick: When use lru_cache, cannot use list which is not hashable
         return dp(tuple([0] * m))
 ```
@@ -257,11 +257,11 @@ class Solution:
         #   We can remodel the question to use an array of (steps // 2 + 1).
         #   Some math method should be used to prove the result are same, but
         #   I don't know. N actually can be any value between min(steps // 2 + 1, arrLen)
-        
+
         N, MOD = min(steps // 2 + 1, arrLen), 10 ** 9 + 7
         dp = [[0] * (N) for _ in range(steps + 1)]
         dp[0][0] = 1
-        
+
         for step in range(1, steps + 1):
             for i in range(N):
                 if i == 0:
@@ -270,7 +270,7 @@ class Solution:
                     dp[step][i] = (dp[step - 1][i] + dp[step - 1][i - 1]) % MOD
                 else:
                     dp[step][i] = (dp[step - 1][i - 1] + dp[step - 1][i] + dp[step - 1][i + 1]) % MOD
-        
+
         return (dp[steps][0]) % MOD
 ```
 
@@ -284,14 +284,14 @@ class Solution:
         dp = [[0] * 5 for _ in range(n)]
         dp[0] = [1] * 5
         MOD = 10 ** 9 + 7
-        
+
         for i in range(1, n):
             dp[i][0] = (dp[i - 1][1]) % MOD
             dp[i][1] = (dp[i - 1][0] + dp[i - 1][2]) % MOD
             dp[i][2] = (dp[i - 1][0] + dp[i - 1][1] + dp[i - 1][3] + dp[i - 1][4]) % MOD
             dp[i][3] = (dp[i - 1][2] + dp[i - 1][4]) % MOD
             dp[i][4] = (dp[i - 1][0]) % MOD
-            
+
         return sum(dp[-1]) % MOD
 ```
 
@@ -363,14 +363,14 @@ class Solution:
         # Intuition: dp[i] is the possibility of getting i
         # points by keep drawing cards until getting >= K points.
         # For each point target dp[i], it can be obtained by
-        # drawing 1 card after getting points [i -1, i - 2, ..., 
+        # drawing 1 card after getting points [i -1, i - 2, ...,
         # i - W], we know the probability of all those previous
         # situations, then it is 1.0/W probability to draw the card
         # required to make points i after all W previous cases.
         # So dp[i] = 1.0/W*dp[i - 1] + 1.0/W*dp[i - 2] + ... +
         # 1.0/W*dp[i - W].
         # Note that the previous cases are valid only if the points
-        # < k, because if it is >=k, card drawing is stopped, there is 0 
+        # < k, because if it is >=k, card drawing is stopped, there is 0
         # probability to get to points i. So the base points taken in to
         # account to calc dp[i] should < k and maximun W points.
         dp = [0] * (N + 1)
@@ -385,8 +385,8 @@ class Solution:
             if i - W - 1 >= 0:
                 sum_ -= dp[i - W - 1]
             dp[i] = 1.0 / W * sum_
-            
-        return sum(dp[K: N + 1])             
+
+        return sum(dp[K: N + 1])
 ```
 
 ### [887. Super Egg Drop](https://leetcode.com/problems/super-egg-drop/)
@@ -396,12 +396,12 @@ class Solution:
     def superEggDrop(self, k: int, n: int) -> int:
         @functools.lru_cache(None)
         def test(k, n):
-            # Intuition: 
+            # Intuition:
             # If k == 1, you can only
             # start from F1, when floor i break, you know the
             # answer is i - 1, so max move is n (worst case all
             # floors cannot break). So there is no case we cannot
-            # get a number given k >= 1. 
+            # get a number given k >= 1.
             # If k > 1, the approach is, for given k and n, we choose a floor
             # i to start with, you first try 1 egg on F[i], if
             # break you need to test [1, i - 1] floors with k - 1
@@ -409,26 +409,26 @@ class Solution:
             # [i + 1, n] floors with k egg.
             # The tricky part is you don't know if it break or not,
             # you are just looking for worst case.
-            
+
             # Why 0? The function always has a answer if k >= 1,
             # if k == 0  and n > 1, it means in upper recursion,
             # you have only 1 egg and you are trying it from bottom
             # of floor and at floor of upper recursion you assum
             # the only egg break, and the last egg is break, you know
-            # the max moves (floor) for that case; so at cur resursion 
+            # the max moves (floor) for that case; so at cur resursion
             # you get 0 egg you just return 0 so the upper recursion can
             # finish.
             if k == 0: return 0
             if k == 1: return n
             if n <= 1: return n
-            
+
             ans = math.inf
             for i in range(1, n + 1):
                 ans = min(ans, 1 + max(test(k, n - i), test(k - 1, i - 1)))
-            
+
             return ans
         return test(k, n)
-    
+
     def test(k, n):
         # Trick: Iterate for i in n get TLE, use binary search to find i.
         # The 2 funcs are monotone increasing and decreasing, so their
@@ -438,7 +438,7 @@ class Solution:
             if k == 0: return 0
             if k == 1: return n
             if n <= 1: return n
-            
+
             l, r = 1, n
             while l < r:
                 m = (l + r) // 2
@@ -449,10 +449,10 @@ class Solution:
                     l = m
                 else:
                     r = m - 1
-            
+
             return test(k, n - l)
         return test(k, n)
-    
+
     def superEggDrop(self, K, N):
         # https://leetcode.com/problems/super-egg-drop/discuss/158974/C%2B%2BJavaPython-2D-and-1D-DP-O(KlogN)
         dp = [[0] * (K + 1) for i in range(N + 1)]
@@ -470,19 +470,19 @@ class Solution:
     def distinctEchoSubstrings(self, text: str) -> int:
         text = '?' + text
         N = len(text)
-        
+
         # dp[i][j] denotes the length of same substring ending with i and j, j is after i
         dp = [[0] * N for _ in range(N)]
         words = set()
         ans = 0
-        
+
         for i in range(1, N):
             for j in range(i + 1, N):
                 # It is ok use N for upper border for both i and j
                 # loop of j wont run when i == N - 1
                 if text[i] == text[j]:
                     dp[i][j] = dp[i - 1][j - 1] + 1
-                
+
                 # Why >= not ==? Cuz the substr ending with j can be longer than
                 # j - i
                 if dp[i][j] >= j - i:
@@ -490,7 +490,7 @@ class Solution:
                     if substr not in words:
                         ans += 1
                         words.add(substr)
-        
+
         return ans
 ```
 
@@ -499,23 +499,23 @@ class Solution:
 ```python
 class Solution:
     def numDecodings(self, s: str) -> int:
-        
+
         if not s or s[0] == 0:
             return 0
-        
+
         dp = [0 for _ in range(len(s) + 1)]
         dp[0] = 1
         dp[1] = 0 if s[0] == '0' else 1
-        
+
         for i in range(2, len(s) + 1):
             last_d = int(s[i - 2])
             cur_d = int(s[i - 1])
-            
+
             n = last_d * 10 + cur_d
-            
+
             if n == 0:
                 return 0
-            
+
             if cur_d == 0:
                 if n <= 26:
                     dp[i] = dp[i - 2]
@@ -524,8 +524,8 @@ class Solution:
             elif last_d == 0 or n > 26:
                 dp[i] = dp[i - 1]
             else:
-                dp[i] = dp[i - 1] + dp[i - 2] 
-                
+                dp[i] = dp[i - 1] + dp[i - 2]
+
         return dp[-1]
 ```
 
@@ -541,13 +541,13 @@ class Solution(object):
         :rtype: int
         """
         m = len(triangle)
-        
+
         for i in reversed(range(0, m-1)):
             for j in range(len(triangle[i])):
                 triangle[i][j] = min(triangle[i+1][j], triangle[i+1][j+1]) + triangle[i][j]
-                
+
         print(triangle)
-        
+
         return triangle[0][0]
 ```
 
@@ -562,22 +562,22 @@ class Solution(object):
         :rtype: List[bool]
         """
         # https://leetcode.com/problems/can-make-palindrome-from-substring/discuss/371999/Python-100-runtime-and-memory
-        
+
         S = len(s)
         dp = [0] * (S + 1)
         a = ord('a')
         ints = map(lambda x: ord(x) - a, s)
-        
+
         for i in range(1, S + 1):
             dp[i] = dp[i - 1] ^ (1 << ints[i - 1])
-        
+
         ans = []
         for query in queries:
             left, right, k = query
             # Trick: Be carefull on edges when handling prefix difference
             diff = dp[left] ^ dp[right + 1]
             ans.append(bin(diff).count('1') <= (k * 2 + 1))
-            
+
         return ans
 ```
 
@@ -588,10 +588,10 @@ class Solution:
     def stoneGameV(self, stoneValue: List[int]) -> int:
         N = len(stoneValue)
         dp = [[0] * N for _ in range(N)]
-        
+
         for i in range(N - 1):
             dp[i][i + 1] = max(stoneValue[i], stoneValue[i + 1])
-        
+
         for l in range(3, N):
             for i in range(0, N - l + 1):
                 print(i)
@@ -606,7 +606,7 @@ class Solution:
                         dp[i][j] = max(dp[i][j], left_sum + max(dp[k + 1][j], dp[i][k]))
         print(dp)
         return dp[0][-1]
-    
+
     def stoneGameV(self, stoneValue: List[int]) -> int:
         n = len(stoneValue)
         acc = [0] + list(itertools.accumulate(stoneValue))
@@ -625,7 +625,7 @@ class Solution:
             return ans
 
         return dfs(0, n - 1)
-    
+
 
     def stoneGameV(self, stoneValue: List[int]) -> int:
         n = len(stoneValue)
@@ -657,7 +657,7 @@ class Solution:
     def stoneGame(self, piles: List[int]) -> bool:
         N = len(piles)
         # Intuition: dp(i, j) is the max score Alice can get when remaining piles
-        # are [i, j], WHEN both side play optimally. 
+        # are [i, j], WHEN both side play optimally.
         @functools.lru_cache(None)
         def dp(i, j):
             if i > j:
@@ -681,21 +681,42 @@ class Solution:
         Use prefix to know hwo many 1's b/w any 2 elements,
         for each elements, supose it is begining of 1's, the flips is
         1's at its left plus 0's at its right
-        
+
         Solution 2: DP
-        dp is the ans for cur pos i. 
+        dp is the ans for cur pos i.
         If i is 1, dp[i] = dp[i - 1]
         If i is 0, dp[i] = min(flip i to 1, flip all 1's before i to 0)
         """
-        
+
         dp = 0
         cur_ones, ones = 0, Counter(s)[1]
-        
+
         for x in s:
             if x == '1':
                 cur_ones += 1
             else:
                 dp = min(dp + 1, cur_ones)
-                
+
         return dp
+```
+
+
+### [1048. Longest String Chain](https://leetcode.com/problems/longest-string-chain/description/?envType=daily-question&envId=2023-09-23)
+```python
+class Solution:
+    def longestStrChain(self, words: List[str]) -> int:
+        #Trick: There is a clear hint to follow length of word
+        # DP[word] is the longest word chain end with word
+        dp = {}
+        words.sort(key=len)
+        max_len = 0
+        for word in words:
+            dp[word] = 1
+            for i in range(len(word)):
+                prev_word = word[:i] + word[i+1:]
+                # For each prev word, get the max len for cur word
+                if prev_word in dp:
+                    dp[word] = max(dp[prev_word] + 1, dp[word])
+            max_len = max(max_len, dp[word])
+        return max_len
 ```

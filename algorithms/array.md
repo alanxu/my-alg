@@ -9,19 +9,19 @@ class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
         # Sort it so don't worry starting index
         intervals.sort(key=lambda x: x[0])
-        
+
         # Keep the running result
         merged = []
-        
+
         for it in intervals:
-            
+
             # Only compare endding index
             if merged and merged[-1][1] >= it[0]:
                 # Need max because [1,4], [2,3]
                 merged[-1][1] = max(it[1], merged[-1][1])
             else:
                 merged += [it]
-                
+
         return merged
 
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
@@ -34,7 +34,7 @@ class Solution:
             else:
                 ans.append([a, b])
         return ans
-                
+
 ```
 
 ### [57. Insert Interval](https://leetcode.com/problems/insert-interval/)
@@ -62,15 +62,15 @@ class Solution(object):
 class Solution:
     def minMeetingRooms(self, intervals: List[List[int]]) -> int:
         rooms = []
-        
+
         intervals.sort(key=lambda x: x[0])
-        
+
         for it in intervals:
             if rooms and it[0] >= rooms[0]:
                     heapq.heappop(rooms)
-                
+
             heapq.heappush(rooms, it[1])
-                
+
         return len(rooms)
 ```
 
@@ -81,12 +81,12 @@ class MyCalendarThree:
 
     def __init__(self):
         self.counter = collections.Counter()
-        
+
 
     def book(self, start: int, end: int) -> int:
         self.counter[start] += 1
         self.counter[end] -= 1
-        
+
         active = ans = 0
         for x in sorted(self.counter):
             active += self.counter[x]
@@ -128,7 +128,7 @@ class Solution:
 class Solution:
     def maxSumSubmatrix(self, matrix: List[List[int]], k: int) -> int:
         R, C = len(matrix), len(matrix[0])
-        
+
         # Trick: Get max sum of subarrays no larger than k
         def max_sum_no_larger_than_k(arr, k):
             prefix_sums = [math.inf]
@@ -140,7 +140,7 @@ class Solution:
                 i = bisect.bisect_left(prefix_sums, cur_sum - k)
                 ans = max(ans, cur_sum - prefix_sums[i])
             return ans
-        
+
         # Trick: Rotate the matrix if R > C
         # Cuz the time complexity is O(R*R*C*logC), so if C is longer, the total
         # complexity will be reduced greatly. So if R is longer, rotate it.
@@ -150,19 +150,19 @@ class Solution:
                 for c in range(C):
                     matrix2[c][r] = matrix[r][c]
             matrix, R, C = matrix2, C, R
-        
+
         # Trick: Use prefix-sums to get sum of each sub-matrix
         # Update matrix in place, calculate prefix sum for each column
         for r in range(R - 1):
             for c in range(C):
                 matrix[r + 1][c] += matrix[r][c]
-        
+
         ans = -math.inf
         for r1 in range(R):
             for r2 in range(r1, R):
                 arr = [matrix[r2][c] - (matrix[r1][c] if r2 > r1 else 0) for c in range(C)]
                 ans = max(ans, max_sum_no_larger_than_k(arr, k))
-        
+
         return ans
 ```
 
@@ -195,7 +195,7 @@ class Solution:
         # starting from first
         mp, ans = defaultdict(int), 0
         mp[0] = 1
-        
+
         # Not include first 0 in pre_sums, it
         # will mess up
         for x in pre_sums[1:]:
@@ -211,7 +211,7 @@ class Solution:
 ```python
 class Solution:
     def numSubmatrixSumTarget(self, matrix: List[List[int]], target: int) -> int:
-        
+
         def num_of_sum(arr, k):
             cur_sum, ans = 0, 0
             mp = defaultdict(int)
@@ -221,13 +221,13 @@ class Solution:
                 ans += mp[cur_sum - k]
                 mp[cur_sum] += 1
             return ans
-        
+
         R, C = len(matrix), len(matrix[0])
-        
+
         for r in range(1, R):
             for c in range(C):
                 matrix[r][c] += matrix[r - 1][c]
-        
+
         ans = 0
         for r1 in range(R):
             for r2 in range(r1, R):
@@ -243,18 +243,18 @@ class Solution:
     def maxSubArrayLen(self, nums: List[int], k: int) -> int:
         # Pattern: Subarray sum of K
         # In this case the answer is able max length, the presence
-        # of the sum key matters, so unlike the max nums we just need 
+        # of the sum key matters, so unlike the max nums we just need
         # to count the num where 0 is ok
         cur_sum, ans = 0, 0
         mp = {0: -1}
         for i, x in enumerate(nums):
             cur_sum += x
-            
+
             if cur_sum - k in mp:
                 ans = max(ans, i - mp[cur_sum - k])
-            
+
             mp[cur_sum] = mp.get(cur_sum, i)
-        
+
         return ans
 ```
 
@@ -264,27 +264,27 @@ class Solution:
 class Solution:
     def subarraysDivByK(self, A: List[int], K: int) -> int:
         # https://leetcode.com/problems/subarray-sums-divisible-by-k/discuss/310767/(Python)-Concise-Explanation-and-Proof
-        
-        # accounts[0] == 1 for edge case runnsing_sum%k == 0, 
-        # you dont need 2 subarray with save value, and every new 0 value will 
+
+        # accounts[0] == 1 for edge case runnsing_sum%k == 0,
+        # you dont need 2 subarray with save value, and every new 0 value will
         # add prev_account+1, 1 is the new prefix sum itself
         accounts = [1] + [0] * (K - 1)
-        
+
         running_sum = 0
         ans = 0
         for n in A:
             running_sum += n
-            
+
             key = running_sum % K
-            
+
             # A new key value will result in accounts[key] MORE matches to be added
             # to the results (accounts[key] is the previous value for key)
             ans += accounts[key]
-            
+
             accounts[key] += 1
-            
+
         return ans
-    
+
     def subarraysDivByK(self, A: List[int], K: int) -> int:
         running_sum, ans = 0, 0
         mp = defaultdict(int)
@@ -302,31 +302,31 @@ class Solution:
 ```python
 class Solution:
     def checkSubarraySum(self, nums: List[int], k: int) -> bool:
-        
+
         mp = {}
         sum = 0
         for i in range(len(nums)):
             sum += nums[i]
-            
+
             if k != 0:
                 sum = sum % k
-            
+
             if not sum and i > 0:
                 return True
-            
+
             if sum in mp:
                 if i - mp[sum] > 1:
                     return True
             else:
                 mp[sum] = i
-            
+
         return False
 
     def checkSubarraySum(self, nums: List[int], k: int) -> bool:
         pre_sums = [0]
         for x in nums:
             pre_sums.append(x + pre_sums[-1])
-            
+
         mp = {0:-1}
         for i, x in enumerate(pre_sums[1:]):
             # Mod are same b/w two presums
@@ -340,6 +340,30 @@ class Solution:
         return False
 ```
 
+### [2848. Points That Intersect With Cars](https://leetcode.com/problems/points-that-intersect-with-cars/)
+```python
+class Solution:
+    def numberOfPoints(self, nums: List[List[int]]) -> int:
+        """
+        One pass solution. Sort nums to avoid considering
+        order of start points. Loop each pair, if the pair
+        is not adjact with prev pair, add full segment; if
+        there are overlap, calculate the delta, also consider
+        cur_end < pre_end.
+        """
+        nums = sorted(nums)
+        r = 0
+        pre_end = -1
+        for pair in nums:
+            start, end = pair[0], pair[1]
+            if start <= pre_end:
+                r += max(0, (end - pre_end))
+            else:
+                r += max(0, (end - start + 1))
+            pre_end = max(pre_end, end)
+        return r
+```
+
 ## Index as Hash Key
 
 ### [41. First Missing Positive](https://leetcode.com/problems/first-missing-positive/)
@@ -349,24 +373,24 @@ class Solution:
     def firstMissingPositive(self, nums: List[int]) -> int:
         # Intuition: There are N pos in list, if put 1..N, then
         # missing is N + 1, if there is any num other than 1..N,
-        # (<=0 or >N), num in 1..N will be kicked out and the 
+        # (<=0 or >N), num in 1..N will be kicked out and the
         # anwser must be in 1..N. Use index of array to refresent
         # num 1..N, if i exist, nums[i] = -nums[i], it will keep
         # value of nums[i] and use minus to makr existence of i.
-        
-        # Trick: Roll out 1 first, cuz 1 will be used for nums which is 
+
+        # Trick: Roll out 1 first, cuz 1 will be used for nums which is
         # negative or > N
         if 1 not in nums:
             return 1
-        
+
         N = len(nums)
-        
+
         # Normalize other numbers into 1, all values must be 1..N
         # to reflect the scope of the index
         for i in range(N):
             if nums[i] <= 0 or nums[i] > N:
                 nums[i] = 1
-        
+
         # Trick: Index as hash key
         # Mark the existence of 1..N, always use abs(), cuz the
         # value could be mark as negative by previous steps. Use
@@ -377,16 +401,16 @@ class Solution:
                 nums[0] = -abs(nums[0])
             else:
                 nums[x] = -abs(nums[x])
-        
+
         # Check 2..N - 1 first
         for i in range(2, N):
             if nums[i] > 0:
                 return i
-        
+
         # Check N
         if nums[0] > 0:
             return N
-        
+
         # If 1..N all exist, return N + 1
         return N + 1
 ```
@@ -420,9 +444,9 @@ class Solution:
     def findMinDifference(self, timePoints: List[str]) -> int:
         def convert(time):
             return int(time[:2]) * 60 + int(time[3:])
-        
+
         times = sorted(map(convert, timePoints))
-        
+
         # Trick: Differences of recursive array
         # Trick: % (a day's minutes) can fix the 00:00 and 24:60
         return min((y - x) % (24 * 60)  for x, y in zip(times, times[1:] + times[:1]))
@@ -442,7 +466,7 @@ class Solution:
                 if idx != -1 and (word1 == word2 or words[i] != words[idx]):
                     ans = min(ans, i - idx)
                 idx = i
-                
+
         return ans
 ```
 
@@ -485,7 +509,7 @@ class Solution:
                 if idx != -1 and (word1 == word2 or words[i] != words[idx]):
                     ans = min(ans, i - idx)
                 idx = i
-                
+
         return ans
 ```
 
@@ -495,14 +519,14 @@ class Solution:
 class Solution:
     def multiply(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
         Ra, Ca, Rb, Cb = len(A), len(A[0]), len(B), len(B[0])
-        
+
         ans = [[0] * Cb for _ in range(Ra)]
-        
+
         for r in range(Ra):
             for c in range(Cb):
                 for i in range(Ca):
                     ans[r][c] += A[r][i] * B[i][c]
-        
+
         return ans
 ```
 
@@ -515,12 +539,12 @@ class Solution(object):
         # so it the condition is not true, return false
         if start.replace('X',  '') != end.replace('X', ''):
             return False
-        
+
         # Use i and j to traverse and compare start and end,
         # fastfoward i and j if they points to 'X'.
         # The should always pointing to same value, as L and R cannot
         # be swapped. And the current L in start has to be after cur L in
-        # end, because it can only go left. And the cur R in start has to 
+        # end, because it can only go left. And the cur R in start has to
         # be before cur R in end, because it can only go right.
         N = len(start)
         i = j = 0
@@ -530,23 +554,23 @@ class Solution(object):
                 i += 1
             while j < N and end[j] == 'X':
                 j += 1
-                
+
             if i == N or j == N:
                 return i == j
-            
+
             if start[i] != end[j]:
                 return False
-            
+
             if start[i] == 'L' and i < j:
                 return False
-            
+
             if start[i] == 'R' and i > j:
                 return False
-            
+
             i += 1
             j += 1
-        
-        return True 
+
+        return True
 ```
 ### [845. Longest Mountain in Array](https://leetcode.com/problems/longest-mountain-in-array/)
 ### [941. Valid Mountain Array](https://leetcode.com/problems/valid-mountain-array/)
@@ -555,16 +579,16 @@ class Solution(object):
 class Solution:
     def validMountainArray(self, arr: List[int]) -> bool:
         N, i = len(arr), 0
-        
+
         while i < N - 1 and arr[i] < arr[i + 1]:
             i += 1
-        
+
         if i == 0 or i == N - 1:
             return False
-        
+
         while i < N - 1 and arr[i] > arr[i + 1]:
             i += 1
-            
+
         return i == N - 1
 ```
 
@@ -573,22 +597,22 @@ class Solution:
 ```python
 class Solution:
     def convert(self, s: str, numRows: int) -> str:
-        
+
         if numRows == 1:
             return s
-        
+
         rows = [''] * numRows
-        
+
         cur_row, next_step = 0, 1
-        
+
         for c in s:
             rows[cur_row] += c
-            
+
             if (cur_row == 0 and next_step == -1) or (cur_row == numRows - 1 and next_step == 1):
                 next_step = -next_step
-            
+
             cur_row += next_step
-            
+
         return ''.join(rows)
 ```
 
@@ -609,7 +633,7 @@ class Solution(object):
         p2 = n - 1
         # set pointer for nums1
         p = m + n - 1
-        
+
         # while there are still elements to compare
         while p1 >= 0 and p2 >= 0:
             if nums1[p1] < nums2[p2]:
@@ -619,7 +643,7 @@ class Solution(object):
                 nums1[p] =  nums1[p1]
                 p1 -= 1
             p -= 1
-        
+
         # add missing elements from nums2
         nums1[:p2 + 1] = nums2[:p2 + 1]
 ```
@@ -684,7 +708,7 @@ class SnapshotArray(object):
     def get(self, index, snap_id):
         i = bisect.bisect(self.A[index], [snap_id + 1]) - 1
         return self.A[index][i][1]
-        
+
 
 
 # Your SnapshotArray object will be instantiated and called as such:
@@ -706,7 +730,7 @@ class Solution:
         counter = collections.Counter(arr)
         arr = sorted(arr, key=lambda x: (-counter[x], x))
         return len(set(arr[:(N + 1) // 2]))
-    
+
     def minSetSize(self, arr: List[int]) -> int:
         N = len(arr)
         counter = collections.Counter(arr)
@@ -741,7 +765,7 @@ class Solution:
         # Dived the arr into shuffled area and remaining area. Each
         # step, pick a random num from remaining area and swap it with
         # the next last num of shuffle area. If only one num left in
-        # remaining area, no need to move it. 
+        # remaining area, no need to move it.
         ans = list(self.arr)
         for i in range(len(ans) - 1):
             j = random.randint(i, len(ans) - 1)
@@ -765,17 +789,17 @@ class Solution:
         max_left = [None] * N
         # min_right[i] is the min in nums[i..N - 1]
         min_right = [None] * N
-        
+
         m = nums[0]
         for i in range(N):
             m = max(m, nums[i])
             max_left[i] = m
-            
+
         m = nums[-1]
         for i in range(N - 1, -1, -1):
             m = min(m, nums[i])
             min_right[i] = m
-            
+
         for i in range(1, N):
             # If i's min_right >= any max_left of prevous value
             if min_right[i] >= max_left[i - 1]:
@@ -810,17 +834,17 @@ class Solution:
             return 0
         if ones == 0:
             return ((n - 1) * (n - 2) // 2 ) % (10**9+7)
-        
+
         idx = []
         for i, c in enumerate(s):
             if c == '1':
                 idx.append(i)
-        
+
         ones_per_partition = ones // 3
-        
+
         zeros1 = idx[ones_per_partition] - idx[ones_per_partition - 1]
         zeros2 = idx[2 * ones_per_partition] - idx[2 * ones_per_partition - 1]
-        
+
         return (zeros1) * (zeros2) % (10**9+7)
 ```
 
@@ -833,7 +857,7 @@ class Solution:
         counts = collections.Counter(nums)
         # Trick: Sort the key of dict by value
         return max(counts.keys(), key=counts.get)
-    
+
     def majorityElement(self, nums):
         # Alg: Boyer-Moore Voting Algorithm
         count = 0
@@ -853,14 +877,14 @@ class Solution:
 class Solution:
     def isAlienSorted(self, words: List[str], order: str) -> bool:
         pos = {v:i for i, v in enumerate(order)}
-        
+
         for i in range(len(words) - 1):
             for j in range(len(words[i])):
                 # First check case ['apple', 'app']
                 # It is here because previous chars matches
                 if j >= len(words[i + 1]):
                     return False
-                
+
                 # Check order
                 if words[i][j] != words[i + 1][j]:
                     if pos[words[i][j]] > pos[words[i + 1][j]]:
@@ -868,10 +892,10 @@ class Solution:
                     # If first small than second, no need compare following
                     break
         return True
-    
+
     def isAlienSorted(self, words: List[str], order: str) -> bool:
         pos = {v:i for i, v in enumerate(order)}
-        
+
         # No matter how many words, compare adjacent 2
         for a, b in zip(words, words[1:]):
             # Use a's len so we just needs to check b's len
@@ -880,7 +904,7 @@ class Solution:
                 # the order before are same, so this is incorrect
                 if i >= len(b):
                     return False
-                
+
                 # if a[i] > b[i], invalid, return False
                 # if a[i] < b[i], no need to check following, return True
                 # if a[i] = b[i], needs to continue check next char
@@ -903,7 +927,7 @@ class RandomizedSet:
         """
         self.dict = {}
         self.list = []
-        
+
 
     def insert(self, val: int) -> bool:
         """
@@ -915,7 +939,7 @@ class RandomizedSet:
         self.list.append(val)
         return True
 
-    
+
     def remove(self, val: int) -> bool:
         """
         Removes a value from the set. Returns true if the set contained the specified element.
@@ -957,10 +981,10 @@ class Solution:
         max_width = max_height = -math.inf
         for i in range(1, len(horizontalCuts)):
             max_height = max(max_height, horizontalCuts[i] - horizontalCuts[i - 1])
-                
+
         for i in range(1, len(verticalCuts)):
             max_width = max(max_width, verticalCuts[i] - verticalCuts[i - 1])
-                
+
         return max_width * max_height % (10 ** 9 + 7)
 ```
 
@@ -979,21 +1003,21 @@ class Solution:
     def uniqueLetterString(self, s: str) -> int:
         # https://leetcode.com/problems/count-unique-characters-of-all-substrings-of-
         # a-given-string/discuss/128952/C%2B%2BJavaPython-One-pass-O(N)
-        
+
         # -1 is default value of last 2 indexes of a char
         index = {c: (-1, -1) for c in string.ascii_uppercase}
-        
+
         ans = 0
         for i, c in enumerate(s):
             k, j = index[c]
             ans += (i - j) * (j - k)
             index[c] = j, i
-        
+
         # Process cases b/w last char and end of str
         for c in index:
             k, j = index[c]
             ans += (len(s) - j) * (j - k)
-            
+
         return ans
 ```
 
@@ -1021,10 +1045,10 @@ class Solution:
             s, e, x = u
             ans[s] += x
             ans[e + 1] -= x
-        
+
         for i in range(1, length):
             ans[i] += ans[i - 1]
-        
+
         ans.pop()
         return ans
 ```
@@ -1036,24 +1060,24 @@ class Solution:
     def nextPermutation(self, nums: List[int]) -> None:
         """
         Do not return anything, modify nums in-place instead.
-        
+
         https://youtu.be/K-QCteGM-Bk
-        
+
         [1,5,8,4,7,6,5,3,1]
         """
-        # Start from last, Find first decending num idx k (num[k] = 4) 
+        # Start from last, Find first decending num idx k (num[k] = 4)
         i = j = len(nums) - 1
         while i > 0 and nums[i - 1] >= nums[i]:
             i -= 1
         # i is the first peak starting from last, i - 1 is
         # our target
         k = i - 1
-        
+
         # If the whole list is decensing, just reverse it
         if i == 0:
             nums.reverse()
             return
-        
+
         # Start from last, find first num greater than nums[k]
         while j > 0 and nums[k] >= nums[j]:
             j -= 1
@@ -1062,13 +1086,13 @@ class Solution:
         # firms a decending seq, we just have to reverse it
         # so it is minimum after num[k]
         nums[k], nums[j] = nums[j], nums[k]
-        
+
         l, r = k + 1, len(nums) - 1
         while l < r:
             nums[l], nums[r] = nums[r], nums[l]
             l += 1
             r -= 1
-        
+
         return nums
 ```
 
@@ -1080,7 +1104,7 @@ class Solution:
     def customSortString(self, order: str, s: str) -> str:
         order = {v: i for i, v in enumerate(order)}
         return ''.join(sorted(s, key=lambda c: order.get(c, math.inf)))
-    
+
     def customSortString(self, order: str, s: str) -> str:
         counts = Counter(s)
         ans = []
