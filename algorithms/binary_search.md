@@ -3,7 +3,7 @@ It can apply to an item in a seq where the left of the item meet a condition whi
 condition;
 Finds smallest item matching a condition -> Find the lower_bound of a scope mating a condition -> Use alg works for
 scope [i, j] or [i, j), which is close-close or close-open
-Close-open, close-close both can work for the problems, the final result of C-O is left and right equal, while C-C is 
+Close-open, close-close both can work for the problems, the final result of C-O is left and right equal, while C-C is
 left or right (the final state is right at left, left at right)
 
 Close-Open:
@@ -38,7 +38,7 @@ class Solution:
                 lo = mid + 1
             else:
                 hi = mid - 1
-        
+
         return hi
 ```
 
@@ -65,11 +65,11 @@ class Solution:
 ```python
 class Solution:
     def search(self, nums: List[int], target: int) -> int:
-        
+
         def get_partition(x):
             ''' Which partition the num is at. '''
             return 1 if x > nums[-1] else 2
-        
+
         left, right = 0, len(nums) - 1
         target_par = get_partition(target)
 
@@ -95,7 +95,7 @@ class Solution:
 class Solution:
     def search(self, reader, target):
         left, right = 0, 2147483647
-        
+
         while left <= right:
             mid = left + (right - left) // 2
             x = reader.get(mid)
@@ -105,19 +105,19 @@ class Solution:
                 left = mid + 1
             else:
                 right = mid - 1
-        
+
         return left if reader.get(left) == target else -1
-        
+
     def search(self, reader, target):
         if reader.get(0) == target:
             return 0
-        
+
         # Trick: Search boundary for target
         left, right = 0, 1
         while reader.get(right) < target:
             left = right
             right <<= 1
-        
+
         while left <= right:
             mid = left + (right - left) // 2
             x = reader.get(mid)
@@ -127,9 +127,34 @@ class Solution:
                 left = mid + 1
             else:
                 right = mid - 1
-        
+
         return -1
 ```
+
+### [1802. Maximum Value at a Given Index in a Bounded Array](https://leetcode.com/problems/maximum-value-at-a-given-index-in-a-bounded-array/description/?envType=daily-question&envId=2023-09-23)
+```python
+class Solution:
+    # Find a value between 1 and maxSum for index which meet
+    # the condition.
+    # Not quite understand, need to relearn binary search.
+    def maxValue(self, n: int, index: int, maxSum: int) -> int:
+        left, right = 1, maxSum
+        while left < right:
+            mid = right - (right - left) // 2
+            if self.check(mid, n, index) <= maxSum:
+                left = mid
+            else:
+                right = mid - 1
+        return left
+
+    def check(self, v, n, index):
+        left_v = max(v - index, 0)
+        right_v = max(v - (n - 1 - index), 0)
+        _sum = (v + left_v) * (v - left_v + 1) // 2 + (v + right_v) * (v - right_v + 1) // 2
+        return _sum - v
+
+```
+
 
 ### [367. Valid Perfect Square](https://leetcode.com/problems/valid-perfect-square/)
 
@@ -138,7 +163,7 @@ class Solution:
     def isPerfectSquare(self, num: int) -> bool:
         if num < 2:
             return True
-        
+
         left, right = 2, num // 2
         while left <= right:
             x = left + (right - left) // 2
@@ -149,7 +174,7 @@ class Solution:
                 left = x + 1
             else:
                 right = x - 1
-        
+
         return False
 ```
 
@@ -222,15 +247,15 @@ class Solution:
         while left < right:
             mid = left + (right - left) // 2
             # if nums[mid] == nums[right], there are 2 possibilities
-            # - if nums[left] == nums[right], we don't know where is 
+            # - if nums[left] == nums[right], we don't know where is
             #   the mid, consider cases [3, 3, 1, 3] and [3, 1, 3, 3],
             #   in this case, we move both left, right by 1, for edge case
-            #   left and right are adjecent, left/right will swap and 
+            #   left and right are adjecent, left/right will swap and
             #   loop will terminate, it doesn't impact the result cuz
             #   nums[left] == nums[right]
             # - if nums[left] > nums[right], right needs to move, bcuz
-            #   if mid is on left side nums[mid] >= nums[left] > nums[right] 
-            #   which conflicts with the initial condition of 
+            #   if mid is on left side nums[mid] >= nums[left] > nums[right]
+            #   which conflicts with the initial condition of
             # - it is impossible nums[left] < nums[right], cuz pointers will
             #   meet at the point of border
             if nums[left] == nums[mid] == nums[right]:
@@ -255,15 +280,15 @@ class Solution:
             # hi set to len(nums), not len(nums) - 1, for input [], it can return correct value
             # it wont impact anything else
             lo, hi = 0, len(nums)
-            
+
             # Trick: Binary Search
             # lo always (mid + 1)
-            # mid always fails on lo if they are adjenct 
+            # mid always fails on lo if they are adjenct
             # when looking for left, hi should move when equal
             # when looking for right, lo should move when equal
-            # when looking for right, because lo move when equal and lo = mid + 1, 
+            # when looking for right, because lo move when equal and lo = mid + 1,
             # so lo/hi will meet at index nums[index] > target
-            
+
             # Trick: no equal, because last operation will make pointer finally equal
             while lo < hi:
                 mid = lo + (hi - lo) // 2
@@ -280,14 +305,14 @@ class Solution:
                         lo = mid + 1
                     else:
                         hi = mid
-            
+
             return lo
-        
+
         left = binary_search(True)
-        
+
         if left == len(nums) or nums[left] != target:
             return [-1, -1]
-        
+
         return [left, binary_search(False) - 1]
 ```
 
@@ -303,7 +328,7 @@ class Solution:
             else:
                 right -= 1
         return arr[left:right+1]
-    
+
     def findClosestElements(self, arr: List[int], k: int, x: int) -> List[int]:
         arr.sort(key=lambda n: abs(n - x))
         return sorted(arr[:k])
@@ -323,11 +348,11 @@ class Solution:
             else:
                 left = mid + 1
         return letters[left] if letters[left] > target else letters[0]
-    
+
     def nextGreatestLetter(self, letters: List[str], target: str) -> str:
         pos = bisect.bisect_right(letters, target)
         return letters[pos % len(letters)]
-    
+
     def nextGreatestLetter(self, letters: List[str], target: str) -> str:
         # Alg: Binary Search template 1
         left, right = 0, len(letters) - 1
@@ -361,7 +386,7 @@ class Solution:
                     left += 1
                 count += right - left
             return count >= k
-        
+
         nums.sort()
         lo, hi = 0, nums[-1] - nums[0]
         while lo < hi:
@@ -370,7 +395,7 @@ class Solution:
                 hi = mid
             else:
                 lo = mid + 1
-        
+
         return lo
 ```
 
@@ -383,7 +408,7 @@ class Solution:
         N = len(nums)
         dp = [[math.inf] * (K + 1) for _ in range(N + 1)]
         dp[0][0] = 0
-        
+
         for i in range(1, N + 1):
             for k in range(1, min(K, i) + 1):
                 dp[i][k] = math.inf
@@ -394,9 +419,9 @@ class Solution:
                     # so the interation is not inf only when j = 1 (first element)
                     prefix_sum += nums[j - 1]
                     dp[i][k] = min(dp[i][k], max(dp[j - 1][k - 1], prefix_sum))
-        
+
         return dp[-1][-1]
-        
+
     def splitArray(self, nums: List[int], K: int) -> int:
         # Alg: Binary Search
         # Intuition: Search for min max sum of one partition, left is max of nums, right
@@ -406,27 +431,27 @@ class Solution:
         # The edge case is gauanteed to make l and r meet.
         N = len(nums)
         l = r = 0
-        
+
         for x in nums:
             r += x
             l = x if x > l else l
-        
+
         ans = r
         while l < r:
             mid = (l + r) // 2
-            
+
             sum_, counts = 0, 1
             for x in nums:
                 sum_ += x
                 if sum_ > mid:
                     counts += 1
                     sum_ = x
-            
+
             if counts <= K:
                 r = mid
             else:
                 l = mid + 1
-        
+
         return l
 ```
 
@@ -437,45 +462,45 @@ class Solution:
 class Solution:
     def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
         m, n = len(nums1), len(nums2)
-        
+
         # Make sure nums1 longer than nums2, so it is easier
         if m > n:
             nums1, nums2, m, n = nums2, nums1, n, m
-            
+
         if n == 0:
             raise ValueError()
-            
+
         # Partition nums1 and nums2,  all in 2 first parts less than all in 2 second parts
         # Use binary search
-        
-        # Why +1? if (m + n) is even, 1 doesn't have any effect, if odd 1 will make the middle 
+
+        # Why +1? if (m + n) is even, 1 doesn't have any effect, if odd 1 will make the middle
         # in first section
         half_len = (m + n + 1) // 2
-        
+
         # Do binary search on nums1 which is longer, nums2 will be calculated according to nums1
         m_left, m_right = 0, m
         while m_left <= m_right:
             # Must use m_left <= m_right otherwise i never reach to m
             # i is the seperator of nums1 smaller|bigger
             # j should be the num of remaining first half
-            # i and j should be first index of second half, cuz index alwasy n-1 
+            # i and j should be first index of second half, cuz index alwasy n-1
             # i must be [0, m] because there is corner case i == m where all nums1 are smaller
             #   When m == n and nums1[-1] < nums2[0], i should move to right but cannot
             i = (m_left + m_right) // 2
             j = half_len - i
-            
+
             # Move i and j until to the begin/end
             # The corner cases are
             # 1. nums2 are completely smaller or bigger than nums1
             # 2. Based on case1, m == n
             # This corner cases result in i or j to be 0 or end
-            
+
             if i > 0 and j < n and nums1[i - 1] > nums2[j]:
-                # If i can move to left and j can move to right and nums1.smaller[-1] still bigger 
+                # If i can move to left and j can move to right and nums1.smaller[-1] still bigger
                 # than nums2.bigger[0]
                 m_right = i -1
             elif i < m and j > 0 and nums1[i] < nums2[j - 1]:
-                # If i can move to right and j can move to left and nums1.bigger[0] still smaller 
+                # If i can move to right and j can move to left and nums1.bigger[0] still smaller
                 # than nums2.smaller[-1]
                 m_left = i + 1
             else:
@@ -485,29 +510,29 @@ class Solution:
                     left_max = nums1[i - 1]
                 else:
                     left_max = max(nums1[i - 1], nums2[j - 1])
-                    
+
                 if (m + n) % 2 == 1:
                     return left_max
-                
+
                 if i == m:
                     right_min = nums2[j]
                 elif j == n:
                     right_min = nums1[i]
                 else:
                     right_min = min(nums1[i], nums2[j])
-                    
+
                 return (left_max + right_min) / 2.0
-                
+
     def findMedianSortedArrays(self, A: List[int], B: List[int]) -> float:
-        
+
         def kth(a, s1, e1, b, s2, e2, k):
             # Intuition: kth() returns the item which is kth smallest in a and b
             # keep reducing the range in a and be util one of it is out of eligible
             # values in kth smallest.
-            
+
             # Trick: Don't use array slicing [i:], it is O(n), instead use
             # start/end indexes
-            
+
             # If s1 doesn't have available items anymore,
             # s1's items in k is exhausted, so items in b within k
             # is k - s1 + 1 the index is k - s1
@@ -564,7 +589,7 @@ class Solution:
                 else:
                     left = mid + 1
         return []
-    
+
     def twoSum(self, numbers: List[int], target: int) -> List[int]:
         # Pattern: Two Pointers
         lo, hi = 0, len(numbers) - 1
@@ -605,7 +630,7 @@ class Solution:
                 col += 1
             else: # found it
                 return True
-        
+
         return False
 ```
 ### [1428. Leftmost Column with at Least a One](https://leetcode.com/problems/leftmost-column-with-at-least-a-one/)
@@ -640,7 +665,7 @@ class Solution:
     def maxLength(self, ribbons: List[int], k: int) -> int:
         """
         Intuition: Binary Search Type II
-        
+
         Alg: Binary Search Type II
         Split the search space into two parts, one part has the target, the other part
         doesn't, there are a clear condition on determine the valid part (in the valid
@@ -652,26 +677,26 @@ class Solution:
         Depends on which one is =mid, the way to calculate mid differs.
         mid = hi - (hi - lo) // 2
         mid = lo + (hi - lo) // 2
-        
+
         https://medium.com/swlh/binary-search-find-upper-and-lower-bound-3f07867d81fb
         """
         if sum(ribbons) < k:
             return 0
-        
+
         lo, hi = 1, max(ribbons)
-        
+
         while lo < hi:
             mid = hi - (hi - lo) // 2
-            
+
             n = 0
             for r in ribbons:
                 n += r // mid
-                
+
             if n >= k:
                 lo = mid
             else:
                 hi = mid - 1
-                
+
         return hi
 ```
 
@@ -695,16 +720,16 @@ class Solution:
         N = len(matrix)
         def count_less_equal(x):
             '''
-            Given a number x, x doesn't have to exist in matrix. 
+            Given a number x, x doesn't have to exist in matrix.
             Returns count of numbers in matrix that less or equal
             to x, and also the largest number in matrix <= x (smaller), and
             smallest number in matrix > x (larger).
             Starting from left-bottom, and moving until cannot move. Image,
-            this func can draw a line to divide the matrix into to parts, 
-            left-top part is nums <= x, and the other half are nums > x. 
+            this func can draw a line to divide the matrix into to parts,
+            left-top part is nums <= x, and the other half are nums > x.
             '''
             r, c = N - 1, 0
-            # Trick: For sorted matrix, start from left-bottom or right-top 
+            # Trick: For sorted matrix, start from left-bottom or right-top
             # so you can move to smaller or larger by moving r or c
             count, smaller, larger = 0, -math.inf, math.inf
             while r >= 0 and c < N:
@@ -716,7 +741,7 @@ class Solution:
                     smaller = max(smaller, matrix[r][c])
                     c += 1
             return count, smaller, larger
-        
+
         # Intuition: Binary search on nums b/w smallest and largest in matrix
         # for each num (mid), it doesnot have to exist in matrix, find how many
         # nums < mid and closet 2 nums around it (smaller and larger). If count == k
@@ -747,14 +772,14 @@ class Solution:
             else:
                 return nums[i - 1] + k
         return nums[-1] + k
-    
+
     def missingElement(self, nums: List[int], k: int) -> int:
         missing = lambda idx: nums[idx] - nums[0] - idx
         N = len(nums)
-        
+
         if missing(N - 1) < k:
             return nums[-1] + k - missing(N - 1)
-        
+
         left, right = 0, N - 1
         # Trick: If right = pivot, use <
         while left < right:
@@ -764,7 +789,7 @@ class Solution:
             else:
                 # Trick: Left cannot point to pivot
                 left = pivot + 1
-        
+
         # Trick: Left and right will be one finally
         return nums[right-1] + k - missing(right-1)
 
@@ -786,12 +811,12 @@ class Solution:
     def singleNonDuplicate(self, nums: List[int]) -> int:
         # Trick: When see sorted array, consider Binart Search
         left, right = 0, len(nums) - 1
-        
+
         while left < right:
             pivot = left + (right - left) // 2
             if pivot % 2 == 1:
                 pivot -= 1
-            
+
             if nums[pivot] == nums[pivot + 1]:
                 left += 2
             else:
@@ -827,7 +852,7 @@ class Solution:
             else:
                 right = mid
         peak = left
-        
+
         left, right = 0, peak
         while left <= right:
             mid = (left + right) // 2
@@ -837,7 +862,7 @@ class Solution:
                 right = mid - 1
             else:
                 left = mid + 1
-                
+
         left, right = peak, N - 1
         while left <= right:
             mid = (left + right) // 2
@@ -847,7 +872,7 @@ class Solution:
                 right = mid - 1
             else:
                 left = mid + 1
-                
+
         return -1
 ```
 
@@ -877,11 +902,11 @@ class Solution:
     def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
         if not matrix:
             return False
-        
+
         m, n = len(matrix), len(matrix[0])
-        
+
         left, right = 0, m * n - 1
-        
+
         # If both left and right move +/-1, use left <= right
         while left <= right:
             mid = (left + right) // 2
@@ -911,7 +936,7 @@ class Solution:
 
     def pickIndex(self) -> int:
         target = self.total_sum * random.random()
-        
+
         low, high = 0, len(self.prefix_sums) - 1
         while low < high:
             mid = low + (high - low) // 2
@@ -920,7 +945,7 @@ class Solution:
             else:
                 high = mid
         return low
-            
+
 
 
 # Your Solution object will be instantiated and called as such:
@@ -967,7 +992,7 @@ class Solution:
 ```python
 class Solution:
     def findKthPositive(self, arr: List[int], k: int) -> int:
-        
+
         lo, hi = 0, len(arr) - 1
         while lo <= hi:
             mid = lo + (hi - lo) // 2
@@ -977,7 +1002,7 @@ class Solution:
                 lo += 1
             else:
                 hi -= 1
-        
+
         # At the end of the loop, left = right + 1,
         # and the kth missing is in-between arr[right] and arr[left].
         # The number of integers missing before arr[right] is
@@ -986,5 +1011,3 @@ class Solution:
         # arr[right] + k - (arr[right] - right - 1) = k + left
         return lo + k
 ```
-
-
